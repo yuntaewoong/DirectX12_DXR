@@ -53,7 +53,7 @@ namespace library
 				//end timer
 				QueryPerformanceCounter(&EndingTime);
 				elapsedTime = (EndingTime.QuadPart - StartingTime.QuadPart) / (FLOAT)Frequency.QuadPart;
-				m_renderer->Render();
+				m_renderer->Render(elapsedTime);
 				//start timer
 				QueryPerformanceCounter(&StartingTime);
 			}
