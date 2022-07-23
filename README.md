@@ -1,8 +1,11 @@
-# DirectX12_Renderer
+# DirectX12_DXR
 다이렉트X 12 api를 이용한 그래픽스 프로젝트
 
 # 목표
 다이렉트x 12버전만 지원하는 DXR 기능 이용해서 실시간 ray tracing구현하기
+
+# 일정
+(22'07'23 ~ 22'08'31)
 
 # 계획
 - ray tracing 방식 삼각형 그리기
