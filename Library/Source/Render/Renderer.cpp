@@ -96,96 +96,17 @@ namespace library
 	HRESULT Renderer::initializeAssets()
 	{
         HRESULT hr = S_OK;
-        
-        {//Root Signature만들기 (어떤 리소스들이 파이프라인에 들어가는가?)(ex/ constant buffer, sampler), 현재는 공허한 상태
-            D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
-                .NumParameters = 0u,
-                .pParameters = nullptr,
-                .NumStaticSamplers = 0u,
-                .pStaticSamplers = nullptr,
-                .Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
-            };
-            ComPtr<ID3DBlob> signature(nullptr);
-            ComPtr<ID3DBlob> error(nullptr);
-            hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            hr = m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature));//루트 시그니처 생성
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-        }
-
-        //PSO생성(pipeline state object)
+        hr = createRootSignature();
+        if (FAILED(hr))
         {
-            ComPtr<ID3DBlob> vertexShader;
-            ComPtr<ID3DBlob> pixelShader;
-#if defined(_DEBUG)
-            UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-            UINT compileFlags = 0;
-#endif
-            hr = D3DCompileFromFile(L"Shader/BasicShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            hr = D3DCompileFromFile(L"Shader/BasicShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-            {
-                { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-                { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-            };
-
-            //렌더링 파이프라인 설계
-            D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {
-                .pRootSignature = m_rootSignature.Get(),
-                .VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get()),
-                .PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get()),
-                .DS = nullptr,
-                .HS = nullptr,
-                .GS = nullptr,
-                .StreamOutput = nullptr,
-                .BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT),
-                .SampleMask = UINT_MAX,
-                .RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
-                .DepthStencilState = {
-                    .DepthEnable = FALSE,
-                    .StencilEnable = FALSE,
-                },
-                .InputLayout = {
-                    .pInputElementDescs = inputElementDescs,
-                    .NumElements = _countof(inputElementDescs)
-                },
-                .IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED,
-                .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
-                .NumRenderTargets = 1u,
-                .RTVFormats = {                                                         //Render Target View
-                    DXGI_FORMAT_R8G8B8A8_UNORM
-                },
-                .DSVFormat = DXGI_FORMAT_R32G32B32A32_FLOAT,                            //Depth Stencil View
-                .SampleDesc = {
-                    .Count = 1,
-                    .Quality = 0
-                },
-                .NodeMask = 0u,
-                .CachedPSO = nullptr,
-                .Flags = D3D12_PIPELINE_STATE_FLAG_NONE
-            };
-            hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState));   // PSO만들기
-            if (FAILED(hr))
-            {
-                return hr;
-            }
+            return hr;
         }
+        hr = createPipelineState();
+        if (FAILED(hr))
         {
+            return hr;
+        }
+        {//commandList 만들기
             hr = m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_commandList));
             if (FAILED(hr))
             {
@@ -198,45 +119,12 @@ namespace library
                 return hr;
             }
         }
-        {//Vertex Buffer 만들기, directx12는 vertex buffer를 D3D12Resource로 봄
-            Vertex triangleVertices[] =
-            {
-                { { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-                { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-                { { -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
-            };
-            const UINT vertexBufferSize = sizeof(triangleVertices);
-
-            //현재 heap type을 upload로 한 상태로 vertex buffer를 gpu메모리에 생성하는데, 이는 좋지 않은 방법
-            //GPU가 접근할때마다 마샬링이 일어난다고 마소직원이 주석을 남김
-            CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
-            D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-            hr = m_device->CreateCommittedResource(//힙 크기 == 데이터 크기로 힙과, 자원 할당
-                &heapProperties,                    //힙 타입
-                D3D12_HEAP_FLAG_NONE,
-                &resourceDesc,                      //자원 크기정보
-                D3D12_RESOURCE_STATE_GENERIC_READ,  //접근 정보
-                nullptr,
-                IID_PPV_ARGS(&m_vertexBuffer)       //CPU메모리에서 접근가능한 ComPtr개체
-            );
-
-            UINT8* pVertexDataBegin = nullptr;    // gpu메모리에 mapping 될 cpu메모리(virtual memory로 운영체제 통해 접근하는듯)
-            CD3DX12_RANGE readRange(0, 0);        // 0~0으로 설정시 CPU메모리로 gpu데이터 읽기 불허 가능, nullptr입력하면 gpu데이터 읽기 가능
-            hr = m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin));//매핑
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));//gpu 메모리 전송
-            m_vertexBuffer->Unmap(0, nullptr);//매핑 해제
-            
-            m_vertexBufferView = {
-                .BufferLocation = m_vertexBuffer->GetGPUVirtualAddress(),   //gpu메모리에 대응하는 cpu virtual address겟
-                .SizeInBytes = vertexBufferSize,                            //vertex버퍼 총 크기는?
-                .StrideInBytes = sizeof(Vertex)                             //각 vertex는 어떻게 띄어 읽어야하는가?
-            };
-        }
+        hr = createVertexBuffer();
+        if (FAILED(hr))
         {
+            return hr;
+        }
+        {//fence만들기
             hr = m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
             if (FAILED(hr))
             {
@@ -519,6 +407,139 @@ namespace library
         {
             return hr;
         }
+        return hr;
+    }
+    HRESULT Renderer::createRootSignature()
+    {
+        HRESULT hr = S_OK;
+        D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
+            .NumParameters = 0u,
+            .pParameters = nullptr,
+            .NumStaticSamplers = 0u,
+            .pStaticSamplers = nullptr,
+            .Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+        };
+        ComPtr<ID3DBlob> signature(nullptr);
+        ComPtr<ID3DBlob> error(nullptr);
+        hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature));//루트 시그니처 생성
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        return hr;
+    }
+    HRESULT Renderer::createPipelineState()
+    {
+        HRESULT hr = S_OK;
+        ComPtr<ID3DBlob> vertexShader;
+        ComPtr<ID3DBlob> pixelShader;
+#if defined(_DEBUG)
+        UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+        UINT compileFlags = 0;
+#endif
+        hr = D3DCompileFromFile(L"Shader/BasicShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = D3DCompileFromFile(L"Shader/BasicShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+        {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+
+        //렌더링 파이프라인 설계
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {
+            .pRootSignature = m_rootSignature.Get(),
+            .VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get()),
+            .PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get()),
+            .DS = nullptr,
+            .HS = nullptr,
+            .GS = nullptr,
+            .StreamOutput = nullptr,
+            .BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT),
+            .SampleMask = UINT_MAX,
+            .RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
+            .DepthStencilState = {
+                .DepthEnable = FALSE,
+                .StencilEnable = FALSE,
+            },
+            .InputLayout = {
+                .pInputElementDescs = inputElementDescs,
+                .NumElements = _countof(inputElementDescs)
+            },
+            .IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED,
+            .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+            .NumRenderTargets = 1u,
+            .RTVFormats = {                                                         //Render Target View
+                DXGI_FORMAT_R8G8B8A8_UNORM
+            },
+            .DSVFormat = DXGI_FORMAT_R32G32B32A32_FLOAT,                            //Depth Stencil View
+            .SampleDesc = {
+                .Count = 1,
+                .Quality = 0
+            },
+            .NodeMask = 0u,
+            .CachedPSO = nullptr,
+            .Flags = D3D12_PIPELINE_STATE_FLAG_NONE
+        };
+        hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState));   // PSO만들기
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        return hr;
+    }
+    HRESULT Renderer::createVertexBuffer()
+    {//Vertex Buffer 만들기, directx12는 vertex buffer를 D3D12Resource로 봄
+        HRESULT hr = S_OK;
+        Vertex triangleVertices[] =
+        {
+            { { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+            { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+            { { -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
+        };
+        const UINT vertexBufferSize = sizeof(triangleVertices);
+
+        //현재 heap type을 upload로 한 상태로 vertex buffer를 gpu메모리에 생성하는데, 이는 좋지 않은 방법
+        //GPU가 접근할때마다 마샬링이 일어난다고 마소직원이 주석을 남김
+        CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+        D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+        hr = m_device->CreateCommittedResource(//힙 크기 == 데이터 크기로 힙과, 자원 할당
+            &heapProperties,                    //힙 타입
+            D3D12_HEAP_FLAG_NONE,
+            &resourceDesc,                      //자원 크기정보
+            D3D12_RESOURCE_STATE_GENERIC_READ,  //접근 정보
+            nullptr,
+            IID_PPV_ARGS(&m_vertexBuffer)       //CPU메모리에서 접근가능한 ComPtr개체
+        );
+
+        UINT8* pVertexDataBegin = nullptr;    // gpu메모리에 mapping 될 cpu메모리(virtual memory로 운영체제 통해 접근하는듯)
+        CD3DX12_RANGE readRange(0, 0);        // 0~0으로 설정시 CPU메모리로 gpu데이터 읽기 불허 가능, nullptr입력하면 gpu데이터 읽기 가능
+        hr = m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin));//매핑
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));//gpu 메모리 전송
+        m_vertexBuffer->Unmap(0, nullptr);//매핑 해제
+
+        m_vertexBufferView = {
+            .BufferLocation = m_vertexBuffer->GetGPUVirtualAddress(),   //gpu메모리에 대응하는 cpu virtual address겟
+            .SizeInBytes = vertexBufferSize,                            //vertex버퍼 총 크기는?
+            .StrideInBytes = sizeof(Vertex)                             //각 vertex는 어떻게 띄어 읽어야하는가?
+        };
         return hr;
     }
 }

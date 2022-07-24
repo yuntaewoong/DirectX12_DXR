@@ -52,10 +52,16 @@ namespace library
         HRESULT populateCommandList();
         HRESULT waitForPreviousFrame();
         void getWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight);
+        
+
         HRESULT createDevice();
         HRESULT createCommandQueue();
         HRESULT createSwapChain(_In_ HWND hWnd);
         HRESULT createRenderTargetView();
         HRESULT createCommandAllocator();
+
+        HRESULT createRootSignature();
+        HRESULT createPipelineState();
+        HRESULT createVertexBuffer();
 	};
 }
