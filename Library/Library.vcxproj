@@ -85,16 +85,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Build\Library\Debug</OutDir>
-    <IntDir>..\Build\Library\Debug\Intermediate</IntDir>
+    <OutDir>..\Build\Library\Debug\</OutDir>
+    <IntDir>..\Build\Library\Debug\Intermediate\</IntDir>
     <TargetName>$(ProjectName)d</TargetName>
     <ExternalIncludePath>$(ProjectDir)..\Library\Header;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Build\Library\Release</OutDir>
+    <OutDir>..\Build\Library\Release\</OutDir>
     <ExternalIncludePath>$(ProjectDir)..\Library\Header;$(ExternalIncludePath)</ExternalIncludePath>
-    <IntDir>..\Build\Library\Release\Intermediate</IntDir>
+    <IntDir>..\Build\Library\Release\Intermediate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -145,8 +145,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
     </Lib>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -167,6 +171,10 @@
     <Lib>
       <AdditionalDependencies>d3d12.lib;dxgi.lib</AdditionalDependencies>
     </Lib>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Header\Common\Common.h" />

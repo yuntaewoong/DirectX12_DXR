@@ -17,15 +17,25 @@ namespace library
         void Render(_In_ FLOAT deltaTime);
 	private:
         static const UINT FRAME_COUNT = 2;
+        struct Vertex
+        {
+            XMFLOAT3 position;
+            XMFLOAT4 color;
+        };
         ComPtr<IDXGIFactory4> m_dxgiFactory;
         ComPtr<IDXGISwapChain3> m_swapChain;
         ComPtr<ID3D12Device> m_device;
         ComPtr<ID3D12Resource> m_renderTargets[FRAME_COUNT];
         ComPtr<ID3D12CommandAllocator> m_commandAllocator;
         ComPtr<ID3D12CommandQueue> m_commandQueue;
+        ComPtr<ID3D12RootSignature> m_rootSignature;
         ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
         ComPtr<ID3D12PipelineState> m_pipelineState;
         ComPtr<ID3D12GraphicsCommandList> m_commandList;
+
+        ComPtr<ID3D12Resource> m_vertexBuffer;
+        D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
         UINT m_rtvDescriptorSize;
         UINT m_frameIndex;
         HANDLE m_fenceEvent;

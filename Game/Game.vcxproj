@@ -21,6 +21,11 @@
   <ItemGroup>
     <ClCompile Include="Source\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\BasicShader.hlsl">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -89,17 +94,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Build\Game\Debug</OutDir>
+    <OutDir>..\Build\Game\Debug\</OutDir>
     <LibraryPath>$(Projectdir)..\Build\Library\Debug\libraryd.lib;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(ProjectDir)..\library\header;$(ExternalIncludePath)</ExternalIncludePath>
-    <IntDir>..\Build\Game\Debug\Intermediate</IntDir>
+    <IntDir>..\Build\Game\Debug\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Build\Game\Release</OutDir>
+    <OutDir>..\Build\Game\Release\</OutDir>
     <LibraryPath>$(Projectdir)..\Build\Library\Release\library.lib;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(ProjectDir)..\library\header;$(ExternalIncludePath)</ExternalIncludePath>
-    <IntDir>..\Build\Game\Release\Intermediate</IntDir>
+    <IntDir>..\Build\Game\Release\Intermediate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -147,8 +152,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)..\Build\Library\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libraryd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Libraryd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
