@@ -34,6 +34,9 @@
     <Filter Include="Source Files\Render">
       <UniqueIdentifier>{60c56767-982b-455d-b5f9-6a5d897f26e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{0b809e7b-2e1a-4f3f-a48d-e506d61e0c97}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -65,5 +68,13 @@
     <ClCompile Include="Source\Render\Renderer.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\BasicPixelShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\BasicVertexShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

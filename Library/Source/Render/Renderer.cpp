@@ -1,4 +1,6 @@
 #include "Render/Renderer.h"
+#include "CompiledShaders\BasicVertexShader.hlsl.h"
+#include "CompiledShaders\BasicPixelShader.hlsl.h"
 namespace library
 {
     Renderer::Renderer() :
@@ -436,23 +438,11 @@ namespace library
     HRESULT Renderer::createPipelineState()
     {
         HRESULT hr = S_OK;
-        ComPtr<ID3DBlob> vertexShader;
-        ComPtr<ID3DBlob> pixelShader;
-#if defined(_DEBUG)
-        UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-        UINT compileFlags = 0;
-#endif
-        hr = D3DCompileFromFile(L"Shader/BasicShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = D3DCompileFromFile(L"Shader/BasicShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+
+        //빌드 Time에 컴파일되는 shader
+        D3D12_SHADER_BYTECODE vertexShaderByteCode = CD3DX12_SHADER_BYTECODE((void*)g_pBasicVertexShader, ARRAYSIZE(g_pBasicVertexShader));
+        D3D12_SHADER_BYTECODE pixelShaderByteCode = CD3DX12_SHADER_BYTECODE((void*)g_pBasicPixelShader, ARRAYSIZE(g_pBasicPixelShader));
+        
         D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
         {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -462,8 +452,8 @@ namespace library
         //렌더링 파이프라인 설계
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {
             .pRootSignature = m_rootSignature.Get(),
-            .VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get()),
-            .PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get()),
+            .VS = vertexShaderByteCode,
+            .PS = pixelShaderByteCode,
             .DS = nullptr,
             .HS = nullptr,
             .GS = nullptr,
