@@ -15,7 +15,9 @@ namespace library
 
         HRESULT Initialize(_In_ HWND hWnd);
         void Render(_In_ FLOAT deltaTime);
+        void SetRenderMode(_In_ ERenderMode renderMode);
 	private:
+        ERenderMode m_renderMode;
         static const UINT FRAME_COUNT = 2;
         struct Vertex
         {

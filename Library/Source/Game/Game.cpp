@@ -41,6 +41,7 @@ namespace library
 		QueryPerformanceFrequency(&Frequency);
 		QueryPerformanceCounter(&StartingTime);
 		FLOAT elapsedTime = 0.0f;
+		ERenderMode renderModeCache = m_mainWindow->GetRenderMode();
 		while (WM_QUIT != msg.message)
 		{
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -53,6 +54,12 @@ namespace library
 				//end timer
 				QueryPerformanceCounter(&EndingTime);
 				elapsedTime = (EndingTime.QuadPart - StartingTime.QuadPart) / (FLOAT)Frequency.QuadPart;
+				
+				if (renderModeCache != m_mainWindow->GetRenderMode())
+				{
+					renderModeCache = m_mainWindow->GetRenderMode();
+					m_renderer->SetRenderMode(renderModeCache);
+				}
 				m_renderer->Render(elapsedTime);
 				//start timer
 				QueryPerformanceCounter(&StartingTime);

@@ -4,6 +4,7 @@
 namespace library
 {
     Renderer::Renderer() :
+        m_renderMode(ERenderMode::RASTERIZATION),
         m_dxgiFactory(nullptr),
         m_swapChain(nullptr),
         m_device(nullptr),
@@ -47,6 +48,10 @@ namespace library
         m_swapChain->Present(1, 0);//백버퍼 교체
 
         waitForPreviousFrame();//gpu작업완료 대기
+    }
+    void Renderer::SetRenderMode(_In_ ERenderMode renderMode)
+    {
+        m_renderMode = renderMode;
     }
     HRESULT Renderer::initializePipeLine(_In_ HWND hWnd)
     {
@@ -195,9 +200,11 @@ namespace library
                 return S_OK;
             }
         }
+        return E_FAIL;
     }
     HRESULT Renderer::populateCommandList()
     {
+        
         //command list allocator특: gpu동작 끝나야 Reset가능(펜스로 동기화해라)
         HRESULT hr = S_OK;
         hr = m_commandAllocator->Reset();
@@ -205,47 +212,84 @@ namespace library
         {
             return hr;
         }
-
         //command list 특: ExecuteCommandList실행하면 언제든지 Reset가능
         hr = m_commandList->Reset(m_commandAllocator.Get(), m_pipelineState.Get());
         if (FAILED(hr))
         {
             return hr;
         }
-        //commandList내용 채우기
-        m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
-        CD3DX12_VIEWPORT viewPort( 0.0f,0.0f,1920.0f,1080.0f );
-        CD3DX12_RECT scissorRect(0, 0, 1920l, 1080l);
-        m_commandList->RSSetViewports(1, &viewPort);
-        m_commandList->RSSetScissorRects(1, &scissorRect);
-
-        // 백버퍼를 RT으로 쓸것이라고 전달(barrier)
-        const D3D12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_renderTargets[m_frameIndex].Get(),
-            D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET
-        );
-        m_commandList->ResourceBarrier(1, &resourceBarrier);
-
-        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-        m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);//OM에서 그릴 렌더타겟 지정
-        
-        const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-        m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);//RTV를 언젠가 클리어 해달라고 commandList에 기록
-        m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-        m_commandList->DrawInstanced(3, 1, 0, 0);
-
-        // 백버퍼를 Present용으로 쓸것이라고 전달(barrier)
-        const D3D12_RESOURCE_BARRIER resourceBarrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_renderTargets[m_frameIndex].Get(),
-            D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT
-        );
-        m_commandList->ResourceBarrier(1,&resourceBarrier1);
-
-        hr = m_commandList->Close();//command list작성 종료
-        if (FAILED(hr))
+        if (m_renderMode == ERenderMode::RASTERIZATION)//래스터 렌더링 command list
         {
-            return hr;
+            //commandList내용 채우기
+            m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+            CD3DX12_VIEWPORT viewPort(0.0f, 0.0f, 1920.0f, 1080.0f);
+            CD3DX12_RECT scissorRect(0, 0, 1920l, 1080l);
+            m_commandList->RSSetViewports(1, &viewPort);
+            m_commandList->RSSetScissorRects(1, &scissorRect);
+
+            // 백버퍼를 RT으로 쓸것이라고 전달(barrier)
+            const D3D12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+                m_renderTargets[m_frameIndex].Get(),
+                D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET
+            );
+            m_commandList->ResourceBarrier(1, &resourceBarrier);
+
+            CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+            m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);//OM에서 그릴 렌더타겟 지정
+
+            const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+            m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);//RTV를 언젠가 클리어 해달라고 commandList에 기록
+            m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+            m_commandList->DrawInstanced(3, 1, 0, 0);
+
+            // 백버퍼를 Present용으로 쓸것이라고 전달(barrier)
+            const D3D12_RESOURCE_BARRIER resourceBarrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+                m_renderTargets[m_frameIndex].Get(),
+                D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT
+            );
+            m_commandList->ResourceBarrier(1, &resourceBarrier1);
+
+            hr = m_commandList->Close();//command list작성 종료
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+        }
+        else if (m_renderMode == ERenderMode::RAY_TRACING)//Ray Tracing 렌더링 command list
+        {
+            //commandList내용 채우기
+            m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+            CD3DX12_VIEWPORT viewPort(0.0f, 0.0f, 1920.0f, 1080.0f);
+            CD3DX12_RECT scissorRect(0, 0, 1920l, 1080l);
+            m_commandList->RSSetViewports(1, &viewPort);
+            m_commandList->RSSetScissorRects(1, &scissorRect);
+
+            // 백버퍼를 RT으로 쓸것이라고 전달(barrier)
+            const D3D12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+                m_renderTargets[m_frameIndex].Get(),
+                D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET
+            );
+            m_commandList->ResourceBarrier(1, &resourceBarrier);
+
+            CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+            m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);//OM에서 그릴 렌더타겟 지정
+
+            const float clearColor[] = { 0.8f, 0.6f, 0.4f, 1.0f };
+            m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);//RTV를 언젠가 클리어 해달라고 commandList에 기록
+
+            // 백버퍼를 Present용으로 쓸것이라고 전달(barrier)
+            const D3D12_RESOURCE_BARRIER resourceBarrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+                m_renderTargets[m_frameIndex].Get(),
+                D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT
+            );
+            m_commandList->ResourceBarrier(1, &resourceBarrier1);
+
+            hr = m_commandList->Close();//command list작성 종료
+            if (FAILED(hr))
+            {
+                return hr;
+            }
         }
         return S_OK;
     }
@@ -368,6 +412,7 @@ namespace library
         {
             return hr;
         }
+        return hr;
     }
     HRESULT Renderer::createRenderTargetView()
     {
