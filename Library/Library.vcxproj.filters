@@ -76,5 +76,8 @@
     <FxCompile Include="Shader\BasicVertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\BasicRayTracing.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
