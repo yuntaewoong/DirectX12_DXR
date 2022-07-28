@@ -21,8 +21,9 @@ namespace library
         static const UINT FRAME_COUNT = 2;
         struct Vertex
         {
-            XMFLOAT3 position;
-            XMFLOAT4 color;
+            float f1,f2,f3;
+            /*XMFLOAT3 position;
+            XMFLOAT4 color;*/
         };
         using Index = UINT16;
         ComPtr<IDXGIFactory4> m_dxgiFactory;
@@ -55,10 +56,21 @@ namespace library
         
         //Ray tracing Shader에서 접근하는 UAV에 대한 descriptor heap
         ComPtr<ID3D12DescriptorHeap> m_uavHeap;
+        UINT m_descriptorsAllocated;
         UINT m_uavHeapDescriptorSize;
 
         //RayGeneration Shader Constant Buffer 구조체
         RayGenConstantBuffer m_rayGenCB;
+
+        //ray tracing Shader Table자원
+        ComPtr<ID3D12Resource> m_missShaderTable;
+        ComPtr<ID3D12Resource> m_hitGroupShaderTable;
+        ComPtr<ID3D12Resource> m_rayGenShaderTable;
+
+        // Raytracing  결과 UAV자원
+        ComPtr<ID3D12Resource> m_raytracingOutput;
+        D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputResourceUAVGpuDescriptor;
+        UINT m_raytracingOutputResourceUAVDescriptorHeapIndex;
 
         UINT m_rtvDescriptorSize;
         UINT m_frameIndex;
@@ -98,5 +110,7 @@ namespace library
         HRESULT createRaytracingPipelineStateObject();
         HRESULT createUAVDescriptorHeap();
         HRESULT createAccelerationStructure();
+        HRESULT createShaderTable();
+        HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
 	};
 }

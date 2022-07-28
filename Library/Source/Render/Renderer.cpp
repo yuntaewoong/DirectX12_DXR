@@ -1,4 +1,5 @@
 #include "Render/Renderer.h"
+#include "ShaderTable\ShaderTable.h"
 #include "CompiledShaders\BasicVertexShader.hlsl.h"
 #include "CompiledShaders\BasicPixelShader.hlsl.h"
 #include "CompiledShaders\BasicRayTracing.hlsl.h"
@@ -28,14 +29,28 @@ namespace library
         m_bottomLevelAccelerationStructure(nullptr),
         m_topLevelAccelerationStructure(nullptr),
         m_uavHeap(nullptr),
+        m_descriptorsAllocated(0u),
         m_uavHeapDescriptorSize(0u),
         m_rayGenCB(),
+        m_missShaderTable(nullptr),
+        m_hitGroupShaderTable(nullptr),
+        m_rayGenShaderTable(nullptr),
+        m_raytracingOutput(nullptr),
+        m_raytracingOutputResourceUAVGpuDescriptor(),
+        m_raytracingOutputResourceUAVDescriptorHeapIndex(0u),
         m_rtvDescriptorSize(0u),
         m_frameIndex(0u),
         m_fenceEvent(),
         m_fence(nullptr),
         m_fenceValue(0u)
-    {}
+    {
+        m_rayGenCB.viewport = { -1.0f, -1.0f, 1.0f, 1.0f };
+        m_rayGenCB.stencil =
+        {
+            -1 + (0.1f / (9/16.f)), -1 + 0.1f,
+             1 - (0.1f / (9 / 16.f)), 1.0f - 0.1f
+        };
+    }
 	HRESULT Renderer::Initialize(_In_ HWND hWnd)
 	{
         HRESULT hr = S_OK;
@@ -54,7 +69,7 @@ namespace library
     void Renderer::Render(_In_ FLOAT deltaTime)
     {
         populateCommandList();//command 기록
-        
+        m_commandList->Close();//command list작성 종료
         ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
         m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);//command queue에 담긴 command list들 실행명령(비동기)
         
@@ -185,6 +200,16 @@ namespace library
         {
             return hr;
         }
+        hr = createShaderTable();// shader table만들기
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = createRaytacingOutputResource(hWnd);//output UAV만들기
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         return hr;
 	}
 	HRESULT Renderer::initializeAssets()
@@ -300,47 +325,65 @@ namespace library
                 D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT
             );
             m_commandList->ResourceBarrier(1, &resourceBarrier1);
-
-            hr = m_commandList->Close();//command list작성 종료
-            if (FAILED(hr))
-            {
-                return hr;
-            }
         }
         else if (m_renderMode == ERenderMode::RAY_TRACING)//Ray Tracing 렌더링 command list
         {
-            //commandList내용 채우기
-            m_commandList->SetGraphicsRootSignature(m_rasterRootSignature.Get());
-            CD3DX12_VIEWPORT viewPort(0.0f, 0.0f, 1920.0f, 1080.0f);
-            CD3DX12_RECT scissorRect(0, 0, 1920l, 1080l);
-            m_commandList->RSSetViewports(1, &viewPort);
-            m_commandList->RSSetScissorRects(1, &scissorRect);
-
-            // 백버퍼를 RT으로 쓸것이라고 전달(barrier)
-            const D3D12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_commandList->SetComputeRootSignature(m_raytracingGlobalRootSignature.Get());//compute shader의 루트 시그니처 바인딩  
+            m_commandList->SetDescriptorHeaps(1, m_uavHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩(이 CPU heap 매핑된 GPU주소들을 사용하겠다)
+            m_commandList->SetComputeRootDescriptorTable(
+                static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
+                m_raytracingOutputResourceUAVGpuDescriptor
+            );//아웃풋 UAV텍스쳐 바인딩
+            m_commandList->SetComputeRootShaderResourceView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
+                m_topLevelAccelerationStructure->GetGPUVirtualAddress()
+            );//TLAS 바인딩
+            D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
+                .RayGenerationShaderRecord = {
+                    .StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress(),
+                    .SizeInBytes = m_rayGenShaderTable->GetDesc().Width
+                },
+                .MissShaderTable = {
+                    .StartAddress = m_missShaderTable->GetGPUVirtualAddress(),
+                    .SizeInBytes = m_missShaderTable->GetDesc().Width,
+                    .StrideInBytes = m_missShaderTable->GetDesc().Width
+                },
+                .HitGroupTable = {
+                    .StartAddress = m_hitGroupShaderTable->GetGPUVirtualAddress(),
+                    .SizeInBytes = m_hitGroupShaderTable->GetDesc().Width,
+                    .StrideInBytes = m_hitGroupShaderTable->GetDesc().Width
+                },
+                .Width = 1920,
+                .Height = 1080,
+                .Depth = 1
+            };
+            m_dxrCommandList->SetPipelineState1(m_dxrStateObject.Get());//열심히 만든 ray tracing pipeline바인딩
+            m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
+        
+            D3D12_RESOURCE_BARRIER preCopyBarriers[2] = {};
+            preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
                 m_renderTargets[m_frameIndex].Get(),
-                D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET
-            );
-            m_commandList->ResourceBarrier(1, &resourceBarrier);
+                D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_COPY_DEST
+            );//Render Target을 Copy목적지로 전이
+            preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+                m_raytracingOutput.Get(),
+                D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE
+            );//UAV에서 Copy
+            m_commandList->ResourceBarrier(ARRAYSIZE(preCopyBarriers), preCopyBarriers);
 
-            CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-            m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);//OM에서 그릴 렌더타겟 지정
+            m_commandList->CopyResource(m_renderTargets[m_frameIndex].Get(), m_raytracingOutput.Get());
 
-            const float clearColor[] = { 0.8f, 0.6f, 0.4f, 1.0f };
-            m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);//RTV를 언젠가 클리어 해달라고 commandList에 기록
-
-            // 백버퍼를 Present용으로 쓸것이라고 전달(barrier)
-            const D3D12_RESOURCE_BARRIER resourceBarrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+            D3D12_RESOURCE_BARRIER postCopyBarriers[2] = {};
+            postCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
                 m_renderTargets[m_frameIndex].Get(),
-                D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT
-            );
-            m_commandList->ResourceBarrier(1, &resourceBarrier1);
-
-            hr = m_commandList->Close();//command list작성 종료
-            if (FAILED(hr))
-            {
-                return hr;
-            }
+                D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT
+            );//Render Target을 present단계로 만들기
+            postCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+                m_raytracingOutput.Get(),
+                D3D12_RESOURCE_STATE_COPY_SOURCE,
+                D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+            );//UAV를 다시 UA로 만들기
+            m_commandList->ResourceBarrier(ARRAYSIZE(postCopyBarriers), postCopyBarriers);
         }
         return S_OK;
     }
@@ -592,10 +635,16 @@ namespace library
         HRESULT hr = S_OK;
         Vertex triangleVertices[] =
         {
+            {0,-0.7f,1.f},
+            {-0.7f,0.7f,1.f},
+            {0.7f,0.7f,1.f}
+        };
+            
+            /*{
             { { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
             { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
             { { -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
-        };
+        };*/
         const UINT vertexBufferSize = sizeof(triangleVertices);
 
         //현재 heap type을 upload로 한 상태로 vertex buffer를 gpu메모리에 생성하는데, 이는 좋지 않은 방법
@@ -690,6 +739,7 @@ namespace library
         {
             return hr;
         }
+        return hr;
     }
     HRESULT Renderer::createRaytracingRootSignature()
     {
@@ -979,6 +1029,120 @@ namespace library
             return hr;
         }
         //m_deviceResources->WaitForGpu();//GPU완료 대기
+        return hr;
+    }
+    HRESULT Renderer::createShaderTable()
+    {
+        HRESULT hr = S_OK;
+        void* rayGenShaderIdentifier = nullptr;
+        void* missShaderIdentifier = nullptr;
+        void* hitGroupShaderIdentifier = nullptr;
+
+        // Get shader identifiers.
+        UINT shaderIdentifierSize;
+        {
+            ComPtr<ID3D12StateObjectProperties> stateObjectProperties(nullptr);
+            hr = m_dxrStateObject.As(&stateObjectProperties);//m_dxrStateObject가 ID3D12StateObjectProperties의 기능을 사용하겠다
+            rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyRaygenShader");
+            missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyMissShader");
+            hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyHitGroup");
+            shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+        }
+
+        // Ray gen shader table
+        {
+            struct RootArguments {
+                RayGenConstantBuffer cb;
+            } rootArguments;
+            rootArguments.cb = m_rayGenCB;
+
+            UINT numShaderRecords = 1;
+            UINT shaderRecordSize = shaderIdentifierSize + sizeof(rootArguments);
+            ShaderTable rayGenShaderTable{};
+            hr = rayGenShaderTable.Initialize(m_device.Get(), numShaderRecords, shaderRecordSize);
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+            ShaderRecord tempRecord = ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments));
+            rayGenShaderTable.Push_back(tempRecord);
+            m_rayGenShaderTable = rayGenShaderTable.GetResource();
+        }
+
+        // Miss shader table
+        {
+            UINT numShaderRecords = 1;
+            UINT shaderRecordSize = shaderIdentifierSize;
+            ShaderTable missShaderTable{};
+            hr = missShaderTable.Initialize(m_device.Get(), numShaderRecords, shaderRecordSize);
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+            ShaderRecord tempRecord = ShaderRecord(missShaderIdentifier, shaderIdentifierSize);
+            missShaderTable.Push_back(tempRecord);
+            m_missShaderTable = missShaderTable.GetResource();
+        }
+
+        // Hit group shader table
+        {
+            UINT numShaderRecords = 1;
+            UINT shaderRecordSize = shaderIdentifierSize;
+            ShaderTable hitGroupShaderTable{};
+            hr = hitGroupShaderTable.Initialize(m_device.Get(), numShaderRecords, shaderRecordSize);
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+            ShaderRecord tempRecord = ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize);
+            hitGroupShaderTable.Push_back(tempRecord);
+            m_hitGroupShaderTable = hitGroupShaderTable.GetResource();
+        }
+        return hr;
+    }
+    HRESULT Renderer::createRaytacingOutputResource(_In_ HWND hWnd)
+    {
+        HRESULT hr = S_OK;
+        UINT width = 0u;
+        UINT height = 0u;
+        getWindowWidthHeight(hWnd, &width, &height);
+        //format은 Swap chain의 format과 같아야함!
+        CD3DX12_RESOURCE_DESC uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+            DXGI_FORMAT_R8G8B8A8_UNORM, 
+            width, 
+            height,
+            1, 1, 1, 0, 
+            D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
+        );
+        CD3DX12_HEAP_PROPERTIES defaultHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+        hr = m_device->CreateCommittedResource(//결과물 UAV버퍼 생성
+            &defaultHeapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &uavDesc, 
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+            nullptr,
+            IID_PPV_ARGS(&m_raytracingOutput)
+        );
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        //m_raytracingOutputResourceUAVDescriptorHeapIndex = AllocateDescriptor(&uavDescriptorHandle, m_raytracingOutputResourceUAVDescriptorHeapIndex);
+        D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapCpuBase = m_uavHeap->GetCPUDescriptorHandleForHeapStart();
+        if (m_raytracingOutputResourceUAVDescriptorHeapIndex >= m_uavHeap->GetDesc().NumDescriptors)
+        {
+            m_raytracingOutputResourceUAVDescriptorHeapIndex = m_descriptorsAllocated++;
+        }
+        D3D12_CPU_DESCRIPTOR_HANDLE uavDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+            descriptorHeapCpuBase, 
+            m_raytracingOutputResourceUAVDescriptorHeapIndex,
+            m_uavHeapDescriptorSize
+        );
+        D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {
+            .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D
+        };
+        m_device->CreateUnorderedAccessView(m_raytracingOutput.Get(), nullptr, &UAVDesc, uavDescriptorHandle);
+        m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_uavHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_uavHeapDescriptorSize);
         return hr;
     }
 }

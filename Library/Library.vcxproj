@@ -183,12 +183,16 @@
     <ClInclude Include="Header\Common\d3dx12.h" />
     <ClInclude Include="Header\Game\Game.h" />
     <ClInclude Include="Header\Render\Renderer.h" />
+    <ClInclude Include="Header\ShaderTable\ShaderRecord.h" />
+    <ClInclude Include="Header\ShaderTable\ShaderTable.h" />
     <ClInclude Include="Header\Window\BaseWindow.h" />
     <ClInclude Include="Header\Window\MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\Game.cpp" />
     <ClCompile Include="Source\Render\Renderer.cpp" />
+    <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp" />
+    <ClCompile Include="Source\ShaderTable\ShaderTable.cpp.cpp" />
     <ClCompile Include="Source\Window\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
