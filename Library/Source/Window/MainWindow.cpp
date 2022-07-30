@@ -4,8 +4,7 @@ namespace library
 {
     MainWindow::MainWindow(INT nWidth, INT nHeight) :
         m_nWidth(nWidth),
-        m_nHeight(nHeight),
-        m_renderMode(ERenderMode::RASTERIZATION)
+        m_nHeight(nHeight)
     {}
     
     HRESULT MainWindow::Initialize(_In_ HINSTANCE hInstance, _In_ INT nCmdShow, _In_ PCWSTR pszWindowName)
@@ -47,25 +46,11 @@ namespace library
             PostQuitMessage(0);
             break;
         case WM_KEYDOWN:
-            if (wParam == VK_SPACE)
-            {
-                toggleRenderMode();
-            }
+            break;
         default:
             return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
         }
 
         return 0;
-    }
-    ERenderMode MainWindow::GetRenderMode() const
-    {
-        return m_renderMode;
-    }
-    void MainWindow::toggleRenderMode()
-    {
-        if (m_renderMode == ERenderMode::RASTERIZATION)
-            m_renderMode = ERenderMode::RAY_TRACING;
-        else if(m_renderMode == ERenderMode::RAY_TRACING)
-            m_renderMode = ERenderMode::RASTERIZATION;
     }
 }

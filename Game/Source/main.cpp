@@ -7,7 +7,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
-	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 초기화 테스트",1920,1080);
+	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 DXR삼각형 초기화",1920,1080);
 	
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
 	{

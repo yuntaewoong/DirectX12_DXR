@@ -19,11 +19,6 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-enum class ERenderMode 
-{
-    RASTERIZATION,
-    RAY_TRACING
-};
 enum class EGlobalRootSignatureSlot
 {
     OutputViewSlot = 0,

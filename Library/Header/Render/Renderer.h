@@ -15,9 +15,7 @@ namespace library
 
         HRESULT Initialize(_In_ HWND hWnd);
         void Render(_In_ FLOAT deltaTime);
-        void SetRenderMode(_In_ ERenderMode renderMode);
 	private:
-        ERenderMode m_renderMode;
         static const UINT FRAME_COUNT = 2;
         struct Vertex
         {
@@ -30,9 +28,7 @@ namespace library
         ComPtr<ID3D12Resource> m_renderTargets[FRAME_COUNT];
         ComPtr<ID3D12CommandAllocator> m_commandAllocator;
         ComPtr<ID3D12CommandQueue> m_commandQueue;
-        ComPtr<ID3D12RootSignature> m_rasterRootSignature;
         ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-        ComPtr<ID3D12PipelineState> m_pipelineState;
         ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
         ComPtr<ID3D12Resource> m_vertexBuffer;
@@ -79,7 +75,6 @@ namespace library
 
     private:
         HRESULT initializePipeLine(_In_ HWND hWnd);
-        HRESULT initializeAssets();
         HRESULT getHardwareAdapter(
             _In_ IDXGIFactory1* pFactory,
             _Outptr_result_maybenull_ IDXGIAdapter1** ppAdapter,
@@ -96,8 +91,6 @@ namespace library
         HRESULT createRenderTargetView();
         HRESULT createCommandAllocator();
 
-        HRESULT createRasterRootSignature();
-        HRESULT createPipelineState();
         HRESULT createVertexBuffer();
         HRESULT createIndexBuffer();
 

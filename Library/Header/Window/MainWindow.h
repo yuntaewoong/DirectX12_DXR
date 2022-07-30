@@ -24,11 +24,10 @@ namespace library
         HRESULT Initialize(_In_ HINSTANCE hInstance, _In_ INT nCmdShow, _In_ PCWSTR pszWindowName) override;
         PCWSTR GetWindowClassName() const override;
         LRESULT HandleMessage(_In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam) override;
-        ERenderMode GetRenderMode() const;
+        
     private:
         INT m_nWidth;
         INT m_nHeight;
-        ERenderMode m_renderMode;
     private:
         void toggleRenderMode();
     };

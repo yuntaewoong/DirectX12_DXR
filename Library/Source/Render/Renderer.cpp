@@ -6,16 +6,13 @@
 namespace library
 {
     Renderer::Renderer() :
-        m_renderMode(ERenderMode::RASTERIZATION),
         m_dxgiFactory(nullptr),
         m_swapChain(nullptr),
         m_device(nullptr),
         m_renderTargets{ nullptr,nullptr },
         m_commandAllocator(nullptr),
         m_commandQueue(nullptr),
-        m_rasterRootSignature(nullptr),
         m_rtvHeap(nullptr),
-        m_pipelineState(nullptr),
         m_commandList(nullptr),
         m_vertexBuffer(nullptr),
         m_vertexBufferView(),
@@ -59,11 +56,6 @@ namespace library
         {
             return hr;
         }
-        hr = initializeAssets();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
         return S_OK;
 	}
     void Renderer::Render(_In_ FLOAT deltaTime)
@@ -76,10 +68,6 @@ namespace library
         m_swapChain->Present(1, 0);//백버퍼 교체
 
         waitForPreviousFrame();//gpu작업완료 대기
-    }
-    void Renderer::SetRenderMode(_In_ ERenderMode renderMode)
-    {
-        m_renderMode = renderMode;
     }
     HRESULT Renderer::initializePipeLine(_In_ HWND hWnd)
     {
@@ -210,22 +198,11 @@ namespace library
         {
             return hr;
         }
-        return hr;
-	}
-	HRESULT Renderer::initializeAssets()
-	{
-        HRESULT hr = S_OK;
-        hr = createRasterRootSignature();
+        hr = waitForPreviousFrame();
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = createPipelineState();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        waitForPreviousFrame();
         return hr;
 	}
     /*
@@ -288,103 +265,68 @@ namespace library
         {
             return hr;
         }
-        //command list 특: ExecuteCommandList실행하면 언제든지 Reset가능
-        hr = m_commandList->Reset(m_commandAllocator.Get(), m_pipelineState.Get());
+        hr = m_commandList->Reset(m_commandAllocator.Get(), nullptr);
         if (FAILED(hr))
         {
             return hr;
         }
-        if (m_renderMode == ERenderMode::RASTERIZATION)//래스터 렌더링 command list
-        {
-            //commandList내용 채우기
-            m_commandList->SetGraphicsRootSignature(m_rasterRootSignature.Get());
-            CD3DX12_VIEWPORT viewPort(0.0f, 0.0f, 1920.0f, 1080.0f);
-            CD3DX12_RECT scissorRect(0, 0, 1920l, 1080l);
-            m_commandList->RSSetViewports(1, &viewPort);
-            m_commandList->RSSetScissorRects(1, &scissorRect);
-
-            // 백버퍼를 RT으로 쓸것이라고 전달(barrier)
-            const D3D12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-                m_renderTargets[m_frameIndex].Get(),
-                D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET
-            );
-            m_commandList->ResourceBarrier(1, &resourceBarrier);
-
-            CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-            m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);//OM에서 그릴 렌더타겟 지정
-
-            const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-            m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);//RTV를 언젠가 클리어 해달라고 commandList에 기록
-            m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-            m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-            m_commandList->IASetIndexBuffer(&m_indexBufferView);
-            m_commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
-            // 백버퍼를 Present용으로 쓸것이라고 전달(barrier)
-            const D3D12_RESOURCE_BARRIER resourceBarrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
-                m_renderTargets[m_frameIndex].Get(),
-                D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT
-            );
-            m_commandList->ResourceBarrier(1, &resourceBarrier1);
-        }
-        else if (m_renderMode == ERenderMode::RAY_TRACING)//Ray Tracing 렌더링 command list
-        {
-            m_commandList->SetComputeRootSignature(m_raytracingGlobalRootSignature.Get());//compute shader의 루트 시그니처 바인딩  
-            m_commandList->SetDescriptorHeaps(1, m_uavHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩(이 CPU heap 매핑된 GPU주소들을 사용하겠다)
-            m_commandList->SetComputeRootDescriptorTable(
-                static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
-                m_raytracingOutputResourceUAVGpuDescriptor
-            );//아웃풋 UAV텍스쳐 바인딩
-            m_commandList->SetComputeRootShaderResourceView(
-                static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
-                m_topLevelAccelerationStructure->GetGPUVirtualAddress()
-            );//TLAS 바인딩
-            D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
-                .RayGenerationShaderRecord = {
-                    .StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress(),
-                    .SizeInBytes = m_rayGenShaderTable->GetDesc().Width
-                },
-                .MissShaderTable = {
-                    .StartAddress = m_missShaderTable->GetGPUVirtualAddress(),
-                    .SizeInBytes = m_missShaderTable->GetDesc().Width,
-                    .StrideInBytes = m_missShaderTable->GetDesc().Width
-                },
-                .HitGroupTable = {
-                    .StartAddress = m_hitGroupShaderTable->GetGPUVirtualAddress(),
-                    .SizeInBytes = m_hitGroupShaderTable->GetDesc().Width,
-                    .StrideInBytes = m_hitGroupShaderTable->GetDesc().Width
-                },
-                .Width = 1920,
-                .Height = 1080,
-                .Depth = 1
-            };
-            m_dxrCommandList->SetPipelineState1(m_dxrStateObject.Get());//열심히 만든 ray tracing pipeline바인딩
-            m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
+        m_commandList->SetComputeRootSignature(m_raytracingGlobalRootSignature.Get());//compute shader의 루트 시그니처 바인딩  
+        m_commandList->SetDescriptorHeaps(1, m_uavHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩(이 CPU heap 매핑된 GPU주소들을 사용하겠다)
+        m_commandList->SetComputeRootDescriptorTable(
+            static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
+            m_raytracingOutputResourceUAVGpuDescriptor
+        );//아웃풋 UAV텍스쳐 바인딩
+        m_commandList->SetComputeRootShaderResourceView(
+            static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
+            m_topLevelAccelerationStructure->GetGPUVirtualAddress()
+        );//TLAS 바인딩
+        D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
+            .RayGenerationShaderRecord = {
+                .StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress(),
+                .SizeInBytes = m_rayGenShaderTable->GetDesc().Width
+            },
+            .MissShaderTable = {
+                .StartAddress = m_missShaderTable->GetGPUVirtualAddress(),
+                .SizeInBytes = m_missShaderTable->GetDesc().Width,
+                .StrideInBytes = m_missShaderTable->GetDesc().Width
+            },
+            .HitGroupTable = {
+                .StartAddress = m_hitGroupShaderTable->GetGPUVirtualAddress(),
+                .SizeInBytes = m_hitGroupShaderTable->GetDesc().Width,
+                .StrideInBytes = m_hitGroupShaderTable->GetDesc().Width
+            },
+            .Width = 1920,
+            .Height = 1080,
+            .Depth = 1
+        };
+        m_dxrCommandList->SetPipelineState1(m_dxrStateObject.Get());//열심히 만든 ray tracing pipeline바인딩
+        m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
         
-            D3D12_RESOURCE_BARRIER preCopyBarriers[2] = {};
-            preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-                m_renderTargets[m_frameIndex].Get(),
-                D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_COPY_DEST
-            );//Render Target을 Copy목적지로 전이
-            preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
-                m_raytracingOutput.Get(),
-                D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE
-            );//UAV에서 Copy
-            m_commandList->ResourceBarrier(ARRAYSIZE(preCopyBarriers), preCopyBarriers);
+        D3D12_RESOURCE_BARRIER preCopyBarriers[2] = {};
+        preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_renderTargets[m_frameIndex].Get(),
+            D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_COPY_DEST
+        );//Render Target을 Copy목적지로 전이
+        preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_raytracingOutput.Get(),
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE
+        );//UAV에서 Copy
+        m_commandList->ResourceBarrier(ARRAYSIZE(preCopyBarriers), preCopyBarriers);
 
-            m_commandList->CopyResource(m_renderTargets[m_frameIndex].Get(), m_raytracingOutput.Get());
+        m_commandList->CopyResource(m_renderTargets[m_frameIndex].Get(), m_raytracingOutput.Get());
 
-            D3D12_RESOURCE_BARRIER postCopyBarriers[2] = {};
-            postCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-                m_renderTargets[m_frameIndex].Get(),
-                D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT
-            );//Render Target을 present단계로 만들기
-            postCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
-                m_raytracingOutput.Get(),
-                D3D12_RESOURCE_STATE_COPY_SOURCE,
-                D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-            );//UAV를 다시 UA로 만들기
-            m_commandList->ResourceBarrier(ARRAYSIZE(postCopyBarriers), postCopyBarriers);
-        }
+        D3D12_RESOURCE_BARRIER postCopyBarriers[2] = {};
+        postCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_renderTargets[m_frameIndex].Get(),
+            D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT
+        );//Render Target을 present단계로 만들기
+        postCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_raytracingOutput.Get(),
+            D3D12_RESOURCE_STATE_COPY_SOURCE,
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+        );//UAV를 다시 UA로 만들기
+        m_commandList->ResourceBarrier(ARRAYSIZE(postCopyBarriers), postCopyBarriers);
+        
         return S_OK;
     }
     HRESULT Renderer::waitForPreviousFrame()
@@ -544,86 +486,6 @@ namespace library
     {
         HRESULT hr = S_OK;
         hr = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator));
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        return hr;
-    }
-    HRESULT Renderer::createRasterRootSignature()
-    {
-        HRESULT hr = S_OK;
-        D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
-            .NumParameters = 0u,
-            .pParameters = nullptr,
-            .NumStaticSamplers = 0u,
-            .pStaticSamplers = nullptr,
-            .Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
-        };
-        ComPtr<ID3DBlob> signature(nullptr);
-        ComPtr<ID3DBlob> error(nullptr);
-        hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rasterRootSignature));//루트 시그니처 생성
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        return hr;
-    }
-    HRESULT Renderer::createPipelineState()
-    {
-        HRESULT hr = S_OK;
-
-        //빌드 Time에 컴파일되는 shader
-        D3D12_SHADER_BYTECODE vertexShaderByteCode = CD3DX12_SHADER_BYTECODE((void*)g_pBasicVertexShader, ARRAYSIZE(g_pBasicVertexShader));
-        D3D12_SHADER_BYTECODE pixelShaderByteCode = CD3DX12_SHADER_BYTECODE((void*)g_pBasicPixelShader, ARRAYSIZE(g_pBasicPixelShader));
-        
-        D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-        {
-            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-            { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-        };
-
-        //렌더링 파이프라인 설계
-        D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {
-            .pRootSignature = m_rasterRootSignature.Get(),
-            .VS = vertexShaderByteCode,
-            .PS = pixelShaderByteCode,
-            .DS = nullptr,
-            .HS = nullptr,
-            .GS = nullptr,
-            .StreamOutput = nullptr,
-            .BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT),
-            .SampleMask = UINT_MAX,
-            .RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
-            .DepthStencilState = {
-                .DepthEnable = FALSE,
-                .StencilEnable = FALSE,
-            },
-            .InputLayout = {
-                .pInputElementDescs = inputElementDescs,
-                .NumElements = _countof(inputElementDescs)
-            },
-            .IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED,
-            .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
-            .NumRenderTargets = 1u,
-            .RTVFormats = {                                                         //Render Target View
-                DXGI_FORMAT_R8G8B8A8_UNORM
-            },
-            .DSVFormat = DXGI_FORMAT_R32G32B32A32_FLOAT,                            //Depth Stencil View
-            .SampleDesc = {
-                .Count = 1,
-                .Quality = 0
-            },
-            .NodeMask = 0u,
-            .CachedPSO = nullptr,
-            .Flags = D3D12_PIPELINE_STATE_FLAG_NONE
-        };
-        hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState));   // PSO만들기
         if (FAILED(hr))
         {
             return hr;
