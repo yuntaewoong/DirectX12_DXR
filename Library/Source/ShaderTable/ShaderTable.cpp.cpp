@@ -8,6 +8,13 @@ namespace library
         m_mappedShaderRecords(nullptr),
         m_shaderRecordSize(0u)
     {}
+    ShaderTable::~ShaderTable()
+    {
+        if (m_resource.Get())
+        {
+            m_resource->Unmap(0, nullptr);
+        }
+    }
     HRESULT ShaderTable::Initialize(_In_ ID3D12Device* device, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize)
     {
         HRESULT hr = S_OK;

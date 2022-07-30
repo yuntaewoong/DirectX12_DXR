@@ -21,9 +21,7 @@ namespace library
         static const UINT FRAME_COUNT = 2;
         struct Vertex
         {
-            float f1,f2,f3;
-            /*XMFLOAT3 position;
-            XMFLOAT4 color;*/
+            XMFLOAT3 position;
         };
         using Index = UINT16;
         ComPtr<IDXGIFactory4> m_dxgiFactory;

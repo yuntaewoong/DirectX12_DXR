@@ -11,7 +11,7 @@ namespace library
         ShaderTable(ShaderTable&& other) = delete;
         ShaderTable& operator=(const ShaderTable& other) = delete;
         ShaderTable& operator=(ShaderTable&& other) = delete;
-        ~ShaderTable() = default;
+        ~ShaderTable();
 
         HRESULT Initialize(_In_ ID3D12Device* device, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize);
         HRESULT Push_back(const ShaderRecord& shaderRecord);

@@ -633,18 +633,12 @@ namespace library
     HRESULT Renderer::createVertexBuffer()
     {//Vertex Buffer 만들기, directx12는 vertex buffer를 D3D12Resource로 봄
         HRESULT hr = S_OK;
-        Vertex triangleVertices[] =
+        Vertex triangleVertices[] = 
         {
-            {0,-0.7f,1.f},
-            {-0.7f,0.7f,1.f},
-            {0.7f,0.7f,1.f}
+            XMFLOAT3(0,-1.f,0.f),
+            XMFLOAT3(-1.f,1.f,0.f),
+            XMFLOAT3(1.f,1.f,0.f)
         };
-            
-            /*{
-            { { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-            { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-            { { -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
-        };*/
         const UINT vertexBufferSize = sizeof(triangleVertices);
 
         //현재 heap type을 upload로 한 상태로 vertex buffer를 gpu메모리에 생성하는데, 이는 좋지 않은 방법
@@ -744,10 +738,11 @@ namespace library
     HRESULT Renderer::createRaytracingRootSignature()
     {
         HRESULT hr = S_OK;
-        ComPtr<ID3DBlob> signature(nullptr);
-        ComPtr<ID3DBlob> error(nullptr);
+        
         //global 루트 시그니처: 모든 Shader에서 사용할 자원 정의
         {
+            ComPtr<ID3DBlob> signature(nullptr);
+            ComPtr<ID3DBlob> error(nullptr);
             CD3DX12_DESCRIPTOR_RANGE UAVDescriptor{};
             UAVDescriptor.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
             CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE] = {};
@@ -767,6 +762,8 @@ namespace library
         }
         //local 루트 시그니처: 특정 Shader에서 사용할 자원 정의(Shader Table에서 선택)
         {
+            ComPtr<ID3DBlob> signature(nullptr);
+            ComPtr<ID3DBlob> error(nullptr);
             CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_LOCAL_ROOT_SIGNATURE] = {};
             rootParameters[static_cast<int>(ELocalRootSignatureSlot::ViewportConstantSlot)].InitAsConstants(SizeOfInUint32(m_rayGenCB), 0, 0);//Constant버퍼는 이렇게
             CD3DX12_ROOT_SIGNATURE_DESC localRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
@@ -801,6 +798,7 @@ namespace library
 
         
         CD3DX12_HIT_GROUP_SUBOBJECT* hitGroup = raytracingPipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();//hit group 서브 오브젝트 생성
+        
         hitGroup->SetClosestHitShaderImport(L"MyClosestHitShader");//히트그룹과 연결될 셰이더진입점
         hitGroup->SetHitGroupExport(L"MyHitGroup");//히트 그룹 수출
         hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);//이 히트그룹은 삼각형
@@ -975,8 +973,7 @@ namespace library
                 },
                 .InstanceID = 24,
                 .InstanceMask = 1,
-                .InstanceContributionToHitGroupIndex = 24,
-                .Flags = 8,
+                .InstanceContributionToHitGroupIndex = 0,
                 .AccelerationStructure = m_bottomLevelAccelerationStructure->GetGPUVirtualAddress()
             };
             CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
@@ -1023,12 +1020,11 @@ namespace library
             ID3D12CommandList* commandLists[] = { m_commandList.Get() };
             m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
         }
-        hr = waitForPreviousFrame();
+        hr = waitForPreviousFrame();//command list 실행완료 대기
         if (FAILED(hr))
         {
             return hr;
         }
-        //m_deviceResources->WaitForGpu();//GPU완료 대기
         return hr;
     }
     HRESULT Renderer::createShaderTable()
@@ -1064,8 +1060,7 @@ namespace library
             {
                 return hr;
             }
-            ShaderRecord tempRecord = ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments));
-            rayGenShaderTable.Push_back(tempRecord);
+            rayGenShaderTable.Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments)));
             m_rayGenShaderTable = rayGenShaderTable.GetResource();
         }
 
@@ -1079,8 +1074,7 @@ namespace library
             {
                 return hr;
             }
-            ShaderRecord tempRecord = ShaderRecord(missShaderIdentifier, shaderIdentifierSize);
-            missShaderTable.Push_back(tempRecord);
+            missShaderTable.Push_back(ShaderRecord(missShaderIdentifier, shaderIdentifierSize));
             m_missShaderTable = missShaderTable.GetResource();
         }
 
@@ -1094,8 +1088,7 @@ namespace library
             {
                 return hr;
             }
-            ShaderRecord tempRecord = ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize);
-            hitGroupShaderTable.Push_back(tempRecord);
+            hitGroupShaderTable.Push_back(ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize));
             m_hitGroupShaderTable = hitGroupShaderTable.GetResource();
         }
         return hr;
@@ -1127,7 +1120,6 @@ namespace library
         {
             return hr;
         }
-        //m_raytracingOutputResourceUAVDescriptorHeapIndex = AllocateDescriptor(&uavDescriptorHandle, m_raytracingOutputResourceUAVDescriptorHeapIndex);
         D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapCpuBase = m_uavHeap->GetCPUDescriptorHandleForHeapStart();
         if (m_raytracingOutputResourceUAVDescriptorHeapIndex >= m_uavHeap->GetDesc().NumDescriptors)
         {
