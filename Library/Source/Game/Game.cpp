@@ -61,6 +61,10 @@ namespace library
 
 		return static_cast<INT>(msg.wParam);
 	}
+	std::unique_ptr<Renderer>& Game::GetRenderer()
+	{
+		return m_renderer;
+	}
 	PCWSTR Game::GetGameName() const
 	{
 		return m_pszGameName;

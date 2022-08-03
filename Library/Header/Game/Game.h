@@ -21,7 +21,7 @@ namespace library
 
         HRESULT Initialize(_In_ HINSTANCE hInstance, _In_ INT nCmdShow);
         INT Run();
-
+        std::unique_ptr<Renderer>& GetRenderer();
         PCWSTR GetGameName() const;
         std::unique_ptr<MainWindow>& GetWindow();
     private:

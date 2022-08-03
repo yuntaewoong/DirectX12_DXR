@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Common/Common.h"
+#include "AccelerationStructure\AccelerationStructure.h"
+#include "Scene\Scene.h"
 namespace library
 {
 	class Renderer
@@ -14,14 +16,12 @@ namespace library
 		~Renderer() = default;
 
         HRESULT Initialize(_In_ HWND hWnd);
+        void SetMainScene(_In_ std::shared_ptr<Scene> pScene);
         void Render(_In_ FLOAT deltaTime);
 	private:
         static const UINT FRAME_COUNT = 2;
-        struct Vertex
-        {
-            XMFLOAT3 position;
-        };
-        using Index = UINT16;
+        std::shared_ptr<Scene> m_scene;
+
         ComPtr<IDXGIFactory4> m_dxgiFactory;
         ComPtr<IDXGISwapChain3> m_swapChain;
         ComPtr<ID3D12Device> m_device;
@@ -32,9 +32,7 @@ namespace library
         ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
         ComPtr<ID3D12Resource> m_vertexBuffer;
-        D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
         ComPtr<ID3D12Resource> m_indexBuffer;
-        D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
         // DXR파이프라인 관련
         ComPtr<ID3D12Device5> m_dxrDevice;
         ComPtr<ID3D12GraphicsCommandList4> m_dxrCommandList;
@@ -45,9 +43,8 @@ namespace library
         ComPtr<ID3D12RootSignature> m_raytracingLocalRootSignature;
         
         //ray tracing BLAS,TLAS
-        ComPtr<ID3D12Resource> m_bottomLevelAccelerationStructure;
-        ComPtr<ID3D12Resource> m_topLevelAccelerationStructure;
-        
+        std::unique_ptr<AccelerationStructure> m_accelerationStructure;
+
         //Ray tracing Shader에서 접근하는 UAV에 대한 descriptor heap
         ComPtr<ID3D12DescriptorHeap> m_uavHeap;
         UINT m_descriptorsAllocated;

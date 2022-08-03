@@ -13,6 +13,8 @@
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
 #include "d3dx12.h"
+#include <unordered_map>
+#include <string>
 
 #define SizeOfInUint32(obj) ((sizeof(obj) - 1) / sizeof(UINT32) + 1)
 
@@ -45,4 +47,13 @@ struct RayGenConstantBuffer
 {
     Viewport viewport;
     Viewport stencil;
+};
+
+struct Vertex
+{
+    XMFLOAT3 position;
+};
+struct Index
+{
+    UINT16 index;
 };

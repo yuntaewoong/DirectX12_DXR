@@ -6,6 +6,7 @@
 namespace library
 {
     Renderer::Renderer() :
+        m_scene(nullptr),
         m_dxgiFactory(nullptr),
         m_swapChain(nullptr),
         m_device(nullptr),
@@ -15,16 +16,13 @@ namespace library
         m_rtvHeap(nullptr),
         m_commandList(nullptr),
         m_vertexBuffer(nullptr),
-        m_vertexBufferView(),
         m_indexBuffer(nullptr),
-        m_indexBufferView(),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_dxrStateObject(nullptr),
         m_raytracingGlobalRootSignature(nullptr),
         m_raytracingLocalRootSignature(nullptr),
-        m_bottomLevelAccelerationStructure(nullptr),
-        m_topLevelAccelerationStructure(nullptr),
+        m_accelerationStructure(std::make_unique<AccelerationStructure>()),
         m_uavHeap(nullptr),
         m_descriptorsAllocated(0u),
         m_uavHeapDescriptorSize(0u),
@@ -58,6 +56,10 @@ namespace library
         }
         return S_OK;
 	}
+    void Renderer::SetMainScene(_In_ std::shared_ptr<Scene> pScene)
+    {
+        m_scene = pScene;
+    }
     void Renderer::Render(_In_ FLOAT deltaTime)
     {
         populateCommandList();//command 기록
@@ -154,6 +156,11 @@ namespace library
                     return hr;
                 }
             }
+        }
+        hr = m_scene->Initialize(m_device.Get());//Renderable들을 관리하는 Scene초기화
+        if (FAILED(hr))
+        {
+            return hr;
         }
         //이하는 RayTracing용 초기화
         ComPtr<IDXGIAdapter1> tempAdapter(nullptr);
@@ -276,10 +283,12 @@ namespace library
             static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
             m_raytracingOutputResourceUAVGpuDescriptor
         );//아웃풋 UAV텍스쳐 바인딩
+
         m_commandList->SetComputeRootShaderResourceView(
             static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
-            m_topLevelAccelerationStructure->GetGPUVirtualAddress()
+            m_accelerationStructure->GetTLAS()->GetTLASVirtualAddress()
         );//TLAS 바인딩
+        
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
             .RayGenerationShaderRecord = {
                 .StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress(),
@@ -526,11 +535,6 @@ namespace library
         memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));//gpu 메모리 전송
         m_vertexBuffer->Unmap(0, nullptr);//매핑 해제
 
-        m_vertexBufferView = {
-            .BufferLocation = m_vertexBuffer->GetGPUVirtualAddress(),   //gpu메모리에 대응하는 cpu virtual address겟
-            .SizeInBytes = vertexBufferSize,                            //vertex버퍼 총 크기는?
-            .StrideInBytes = sizeof(Vertex)                             //각 vertex는 어떻게 띄어 읽어야하는가?
-        };
         return hr;
     }
     HRESULT Renderer::createIndexBuffer()
@@ -566,11 +570,6 @@ namespace library
         memcpy(pIndexDataBegin, indices, sizeof(indices));//gpu 메모리 전송
         m_indexBuffer->Unmap(0, nullptr);//매핑 해제
 
-        m_indexBufferView = {
-            .BufferLocation = m_indexBuffer->GetGPUVirtualAddress(),   //gpu메모리에 대응하는 cpu virtual address겟
-            .SizeInBytes = indexBufferSize,                            //index버퍼 총 크기는?
-            .Format = DXGI_FORMAT_R16_UINT                  //format은?
-        };
         return hr;
     }
     BOOL Renderer::isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const
@@ -720,159 +719,20 @@ namespace library
     {
         HRESULT hr = S_OK;
         m_commandList->Reset(m_commandAllocator.Get(), nullptr);
-
-        D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {//ray tracing geometry정보 구조체 정의, BLAS의 아이템 형식이라 할 수 있음
-            .Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES,// geometry는 삼각형
-            .Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE,//geometry는 불투명
-            .Triangles = {
-                .Transform3x4 = 0,
-                .IndexFormat = DXGI_FORMAT_R16_UINT,
-                .VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT,
-                .IndexCount = static_cast<UINT>(m_indexBuffer->GetDesc().Width) / sizeof(Index),
-                .VertexCount = static_cast<UINT>(m_vertexBuffer->GetDesc().Width) / sizeof(Vertex),
-                .IndexBuffer = m_indexBuffer->GetGPUVirtualAddress(),
-                .VertexBuffer = {
-                    .StartAddress =  m_vertexBuffer->GetGPUVirtualAddress(),
-                    .StrideInBytes = sizeof(Vertex)
-                }
+        {//AS를 이루게 되는 Renderable들 추출
+            std::vector<std::shared_ptr<Renderable>>& renderables = m_scene->GetRenderables();
+            for (UINT i = 0; i < renderables.size(); i++)
+            {
+                m_accelerationStructure->AddRenderable(renderables[i]);
             }
-        };
-        // Get required sizes for an acceleration structure.
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS topLevelInputs = {
-            .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,//TLAS
-            .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
-            .NumDescs = 1,
-            .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY
-        };
-        //AS 빌드 옵션 정의
-
-        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO topLevelPrebuildInfo = {};
-        m_dxrDevice->GetRaytracingAccelerationStructurePrebuildInfo(&topLevelInputs, &topLevelPrebuildInfo);//toplevelinput을 넣어주면 toplevelprebuildinfo가 나옴
-        if (topLevelPrebuildInfo.ResultDataMaxSizeInBytes <= 0)//0바이트보다 큰지 검사
-        {
-            return E_FAIL;
         }
-
-        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO bottomLevelPrebuildInfo = {};
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS bottomLevelInputs = topLevelInputs;
-        bottomLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;//BLAS
-        bottomLevelInputs.pGeometryDescs = &geometryDesc;//BLAS에만 geometry가 있음
-        m_dxrDevice->GetRaytracingAccelerationStructurePrebuildInfo(&bottomLevelInputs, &bottomLevelPrebuildInfo);
-        if (bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes <= 0)//0바이트보다 큰지 검사
-        {
-            return E_FAIL;
-        }
-
-        ComPtr<ID3D12Resource> scratchResource(nullptr);
-        CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
-        CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(
-            max(topLevelPrebuildInfo.ScratchDataSizeInBytes, bottomLevelPrebuildInfo.ScratchDataSizeInBytes),
-            D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
-        );
-        hr = m_device->CreateCommittedResource(
-            &uploadHeapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &bufferDesc,
-            D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-            nullptr,
-            IID_PPV_ARGS(&scratchResource)
-        );
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        //TLAS,BLAS의 scratch데이터중 큰 크기만큼 UAV버퍼 하나 만들기
-
-        {//BLAS 버퍼 만들기
-            CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
-            bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(
-                bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes,
-                D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
-            );
-            D3D12_RESOURCE_STATES initialResourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;//resource state는 acceleration structure
-            
-            hr = m_device->CreateCommittedResource(
-                &uploadHeapProperties,
-                D3D12_HEAP_FLAG_NONE,
-                &bufferDesc,
-                initialResourceState,
-                nullptr,
-                IID_PPV_ARGS(&m_bottomLevelAccelerationStructure)
-            );
+        {//TLAS,BLAS초기화
+            hr = m_accelerationStructure->Initialize(m_dxrDevice.Get(), m_dxrCommandList.Get());
             if (FAILED(hr))
             {
                 return hr;
             }
         }
-        {//TLAS 버퍼 만들기
-            CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
-            bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(
-                topLevelPrebuildInfo.ResultDataMaxSizeInBytes,
-                D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
-            );
-            D3D12_RESOURCE_STATES initialResourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;//resource state는 acceleration structure
-            hr = m_device->CreateCommittedResource(
-                &uploadHeapProperties,
-                D3D12_HEAP_FLAG_NONE,
-                &bufferDesc,
-                initialResourceState,
-                nullptr,
-                IID_PPV_ARGS(&m_topLevelAccelerationStructure)
-            );
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-        }
-        ComPtr<ID3D12Resource> instanceDescs(nullptr);//transform과 해당하는 BLAS주소
-        {
-            //TLAS에 들어가는 Instance버퍼 1개 만들기
-            D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {
-                .Transform = {
-                    {1,0,0,0},
-                    {0,1,0,0},
-                    {0,0,1,0},
-                },
-                .InstanceID = 24,
-                .InstanceMask = 1,
-                .InstanceContributionToHitGroupIndex = 0,
-                .AccelerationStructure = m_bottomLevelAccelerationStructure->GetGPUVirtualAddress()
-            };
-            CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
-            CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(instanceDesc));
-            hr = m_device->CreateCommittedResource(
-                &uploadHeapProperties,
-                D3D12_HEAP_FLAG_NONE,
-                &bufferDesc,
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                nullptr,
-                IID_PPV_ARGS(&instanceDescs)
-            );
-            void* pMappedData = nullptr;
-            instanceDescs->Map(0, nullptr, &pMappedData);
-            memcpy(pMappedData, &instanceDesc, sizeof(instanceDesc));
-            instanceDescs->Unmap(0, nullptr);
-            topLevelInputs.InstanceDescs = instanceDescs->GetGPUVirtualAddress();//top level input에 instance주소 추가
-        }
-        // TLAS빌드옵션
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC topLevelBuildDesc = {
-            .DestAccelerationStructureData = m_topLevelAccelerationStructure->GetGPUVirtualAddress(),//TLAS버퍼 주소
-            .Inputs = topLevelInputs,                                                                //인풋 
-            .SourceAccelerationStructureData = 0,                                                    //?
-            .ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress()              //scratch버퍼 주소
-        };
-        // BLAS빌드옵션
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC bottomLevelBuildDesc = {
-            .DestAccelerationStructureData = m_bottomLevelAccelerationStructure->GetGPUVirtualAddress(),//BLAS버퍼 주소
-            .Inputs = bottomLevelInputs,                                                                //인풋
-            .SourceAccelerationStructureData = 0,                                                       //?
-            .ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress()                 //scratch버퍼 주소
-        };
-        m_dxrCommandList->BuildRaytracingAccelerationStructure(&bottomLevelBuildDesc, 0, nullptr);//BLAS만들기
-        CD3DX12_RESOURCE_BARRIER tempUAV = CD3DX12_RESOURCE_BARRIER::UAV(m_bottomLevelAccelerationStructure.Get());
-        m_commandList->ResourceBarrier(1, &tempUAV);// UAV는 쓸때마다 Barrier (쓰기->쓰기 여도 Unordered때문에 그럼)
-        m_dxrCommandList->BuildRaytracingAccelerationStructure(&topLevelBuildDesc, 0, nullptr);//TLAS만들기
-
         {//TLAS,BLAS만드는 command list실행
             hr = m_commandList->Close();
             if (FAILED(hr))
@@ -882,10 +742,12 @@ namespace library
             ID3D12CommandList* commandLists[] = { m_commandList.Get() };
             m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
         }
-        hr = waitForPreviousFrame();//command list 실행완료 대기
-        if (FAILED(hr))
-        {
-            return hr;
+        {//command list 실행완료 대기
+            hr = waitForPreviousFrame();
+            if (FAILED(hr))
+            {
+                return hr;
+            }
         }
         return hr;
     }

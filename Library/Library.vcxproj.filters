@@ -43,6 +43,18 @@
     <Filter Include="Source Files\ShaderTable">
       <UniqueIdentifier>{78193f6f-d303-4437-9de9-7dbe0daaaac9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\AccelerationStructure">
+      <UniqueIdentifier>{e9066c21-7d93-41c1-8e07-5cc49d03d910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AccelerationStructure">
+      <UniqueIdentifier>{e746fb4d-fa83-4592-848d-a3144934f233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{a52eb3b7-30e0-491d-9e2f-9c2b89518ebd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{be817a22-37fb-4806-ae17-c658721b3f99}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -69,6 +81,21 @@
     <ClInclude Include="Header\ShaderTable\ShaderRecord.h">
       <Filter>Header Files\ShaderTable</Filter>
     </ClInclude>
+    <ClInclude Include="Header\AccelerationStructure\AccelerationStructure.h">
+      <Filter>Header Files\AccelerationStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\AccelerationStructure\TopLevelAccelerationStructure.h">
+      <Filter>Header Files\AccelerationStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\AccelerationStructure\BottomLevelAccelerationStructure.h">
+      <Filter>Header Files\AccelerationStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Render\Renderable.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Scene\Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -85,6 +112,21 @@
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp">
       <Filter>Source Files\ShaderTable</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AccelerationStructure\AccelerationStructure.cpp">
+      <Filter>Source Files\AccelerationStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AccelerationStructure\BottomLevelAccelerationStructure.cpp">
+      <Filter>Source Files\AccelerationStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AccelerationStructure\TopLevelAccelerationStructure.cpp">
+      <Filter>Source Files\AccelerationStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Renderable.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\Scene.cpp">
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
