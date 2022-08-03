@@ -5,7 +5,11 @@
 class TestTriangle : public library::Renderable
 {
 public:
-	TestTriangle();
+	TestTriangle(
+		_In_ XMVECTOR location,
+		_In_ XMVECTOR rotation,
+		_In_ XMVECTOR scale
+	);
 	TestTriangle(const Renderable& other) = delete;
 	TestTriangle(Renderable&& other) = delete;
 	TestTriangle& operator=(const Renderable& other) = delete;

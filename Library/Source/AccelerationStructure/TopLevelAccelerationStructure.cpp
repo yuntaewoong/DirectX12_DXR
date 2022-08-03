@@ -14,13 +14,13 @@ namespace library
     )
     {
         HRESULT hr = S_OK;
+        std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs;
         {//blas마다 대응하는 instanceResource생성후 GPU mem copy
-            std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs;
             instanceDescs.resize(m_bottomLevelAccelerationStructures.size());
             for (INT i = 0; i < instanceDescs.size(); i++)
             {
                 XMFLOAT4X4 transform;
-                XMStoreFloat4x4(&transform, m_bottomLevelAccelerationStructures[i]->GetRenderable()->GetWorldMatrix());
+                XMStoreFloat4x4(&transform, XMMatrixTranspose(m_bottomLevelAccelerationStructures[i]->GetRenderable()->GetWorldMatrix()));
                 instanceDescs[i] = {
                     .Transform = {
                         transform._11,transform._12,transform._13,transform._14,
@@ -51,7 +51,7 @@ namespace library
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS topLevelInputs = {
             .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,//TLAS
             .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
-            .NumDescs = 1,
+            .NumDescs = static_cast<UINT>(instanceDescs.size()),
             .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
             .InstanceDescs = m_instanceResource->GetGPUVirtualAddress()
         };

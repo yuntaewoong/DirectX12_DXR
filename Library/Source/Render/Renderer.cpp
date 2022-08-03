@@ -56,7 +56,7 @@ namespace library
         }
         return S_OK;
 	}
-    void Renderer::SetMainScene(_In_ std::shared_ptr<Scene> pScene)
+    void Renderer::SetMainScene(_In_ std::shared_ptr<Scene>& pScene)
     {
         m_scene = pScene;
     }

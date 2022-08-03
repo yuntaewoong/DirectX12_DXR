@@ -6,7 +6,11 @@ namespace library
 	class Renderable
 	{
 	public:
-		Renderable();
+		Renderable(
+			_In_ XMVECTOR location,
+			_In_ XMVECTOR rotation,
+			_In_ XMVECTOR scale
+		);
 		Renderable(const Renderable& other) = delete;
 		Renderable(Renderable&& other) = delete;
 		Renderable& operator=(const Renderable& other) = delete;

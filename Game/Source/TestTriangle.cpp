@@ -1,7 +1,12 @@
 #include "TestTriangle.h"
 
 
-TestTriangle::TestTriangle()
+TestTriangle::TestTriangle(
+	_In_ XMVECTOR location,
+	_In_ XMVECTOR rotation,
+	_In_ XMVECTOR scale
+) :
+	Renderable::Renderable(location,rotation,scale)
 {}
 HRESULT TestTriangle::Initialize(_In_ ID3D12Device* pDevice)
 {

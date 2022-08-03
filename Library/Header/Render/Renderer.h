@@ -16,7 +16,7 @@ namespace library
 		~Renderer() = default;
 
         HRESULT Initialize(_In_ HWND hWnd);
-        void SetMainScene(_In_ std::shared_ptr<Scene> pScene);
+        void SetMainScene(_In_ std::shared_ptr<Scene>& pScene);
         void Render(_In_ FLOAT deltaTime);
 	private:
         static const UINT FRAME_COUNT = 2;

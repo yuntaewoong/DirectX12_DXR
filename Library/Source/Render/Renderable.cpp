@@ -2,11 +2,21 @@
 
 namespace library
 {
-	Renderable::Renderable() :
+	Renderable::Renderable(
+        _In_ XMVECTOR location,
+        _In_ XMVECTOR rotation,
+        _In_ XMVECTOR scale
+    ) :
 		m_vertexBuffer(nullptr),
 		m_indexBuffer(nullptr),
         m_world(XMMatrixIdentity())
-	{}
+	{
+        m_world = m_world *
+            XMMatrixRotationRollPitchYawFromVector(rotation) *
+            XMMatrixScalingFromVector(scale) *
+            XMMatrixTranslationFromVector(location);
+        m_world = m_world;
+    }
     ComPtr<ID3D12Resource>& Renderable::GetVertexBuffer()
     {
         return m_vertexBuffer;
