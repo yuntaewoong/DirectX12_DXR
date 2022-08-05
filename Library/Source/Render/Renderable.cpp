@@ -78,7 +78,7 @@ namespace library
 	{
         HRESULT hr = S_OK;
         const Index* indices = GetIndices();
-        const UINT indexBufferSize = sizeof(indices);
+        const UINT indexBufferSize = sizeof(Index) * GetNumIndices();
 
         CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);//heap type¿∫ upload
         D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);

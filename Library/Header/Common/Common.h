@@ -28,10 +28,10 @@ enum class EGlobalRootSignatureSlot
     SceneConstantSlot,
     VertexBuffersSlot
 };
-const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE = 2;
+const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE = 4;
 enum class ELocalRootSignatureSlot
 {
-    ViewportConstantSlot = 0
+    CubeConstantSlot = 0,
 };
 const static INT NUM_OF_LOCAL_ROOT_SIGNATURE = 1;
 
@@ -48,10 +48,22 @@ struct RayGenConstantBuffer
     Viewport viewport;
     Viewport stencil;
 };
-
+struct SceneConstantBuffer
+{
+    XMMATRIX projectionToWorld;
+    XMVECTOR cameraPosition;
+    XMVECTOR lightPosition;
+    XMVECTOR lightAmbientColor;
+    XMVECTOR lightDiffuseColor;
+};
+struct CubeConstantBuffer
+{
+    XMFLOAT4 albedo;
+};
 struct Vertex
 {
     XMFLOAT3 position;
+    XMFLOAT3 normal;
 };
 struct Index
 {

@@ -17,22 +17,21 @@ namespace library
 
         HRESULT Initialize(_In_ HWND hWnd);
         void SetMainScene(_In_ std::shared_ptr<Scene>& pScene);
-        void Render(_In_ FLOAT deltaTime);
+        void Render();
+        void Update(_In_ FLOAT deltaTime);
 	private:
-        static const UINT FRAME_COUNT = 2;
+        static const UINT FRAME_COUNT = 3;
         std::shared_ptr<Scene> m_scene;
 
         ComPtr<IDXGIFactory4> m_dxgiFactory;
         ComPtr<IDXGISwapChain3> m_swapChain;
         ComPtr<ID3D12Device> m_device;
         ComPtr<ID3D12Resource> m_renderTargets[FRAME_COUNT];
-        ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+        ComPtr<ID3D12CommandAllocator> m_commandAllocator[FRAME_COUNT];
         ComPtr<ID3D12CommandQueue> m_commandQueue;
         ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
         ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
-        ComPtr<ID3D12Resource> m_vertexBuffer;
-        ComPtr<ID3D12Resource> m_indexBuffer;
         // DXR파이프라인 관련
         ComPtr<ID3D12Device5> m_dxrDevice;
         ComPtr<ID3D12GraphicsCommandList4> m_dxrCommandList;
@@ -51,7 +50,8 @@ namespace library
         UINT m_uavHeapDescriptorSize;
 
         //RayGeneration Shader Constant Buffer 구조체
-        RayGenConstantBuffer m_rayGenCB;
+        SceneConstantBuffer m_sceneCB[FRAME_COUNT];
+        CubeConstantBuffer m_cubeCB;
 
         //ray tracing Shader Table자원
         ComPtr<ID3D12Resource> m_missShaderTable;
@@ -65,11 +65,29 @@ namespace library
 
         UINT m_rtvDescriptorSize;
         UINT m_frameIndex;
-        HANDLE m_fenceEvent;
-        ComPtr<ID3D12Fence> m_fence;
-        UINT64 m_fenceValue;
+        // Presentation fence objects.
+        Microsoft::WRL::ComPtr<ID3D12Fence>                 m_fence;
+        UINT64                                              m_fenceValues[FRAME_COUNT];
+        Microsoft::WRL::Wrappers::Event                     m_fenceEvent;
 
 
+
+        D3D12_CPU_DESCRIPTOR_HANDLE m_indexBufferCpuDescriptorHandle;
+        D3D12_GPU_DESCRIPTOR_HANDLE m_indexBufferGpuDescriptorHandle;
+        D3D12_CPU_DESCRIPTOR_HANDLE m_vertexBufferCpuDescriptorHandle;
+        D3D12_GPU_DESCRIPTOR_HANDLE m_vertexBufferGpuDescriptorHandle;
+        
+        XMVECTOR m_eye;
+        XMVECTOR m_at;
+        XMVECTOR m_up;
+
+        ComPtr<ID3D12Resource> m_perFrameConstants;
+        union AlignedSceneConstantBuffer
+        {
+            SceneConstantBuffer constants;
+            uint8_t alignmentPadding[D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT];
+        };
+        AlignedSceneConstantBuffer* m_mappedConstantData;
     private:
         HRESULT initializePipeLine(_In_ HWND hWnd);
         HRESULT getHardwareAdapter(
@@ -78,18 +96,16 @@ namespace library
             bool requestHighPerformanceAdapter = false
         );
         HRESULT populateCommandList();
-        HRESULT waitForPreviousFrame();
+        //HRESULT waitForPreviousFrame();
         void getWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight);
-        
+        HRESULT waitForGPU() noexcept;
+        HRESULT moveToNextFrame();
 
         HRESULT createDevice();
         HRESULT createCommandQueue();
         HRESULT createSwapChain(_In_ HWND hWnd);
         HRESULT createRenderTargetView();
         HRESULT createCommandAllocator();
-
-        HRESULT createVertexBuffer();
-        HRESULT createIndexBuffer();
 
         //이하 함수는 ray tacing 관련함수
         BOOL isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const;
@@ -100,5 +116,10 @@ namespace library
         HRESULT createAccelerationStructure();
         HRESULT createShaderTable();
         HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
+        UINT createBufferSRV(_In_ ID3D12Resource* buffer,_Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize);
+        void initializeScene();
+        void updateCameraMatrix();
+        HRESULT createConstantBuffer();
+
 	};
 }

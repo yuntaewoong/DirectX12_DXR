@@ -11,12 +11,10 @@ namespace library
         m_swapChain(nullptr),
         m_device(nullptr),
         m_renderTargets{ nullptr,nullptr },
-        m_commandAllocator(nullptr),
+        m_commandAllocator(),
         m_commandQueue(nullptr),
         m_rtvHeap(nullptr),
         m_commandList(nullptr),
-        m_vertexBuffer(nullptr),
-        m_indexBuffer(nullptr),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_dxrStateObject(nullptr),
@@ -26,26 +24,29 @@ namespace library
         m_uavHeap(nullptr),
         m_descriptorsAllocated(0u),
         m_uavHeapDescriptorSize(0u),
-        m_rayGenCB(),
+        m_sceneCB(),
+        m_cubeCB(),
         m_missShaderTable(nullptr),
         m_hitGroupShaderTable(nullptr),
         m_rayGenShaderTable(nullptr),
         m_raytracingOutput(nullptr),
         m_raytracingOutputResourceUAVGpuDescriptor(),
-        m_raytracingOutputResourceUAVDescriptorHeapIndex(0u),
+        m_raytracingOutputResourceUAVDescriptorHeapIndex(UINT_MAX),
         m_rtvDescriptorSize(0u),
         m_frameIndex(0u),
         m_fenceEvent(),
         m_fence(nullptr),
-        m_fenceValue(0u)
-    {
-        m_rayGenCB.viewport = { -1.0f, -1.0f, 1.0f, 1.0f };
-        m_rayGenCB.stencil =
-        {
-            -1 + (0.1f / (9/16.f)), -1 + 0.1f,
-             1 - (0.1f / (9 / 16.f)), 1.0f - 0.1f
-        };
-    }
+        m_fenceValues(),
+        m_indexBufferCpuDescriptorHandle(),
+        m_indexBufferGpuDescriptorHandle(),
+        m_vertexBufferCpuDescriptorHandle(),
+        m_vertexBufferGpuDescriptorHandle(),
+        m_eye(),
+        m_at(),
+        m_up(),
+        m_perFrameConstants(nullptr),
+        m_mappedConstantData(nullptr)
+    {}
 	HRESULT Renderer::Initialize(_In_ HWND hWnd)
 	{
         HRESULT hr = S_OK;
@@ -60,16 +61,40 @@ namespace library
     {
         m_scene = pScene;
     }
-    void Renderer::Render(_In_ FLOAT deltaTime)
+    void Renderer::Render()
     {
         populateCommandList();//command 기록
         m_commandList->Close();//command list작성 종료
         ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
         m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);//command queue에 담긴 command list들 실행명령(비동기)
         
-        m_swapChain->Present(1, 0);//백버퍼 교체
+        m_swapChain->Present(1,0);//백버퍼 교체
+        moveToNextFrame();
 
-        waitForPreviousFrame();//gpu작업완료 대기
+        //waitForGPU();//gpu작업완료 대기
+    }
+    void Renderer::Update(_In_ FLOAT deltaTime)
+    {
+        // Rotate the camera around Y axis.
+        {
+            float secondsToRotateAround = 24.0f;
+            float angleToRotateBy = 360.0f * (deltaTime / secondsToRotateAround);
+            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
+            m_eye = XMVector3Transform(m_eye, rotate);
+            m_up = XMVector3Transform(m_up, rotate);
+            m_at = XMVector3Transform(m_at, rotate);
+            updateCameraMatrix();
+        }
+
+        // Rotate the second light around Y axis.
+        {
+            UINT prevFrameIndex = (m_frameIndex + FRAME_COUNT + 1) % FRAME_COUNT;
+            float secondsToRotateAround = 8.0f;
+            float angleToRotateBy = -360.0f * (deltaTime / secondsToRotateAround);
+            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
+            const XMVECTOR& prevLightPosition = m_sceneCB[prevFrameIndex].lightPosition;
+            m_sceneCB[m_frameIndex].lightPosition = XMVector3Transform(prevLightPosition, rotate);
+        }
     }
     HRESULT Renderer::initializePipeLine(_In_ HWND hWnd)
     {
@@ -116,18 +141,8 @@ namespace library
         {
             return hr;
         }
-        hr = createVertexBuffer();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = createIndexBuffer();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
         {//commandList 만들기
-            hr = m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_commandList));
+            hr = m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator[0].Get(), nullptr, IID_PPV_ARGS(&m_commandList));
             if (FAILED(hr))
             {
                 return hr;
@@ -140,14 +155,14 @@ namespace library
             }
         }
         {//fence만들기
-            hr = m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
+            hr = m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
             if (FAILED(hr))
             {
                 return hr;
             }
-            m_fenceValue = 1;
+            m_fenceValues[m_frameIndex]++;
 
-            m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+            m_fenceEvent.Attach(CreateEvent(nullptr, FALSE, FALSE, nullptr));
             if (m_fenceEvent == nullptr)
             {
                 hr = HRESULT_FROM_WIN32(GetLastError());
@@ -157,6 +172,8 @@ namespace library
                 }
             }
         }
+
+        initializeScene();
         hr = m_scene->Initialize(m_device.Get());//Renderable들을 관리하는 Scene초기화
         if (FAILED(hr))
         {
@@ -200,12 +217,30 @@ namespace library
         {
             return hr;
         }
+        
+        hr = createConstantBuffer();
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        {//SRV생성
+            std::shared_ptr<Renderable>& tempRenderable = m_scene->GetRenderables()[0];//테스트용 렌더러블 레퍼런스 1개 가져오기
+            createBufferSRV(tempRenderable->GetIndexBuffer().Get(), &m_indexBufferCpuDescriptorHandle, &m_indexBufferGpuDescriptorHandle, tempRenderable->GetNumIndices() / 2, 0);
+            createBufferSRV(tempRenderable->GetVertexBuffer().Get(), &m_vertexBufferCpuDescriptorHandle, &m_vertexBufferGpuDescriptorHandle, tempRenderable->GetNumVertices(), 0);
+        }
+        
+
         hr = createRaytacingOutputResource(hWnd);//output UAV만들기
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = waitForPreviousFrame();
+
+        
+
+
+
+        hr = waitForGPU();
         if (FAILED(hr))
         {
             return hr;
@@ -267,17 +302,27 @@ namespace library
         
         //command list allocator특: gpu동작 끝나야 Reset가능(펜스로 동기화해라)
         HRESULT hr = S_OK;
-        hr = m_commandAllocator->Reset();
+        hr = m_commandAllocator[m_frameIndex]->Reset();
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = m_commandList->Reset(m_commandAllocator.Get(), nullptr);
+        hr = m_commandList->Reset(m_commandAllocator[m_frameIndex].Get(), nullptr);
         if (FAILED(hr))
         {
             return hr;
         }
         m_commandList->SetComputeRootSignature(m_raytracingGlobalRootSignature.Get());//compute shader의 루트 시그니처 바인딩  
+
+        
+        // Copy the updated scene constant buffer to GPU.
+        memcpy(&m_mappedConstantData[m_frameIndex].constants, &m_sceneCB[m_frameIndex], sizeof(m_sceneCB[m_frameIndex]));
+        auto cbGpuAddress = m_perFrameConstants->GetGPUVirtualAddress() + m_frameIndex * sizeof(m_mappedConstantData[0]);
+        m_commandList->SetComputeRootConstantBufferView(
+            static_cast<UINT>(EGlobalRootSignatureSlot::SceneConstantSlot),
+            cbGpuAddress
+        );
+
         m_commandList->SetDescriptorHeaps(1, m_uavHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩(이 CPU heap 매핑된 GPU주소들을 사용하겠다)
         m_commandList->SetComputeRootDescriptorTable(
             static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
@@ -288,7 +333,13 @@ namespace library
             static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
             m_accelerationStructure->GetTLAS()->GetTLASVirtualAddress()
         );//TLAS 바인딩
-        
+
+        m_commandList->SetComputeRootDescriptorTable(
+            static_cast<UINT>(EGlobalRootSignatureSlot::VertexBuffersSlot),
+            m_indexBufferGpuDescriptorHandle
+        );//vertex,index버퍼 바인딩
+
+
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
             .RayGenerationShaderRecord = {
                 .StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress(),
@@ -311,6 +362,9 @@ namespace library
         m_dxrCommandList->SetPipelineState1(m_dxrStateObject.Get());//열심히 만든 ray tracing pipeline바인딩
         m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
         
+
+
+
         D3D12_RESOURCE_BARRIER preCopyBarriers[2] = {};
         preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
             m_renderTargets[m_frameIndex].Get(),
@@ -338,34 +392,6 @@ namespace library
         
         return S_OK;
     }
-    HRESULT Renderer::waitForPreviousFrame()
-    {
-        //현재 waitForPreviousFrame함수는 매우 비효율적인 코드(CPU가 GPU끝날때까지 바보가됨(block))
-        //D3D12HelloFrameBuffering <= 이걸 보면 깨달음을 얻을거라는 마소직원의 조언..
-
-        const UINT64 fence = m_fenceValue;
-        HRESULT hr = S_OK;
-        hr = m_commandQueue->Signal(m_fence.Get(), fence);//command queue 작업이 끝나면 fence값 업데이트 해주세요 라는 뜻
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        m_fenceValue++;
-
-        
-        if (m_fence->GetCompletedValue() < fence)
-        {
-            hr = m_fence->SetEventOnCompletion(fence, m_fenceEvent);//m_fence 개체가 fence값으로 업데이트가 완료되면 m_fenceEvent이벤트 signal
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            WaitForSingleObject(m_fenceEvent, INFINITE);//m_fenceEvent가 signal될때까지 본 스레드 blocking
-        }
-
-        m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();//gpu작업이 끝났으니 백버퍼 인덱스 교체
-        return S_OK;
-    }
     void Renderer::getWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight)
     {
         *pWidth = 0u;
@@ -379,6 +405,56 @@ namespace library
         GetClientRect(hWnd, &rc);
         *pWidth = static_cast<UINT>(rc.right - rc.left);
         *pHeight = static_cast<UINT>(rc.bottom - rc.top);
+    }
+    HRESULT Renderer::waitForGPU() noexcept
+    {
+        HRESULT hr = S_OK;
+        if (m_commandQueue && m_fence && m_fenceEvent.IsValid())
+        {
+            // Schedule a Signal command in the GPU queue.
+            UINT64 fenceValue = m_fenceValues[m_frameIndex];
+            hr = m_commandQueue->Signal(m_fence.Get(), fenceValue);//command queue 작업이 끝나면 fence값 fenceValue로 업데이트 해주세요 라는 뜻
+            if (FAILED(hr))
+            {
+                return hr;
+            }   // Wait until the Signal has been processed.
+            hr = m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent.Get());//m_fence 개체가 fence값으로 업데이트가 완료되면 m_fenceEvent이벤트 signal
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+            WaitForSingleObjectEx(m_fenceEvent.Get(), INFINITE, FALSE);//m_fenceEvent가 signal될때까지 본 스레드 blocking
+            // Increment the fence value for the current frame.
+            m_fenceValues[m_frameIndex]++;
+            return hr;
+        }
+        return E_FAIL;
+        
+    }
+    HRESULT Renderer::moveToNextFrame()
+    {
+        HRESULT hr = S_OK;
+        // Schedule a Signal command in the queue.
+        const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
+        
+        hr = m_commandQueue->Signal(m_fence.Get(), currentFenceValue);
+
+        // Update the back buffer index.
+        m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+        // If the next frame is not ready to be rendered yet, wait until it is ready.
+        if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
+        {
+            hr = m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent.Get());
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+            WaitForSingleObjectEx(m_fenceEvent.Get(), INFINITE, FALSE);
+        }
+        // Set the fence value for the next frame.
+        m_fenceValues[m_frameIndex] = currentFenceValue + 1;
+        return hr;
     }
     HRESULT Renderer::createDevice()//d3d device생성
     {
@@ -432,7 +508,7 @@ namespace library
             .Scaling = DXGI_SCALING_NONE,                   //스케일링 지원여부
             .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,    //스왑방식
             .AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,       //alpha값 사용여부
-            .Flags = 0u                                     //각종 flag
+            .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING                              //각종 flag
         };
         ComPtr<IDXGISwapChain1> swapChain(nullptr);
         hr = m_dxgiFactory->CreateSwapChainForHwnd(
@@ -494,82 +570,15 @@ namespace library
     HRESULT Renderer::createCommandAllocator()//command allocator생성(command list메모리 할당)
     {
         HRESULT hr = S_OK;
-        hr = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator));
-        if (FAILED(hr))
+        for (UINT i = 0; i < FRAME_COUNT; i++)
         {
-            return hr;
+            hr = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator[i]));
+            if (FAILED(hr))
+            {
+                return hr;
+            }
         }
-        return hr;
-    }
-    HRESULT Renderer::createVertexBuffer()
-    {//Vertex Buffer 만들기, directx12는 vertex buffer를 D3D12Resource로 봄
-        HRESULT hr = S_OK;
-        Vertex triangleVertices[] = 
-        {
-            XMFLOAT3(0,-1.f,0.f),
-            XMFLOAT3(-1.f,1.f,0.f),
-            XMFLOAT3(1.f,1.f,0.f)
-        };
-        const UINT vertexBufferSize = sizeof(triangleVertices);
-
-        //현재 heap type을 upload로 한 상태로 vertex buffer를 gpu메모리에 생성하는데, 이는 좋지 않은 방법
-        //GPU가 접근할때마다 마샬링이 일어난다고 마소직원이 주석을 남김
-        CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
-        D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-        hr = m_device->CreateCommittedResource(//힙 크기 == 데이터 크기로 힙과, 자원 할당
-            &heapProperties,                    //힙 타입
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDesc,                      //자원 크기정보
-            D3D12_RESOURCE_STATE_GENERIC_READ,  //접근 정보
-            nullptr,
-            IID_PPV_ARGS(&m_vertexBuffer)       //CPU메모리에서 접근가능한 ComPtr개체
-        );
-
-        UINT8* pVertexDataBegin = nullptr;    // gpu메모리에 mapping 될 cpu메모리(virtual memory로 운영체제 통해 접근하는듯)
-        CD3DX12_RANGE readRange(0, 0);        // 0~0으로 설정시 CPU메모리로 gpu데이터 읽기 불허 가능, nullptr입력하면 gpu데이터 읽기 가능
-        hr = m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin));//매핑
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));//gpu 메모리 전송
-        m_vertexBuffer->Unmap(0, nullptr);//매핑 해제
-
-        return hr;
-    }
-    HRESULT Renderer::createIndexBuffer()
-    {
-        HRESULT hr = S_OK;
-        Index indices[] = 
-        {
-            0,1,2
-        };
-        const UINT indexBufferSize = sizeof(indices);
-
-        CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);//heap type은 upload
-        D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-        hr = m_device->CreateCommittedResource(//힙 크기 == 데이터 크기로 힙과, 자원 할당
-            &heapProperties,                    //힙 타입
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDesc,                      //자원 크기정보
-            D3D12_RESOURCE_STATE_GENERIC_READ,  //접근 정보
-            nullptr,
-            IID_PPV_ARGS(&m_indexBuffer)       //CPU메모리에서 접근가능한 ComPtr개체
-        );
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        UINT8* pIndexDataBegin = nullptr;    // gpu메모리에 mapping 될 cpu메모리(virtual memory로 운영체제 통해 접근하는듯)
-        CD3DX12_RANGE readRange(0, 0);        // 0~0으로 설정시 CPU메모리로 gpu데이터 읽기 불허 가능, nullptr입력하면 gpu데이터 읽기 가능
-        hr = m_indexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pIndexDataBegin));//매핑
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        memcpy(pIndexDataBegin, indices, sizeof(indices));//gpu 메모리 전송
-        m_indexBuffer->Unmap(0, nullptr);//매핑 해제
-
+        
         return hr;
     }
     BOOL Renderer::isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const
@@ -604,11 +613,15 @@ namespace library
         {
             ComPtr<ID3DBlob> signature(nullptr);
             ComPtr<ID3DBlob> error(nullptr);
-            CD3DX12_DESCRIPTOR_RANGE UAVDescriptor{};
-            UAVDescriptor.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
+            CD3DX12_DESCRIPTOR_RANGE ranges[2] = {};
+            ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);  // 0번 레지스터는 Output UAV텍스처
+            ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);  // 1번부터 2개의 레지스터는 Vertex,Index버퍼
+
             CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE] = {};
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::OutputViewSlot)].InitAsDescriptorTable(1, &UAVDescriptor);//렌더타겟 텍스처는 이렇게
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::AccelerationStructureSlot)].InitAsShaderResourceView(0);//AS는 이렇게 초기화
+            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::OutputViewSlot)].InitAsDescriptorTable(1, &ranges[0]);//ranges[0]정보로 초기화
+            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::AccelerationStructureSlot)].InitAsShaderResourceView(0);//t0번 레지스터는 AS다
+            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::SceneConstantSlot)].InitAsConstantBufferView(0);//b0번 레지스터는 Constant Buffer다
+            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::VertexBuffersSlot)].InitAsDescriptorTable(1, &ranges[1]);//ranges[1]정보로 초기화
             CD3DX12_ROOT_SIGNATURE_DESC globalRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
             hr = D3D12SerializeRootSignature(&globalRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
             if (FAILED(hr))
@@ -626,7 +639,7 @@ namespace library
             ComPtr<ID3DBlob> signature(nullptr);
             ComPtr<ID3DBlob> error(nullptr);
             CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_LOCAL_ROOT_SIGNATURE] = {};
-            rootParameters[static_cast<int>(ELocalRootSignatureSlot::ViewportConstantSlot)].InitAsConstants(SizeOfInUint32(m_rayGenCB), 0, 0);//Constant버퍼는 이렇게
+            rootParameters[static_cast<int>(ELocalRootSignatureSlot::CubeConstantSlot)].InitAsConstants(SizeOfInUint32(m_cubeCB), 1);//1번 레지스터 
             CD3DX12_ROOT_SIGNATURE_DESC localRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
             localRootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;//이건 로컬이야
             hr = D3D12SerializeRootSignature(&localRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
@@ -676,7 +689,7 @@ namespace library
             localRootSignature->SetRootSignature(m_raytracingLocalRootSignature.Get());// 로컬 루트 시그니처 적용
             CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT* rootSignatureAssociation = raytracingPipeline.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
             rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
-            rootSignatureAssociation->AddExport(L"MyRaygenShader");//ray gen 셰이더에서 사용하겠다
+            rootSignatureAssociation->AddExport(L"MyHitGroup");//My Cloesest Hit 셰이더에서 사용하겠다
         }
 
         //모든 Shader에서 사용할 gloabl root signature서브 오브젝트 적용
@@ -703,7 +716,7 @@ namespace library
         HRESULT hr = S_OK;
         D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {
             .Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,//CBV,SRV,UAV타입이다
-            .NumDescriptors = 1u,
+            .NumDescriptors = 3u,
             .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,//shader에서 볼수있다
             .NodeMask = 0
         };
@@ -718,7 +731,7 @@ namespace library
     HRESULT Renderer::createAccelerationStructure()
     {
         HRESULT hr = S_OK;
-        m_commandList->Reset(m_commandAllocator.Get(), nullptr);
+        m_commandList->Reset(m_commandAllocator[m_frameIndex].Get(), nullptr);
         {//AS를 이루게 되는 Renderable들 추출
             std::vector<std::shared_ptr<Renderable>>& renderables = m_scene->GetRenderables();
             for (UINT i = 0; i < renderables.size(); i++)
@@ -743,7 +756,7 @@ namespace library
             m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
         }
         {//command list 실행완료 대기
-            hr = waitForPreviousFrame();
+            hr = waitForGPU();
             if (FAILED(hr))
             {
                 return hr;
@@ -772,9 +785,9 @@ namespace library
         // Ray gen shader table
         {
             struct RootArguments {
-                RayGenConstantBuffer cb;
+                CubeConstantBuffer cb;
             } rootArguments;
-            rootArguments.cb = m_rayGenCB;
+            rootArguments.cb = m_cubeCB;
 
             UINT numShaderRecords = 1;
             UINT shaderRecordSize = shaderIdentifierSize + sizeof(rootArguments);
@@ -861,4 +874,126 @@ namespace library
         m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_uavHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_uavHeapDescriptorSize);
         return hr;
     }
+    UINT Renderer::createBufferSRV(_In_ ID3D12Resource* buffer, _Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize)
+    {
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Buffer.NumElements = numElements;
+        if (elementSize == 0)
+        {
+            srvDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+            srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
+            srvDesc.Buffer.StructureByteStride = 0;
+        }
+        else
+        {
+            srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+            srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+            srvDesc.Buffer.StructureByteStride = elementSize;
+        }
+        UINT descriptorIndex = UINT_MAX;
+        auto descriptorHeapCpuBase = m_uavHeap->GetCPUDescriptorHandleForHeapStart();
+        if (descriptorIndex >= m_uavHeap->GetDesc().NumDescriptors)
+        {
+            descriptorIndex = m_descriptorsAllocated++;
+        }
+        *cpuDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptorHeapCpuBase, descriptorIndex, m_rtvDescriptorSize);
+
+        m_device->CreateShaderResourceView(buffer, &srvDesc, *cpuDescriptorHandle);
+        *gpuDescriptorHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_uavHeap->GetGPUDescriptorHandleForHeapStart(), descriptorIndex, m_rtvDescriptorSize);
+        return descriptorIndex;
+    }
+    void Renderer::initializeScene()
+    {
+        // Setup materials.
+        {
+            m_cubeCB.albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+
+        // Setup camera.
+        {
+            // Initialize the view and projection inverse matrices.
+            m_eye = { 0.0f, 2.0f, -5.0f, 1.0f };
+            m_at = { 0.0f, 0.0f, 0.0f, 1.0f };
+            XMVECTOR right = { 1.0f, 0.0f, 0.0f, 0.0f };
+
+            XMVECTOR direction = XMVector4Normalize(m_at - m_eye);
+            m_up = XMVector3Normalize(XMVector3Cross(direction, right));
+
+            // Rotate camera around Y axis.
+            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(45.0f));
+            m_eye = XMVector3Transform(m_eye, rotate);
+            m_up = XMVector3Transform(m_up, rotate);
+
+            updateCameraMatrix();
+        }
+
+        // Setup lights.
+        {
+            // Initialize the lighting parameters.
+            XMFLOAT4 lightPosition;
+            XMFLOAT4 lightAmbientColor;
+            XMFLOAT4 lightDiffuseColor;
+
+            lightPosition = XMFLOAT4(0.0f, 1.8f, -3.0f, 0.0f);
+            m_sceneCB[m_frameIndex].lightPosition = XMLoadFloat4(&lightPosition);
+
+            lightAmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+            m_sceneCB[m_frameIndex].lightAmbientColor = XMLoadFloat4(&lightAmbientColor);
+
+            lightDiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.5f, 1.0f);
+            m_sceneCB[m_frameIndex].lightDiffuseColor = XMLoadFloat4(&lightDiffuseColor);
+        }
+
+        // Apply the initial values to all frames' buffer instances.
+        for (auto& sceneCB : m_sceneCB)
+        {
+            sceneCB = m_sceneCB[m_frameIndex];
+        }
+    }
+    void Renderer::updateCameraMatrix()
+    {
+        m_sceneCB[m_frameIndex].cameraPosition = m_eye;
+        float fovAngleY = 45.0f;
+        XMMATRIX view = XMMatrixLookAtLH(m_eye, m_at, m_up);
+        XMMATRIX proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(fovAngleY), 1, 1.0f, 125.0f);
+        XMMATRIX viewProj = view * proj;
+
+        m_sceneCB[m_frameIndex].projectionToWorld = XMMatrixTranspose(XMMatrixInverse(nullptr, viewProj));
+    }
+    HRESULT Renderer::createConstantBuffer()
+    {
+        HRESULT hr = S_OK;
+        // Create the constant buffer memory and map the CPU and GPU addresses
+        const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+
+        // Allocate one constant buffer per frame, since it gets updated every frame.
+        size_t cbSize = FRAME_COUNT * sizeof(AlignedSceneConstantBuffer);//왜인지는 모르겠지만 Constant버퍼는 256의 배수여야함
+        const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
+
+        hr = m_device->CreateCommittedResource(
+            &uploadHeapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &constantBufferDesc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&m_perFrameConstants)
+        );
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+
+        // Map the constant buffer and cache its heap pointers.
+        // We don't unmap this until the app closes. Keeping buffer mapped for the lifetime of the resource is okay.
+        CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
+        hr = m_perFrameConstants->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedConstantData));
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        return hr;
+    }
+
 }

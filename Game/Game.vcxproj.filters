@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Cube">
+      <UniqueIdentifier>{ac1fe220-23d8-4b4e-a7f2-da1ae1cbe129}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cube">
+      <UniqueIdentifier>{7a83dd63-ae73-4d1d-9d96-284890aaf236}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">
@@ -21,10 +27,16 @@
     <ClCompile Include="Source\TestTriangle.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Cube\BaseCube.cpp">
+      <Filter>Source Files\Cube</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\TestTriangle.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Cube\BaseCube.h">
+      <Filter>Header Files\Cube</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

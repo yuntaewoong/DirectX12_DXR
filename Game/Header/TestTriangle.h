@@ -25,9 +25,9 @@ public:
 private:
 	static constexpr const Vertex VERTICES[] = 
 	{
-		{XMFLOAT3(0, -1.f, 0.f)},
-		{ XMFLOAT3(-1.f,1.f,0.f) },
-		{ XMFLOAT3(1.f,1.f,0.f) }
+		{XMFLOAT3(0, -1.f, 0.f),XMFLOAT3(0, 0.f, 1.f)},
+		{ XMFLOAT3(-1.f,1.f,0.f) ,XMFLOAT3(0, 0.f, 1.f)},
+		{ XMFLOAT3(1.f,1.f,0.f) ,XMFLOAT3(0, 0.f, 1.f)},
 	};
 	static constexpr const Index INDICES[] =
 	{
