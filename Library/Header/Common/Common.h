@@ -15,6 +15,7 @@
 #include "d3dx12.h"
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 
 #define SizeOfInUint32(obj) ((sizeof(obj) - 1) / sizeof(UINT32) + 1)
 
@@ -56,6 +57,11 @@ struct SceneConstantBuffer
     XMVECTOR lightAmbientColor;
     XMVECTOR lightDiffuseColor;
 };
+struct CameraConstantBuffer
+{
+    XMMATRIX projectionToWorld;
+    XMVECTOR cameraPosition;
+};
 struct CubeConstantBuffer
 {
     XMFLOAT4 albedo;
@@ -68,4 +74,19 @@ struct Vertex
 struct Index
 {
     UINT16 index;
+};
+
+struct DirectionsInput
+{
+    BOOL bFront;
+    BOOL bLeft;
+    BOOL bBack;
+    BOOL bRight;
+    BOOL bUp;
+    BOOL bDown;
+};
+struct MouseRelativeMovement
+{
+    LONG X;
+    LONG Y;
 };

@@ -21,11 +21,9 @@
   <ItemGroup>
     <ClCompile Include="Source\Cube\BaseCube.cpp" />
     <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\TestTriangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h" />
-    <ClInclude Include="Header\TestTriangle.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -22,7 +22,11 @@ struct SceneConstantBuffer
     float4 lightAmbientColor;
     float4 lightDiffuseColor;
 };
-
+struct CameraConstantBuffer
+{
+    float4x4 projectionToWorld;
+    float4 cameraPosition;
+};
 struct CubeConstantBuffer
 {
     float4 albedo;
@@ -40,7 +44,8 @@ ByteAddressBuffer Indices : register(t1, space0);
 StructuredBuffer<Vertex> Vertices : register(t2, space0);
 
 ConstantBuffer<SceneConstantBuffer> g_sceneCB : register(b0);
-ConstantBuffer<CubeConstantBuffer> g_cubeCB : register(b1);
+ConstantBuffer<SceneConstantBuffer> g_cameraCB : register(b2);
+ConstantBuffer<CubeConstantBuffer> l_cubeCB : register(b1);
 
 // Load three 16 bit indices from a byte addressed buffer.
 uint3 Load3x16BitIndices(uint offsetBytes)
@@ -104,10 +109,10 @@ inline void GenerateCameraRay(uint2 index, out float3 origin, out float3 directi
     screenPos.y = -screenPos.y;
 
     // Unproject the pixel coordinate into a ray.
-    float4 world = mul(float4(screenPos, 0, 1), g_sceneCB.projectionToWorld);
+    float4 world = mul(float4(screenPos, 0, 1), g_cameraCB.projectionToWorld);
 
     world.xyz /= world.w;
-    origin = g_sceneCB.cameraPosition.xyz;
+    origin = g_cameraCB.cameraPosition.xyz;
     direction = normalize(world.xyz - origin);
 }
 
@@ -119,7 +124,7 @@ float4 CalculateDiffuseLighting(float3 hitPosition, float3 normal)
     // Diffuse contribution
     float fNDotL = max(0.0f, dot(pixelToLight, normal));
 
-    return g_cubeCB.albedo *  g_sceneCB.lightDiffuseColor * fNDotL;
+    return l_cubeCB.albedo *  g_sceneCB.lightDiffuseColor * fNDotL;
 }
 
 [shader("raygeneration")]

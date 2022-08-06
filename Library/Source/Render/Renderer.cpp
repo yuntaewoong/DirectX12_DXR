@@ -15,6 +15,7 @@ namespace library
         m_commandQueue(nullptr),
         m_rtvHeap(nullptr),
         m_commandList(nullptr),
+        m_camera(std::make_unique<Camera>(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_dxrStateObject(nullptr),
@@ -49,55 +50,6 @@ namespace library
     {}
 	HRESULT Renderer::Initialize(_In_ HWND hWnd)
 	{
-        HRESULT hr = S_OK;
-        hr = initializePipeLine(hWnd);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        return S_OK;
-	}
-    void Renderer::SetMainScene(_In_ std::shared_ptr<Scene>& pScene)
-    {
-        m_scene = pScene;
-    }
-    void Renderer::Render()
-    {
-        populateCommandList();//command 기록
-        m_commandList->Close();//command list작성 종료
-        ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-        m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);//command queue에 담긴 command list들 실행명령(비동기)
-        
-        m_swapChain->Present(1,0);//백버퍼 교체
-        moveToNextFrame();
-
-        //waitForGPU();//gpu작업완료 대기
-    }
-    void Renderer::Update(_In_ FLOAT deltaTime)
-    {
-        // Rotate the camera around Y axis.
-        {
-            float secondsToRotateAround = 24.0f;
-            float angleToRotateBy = 360.0f * (deltaTime / secondsToRotateAround);
-            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
-            m_eye = XMVector3Transform(m_eye, rotate);
-            m_up = XMVector3Transform(m_up, rotate);
-            m_at = XMVector3Transform(m_at, rotate);
-            updateCameraMatrix();
-        }
-
-        // Rotate the second light around Y axis.
-        {
-            UINT prevFrameIndex = (m_frameIndex + FRAME_COUNT + 1) % FRAME_COUNT;
-            float secondsToRotateAround = 8.0f;
-            float angleToRotateBy = -360.0f * (deltaTime / secondsToRotateAround);
-            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
-            const XMVECTOR& prevLightPosition = m_sceneCB[prevFrameIndex].lightPosition;
-            m_sceneCB[m_frameIndex].lightPosition = XMVector3Transform(prevLightPosition, rotate);
-        }
-    }
-    HRESULT Renderer::initializePipeLine(_In_ HWND hWnd)
-    {
         HRESULT hr = S_OK;
         UINT dxgiFactoryFlags = 0;
 #if defined(_DEBUG)//디버그 빌드시
@@ -217,7 +169,7 @@ namespace library
         {
             return hr;
         }
-        
+
         hr = createConstantBuffer();
         if (FAILED(hr))
         {
@@ -228,17 +180,17 @@ namespace library
             createBufferSRV(tempRenderable->GetIndexBuffer().Get(), &m_indexBufferCpuDescriptorHandle, &m_indexBufferGpuDescriptorHandle, tempRenderable->GetNumIndices() / 2, 0);
             createBufferSRV(tempRenderable->GetVertexBuffer().Get(), &m_vertexBufferCpuDescriptorHandle, &m_vertexBufferGpuDescriptorHandle, tempRenderable->GetNumVertices(), 0);
         }
-        
-
         hr = createRaytacingOutputResource(hWnd);//output UAV만들기
         if (FAILED(hr))
         {
             return hr;
         }
 
-        
-
-
+        hr = m_camera->Initialize(m_device.Get());
+        if (FAILED(hr))
+        {
+            return hr;
+        }
 
         hr = waitForGPU();
         if (FAILED(hr))
@@ -247,6 +199,47 @@ namespace library
         }
         return hr;
 	}
+    void Renderer::HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime)
+    {
+        m_camera->HandleInput(directions, mouseRelativeMovement, deltaTime);
+    }
+    void Renderer::SetMainScene(_In_ std::shared_ptr<Scene>& pScene)
+    {
+        m_scene = pScene;
+    }
+    void Renderer::Render()
+    {
+        populateCommandList();//command 기록
+        m_commandList->Close();//command list작성 종료
+        ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
+        m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);//command queue에 담긴 command list들 실행명령(비동기)
+        
+        m_swapChain->Present(1,0);//백버퍼 교체
+        moveToNextFrame();
+    }
+    void Renderer::Update(_In_ FLOAT deltaTime)
+    {
+        // Rotate the camera around Y axis.
+        {
+            float secondsToRotateAround = 24.0f;
+            float angleToRotateBy = 360.0f * (deltaTime / secondsToRotateAround);
+            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
+            m_eye = XMVector3Transform(m_eye, rotate);
+            m_up = XMVector3Transform(m_up, rotate);
+            m_at = XMVector3Transform(m_at, rotate);
+            updateCameraMatrix();
+        }
+        m_camera->Update(deltaTime);
+        // Rotate the second light around Y axis.
+        {
+            UINT prevFrameIndex = (m_frameIndex + FRAME_COUNT + 1) % FRAME_COUNT;
+            float secondsToRotateAround = 8.0f;
+            float angleToRotateBy = -360.0f * (deltaTime / secondsToRotateAround);
+            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
+            const XMVECTOR& prevLightPosition = m_sceneCB[prevFrameIndex].lightPosition;
+            m_sceneCB[m_frameIndex].lightPosition = XMVector3Transform(prevLightPosition, rotate);
+        }
+    }
     /*
        하드웨어 어뎁터 가져오기
     */
@@ -321,6 +314,17 @@ namespace library
         m_commandList->SetComputeRootConstantBufferView(
             static_cast<UINT>(EGlobalRootSignatureSlot::SceneConstantSlot),
             cbGpuAddress
+        );
+
+        //카메라 CB업데이트후 바인딩
+        CameraConstantBuffer cbCamera{
+            .projectionToWorld = XMMatrixTranspose(m_camera->GetInverseViewProjectionMatrix()),
+            .cameraPosition = m_camera->GetEye()
+        };
+        memcpy(m_camera->GetMappedData(), &cbCamera, sizeof(cbCamera));
+        m_commandList->SetComputeRootConstantBufferView(
+            4,
+            m_camera->GetConstantBuffer()->GetGPUVirtualAddress()
         );
 
         m_commandList->SetDescriptorHeaps(1, m_uavHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩(이 CPU heap 매핑된 GPU주소들을 사용하겠다)
@@ -617,11 +621,12 @@ namespace library
             ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);  // 0번 레지스터는 Output UAV텍스처
             ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);  // 1번부터 2개의 레지스터는 Vertex,Index버퍼
 
-            CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE] = {};
+            CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE+1] = {};
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::OutputViewSlot)].InitAsDescriptorTable(1, &ranges[0]);//ranges[0]정보로 초기화
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::AccelerationStructureSlot)].InitAsShaderResourceView(0);//t0번 레지스터는 AS다
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::SceneConstantSlot)].InitAsConstantBufferView(0);//b0번 레지스터는 Constant Buffer다
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::VertexBuffersSlot)].InitAsDescriptorTable(1, &ranges[1]);//ranges[1]정보로 초기화
+            rootParameters[4].InitAsConstantBufferView(2);//b2번 레지스터는 Constant Buffer다
             CD3DX12_ROOT_SIGNATURE_DESC globalRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
             hr = D3D12SerializeRootSignature(&globalRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
             if (FAILED(hr))

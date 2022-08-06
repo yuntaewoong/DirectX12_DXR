@@ -25,11 +25,14 @@ namespace library
         PCWSTR GetWindowClassName() const override;
         LRESULT HandleMessage(_In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam) override;
         
+        const DirectionsInput& GetDirections() const;
+        const MouseRelativeMovement& GetMouseRelativeMovement() const;
+        void ResetMouseMovement();
     private:
         INT m_nWidth;
         INT m_nHeight;
-    private:
-        void toggleRenderMode();
+        DirectionsInput m_directions;//키보드 인풋
+        MouseRelativeMovement m_mouseRelativeMovement;//마우스 인풋
     };
 }
 

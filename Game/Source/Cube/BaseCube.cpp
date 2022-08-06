@@ -15,6 +15,7 @@ HRESULT BaseCube::Initialize(_In_ ID3D12Device* pDevice)
 	{
 		return hr;
 	}
+	return hr;
 }
 void BaseCube::Update(_In_ FLOAT deltaTime)
 {

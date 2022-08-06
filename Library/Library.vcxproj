@@ -182,6 +182,7 @@
     <ClInclude Include="Header\AccelerationStructure\AccelerationStructure.h" />
     <ClInclude Include="Header\AccelerationStructure\BottomLevelAccelerationStructure.h" />
     <ClInclude Include="Header\AccelerationStructure\TopLevelAccelerationStructure.h" />
+    <ClInclude Include="Header\Camera\Camera.h" />
     <ClInclude Include="Header\Common\Common.h" />
     <ClInclude Include="Header\Common\d3dx12.h" />
     <ClInclude Include="Header\Game\Game.h" />
@@ -197,6 +198,7 @@
     <ClCompile Include="Source\AccelerationStructure\AccelerationStructure.cpp" />
     <ClCompile Include="Source\AccelerationStructure\BottomLevelAccelerationStructure.cpp" />
     <ClCompile Include="Source\AccelerationStructure\TopLevelAccelerationStructure.cpp" />
+    <ClCompile Include="Source\Camera\Camera.cpp" />
     <ClCompile Include="Source\Game\Game.cpp" />
     <ClCompile Include="Source\Render\Renderable.cpp" />
     <ClCompile Include="Source\Render\Renderer.cpp" />
