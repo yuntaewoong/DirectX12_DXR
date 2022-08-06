@@ -29,7 +29,7 @@ namespace library
                     },
                     .InstanceID = static_cast<UINT>(i),
                     .InstanceMask = 1,
-                    .InstanceContributionToHitGroupIndex = 0,
+                    .InstanceContributionToHitGroupIndex = static_cast<UINT>(i),
                     .AccelerationStructure = m_bottomLevelAccelerationStructures[i]->GetGPUVirtualAddress()
                 };
             }

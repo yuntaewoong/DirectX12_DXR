@@ -353,7 +353,7 @@ namespace library
             .HitGroupTable = {
                 .StartAddress = m_hitGroupShaderTable->GetGPUVirtualAddress(),
                 .SizeInBytes = m_hitGroupShaderTable->GetDesc().Width,
-                .StrideInBytes = m_hitGroupShaderTable->GetDesc().Width
+                .StrideInBytes = m_hitGroupShaderTable->GetDesc().Width /2
             },
             .Width = 1920,
             .Height = 1080,
@@ -784,20 +784,15 @@ namespace library
 
         // Ray gen shader table
         {
-            struct RootArguments {
-                CubeConstantBuffer cb;
-            } rootArguments;
-            rootArguments.cb = m_cubeCB;
-
             UINT numShaderRecords = 1;
-            UINT shaderRecordSize = shaderIdentifierSize + sizeof(rootArguments);
+            UINT shaderRecordSize = shaderIdentifierSize;
             ShaderTable rayGenShaderTable{};
             hr = rayGenShaderTable.Initialize(m_device.Get(), numShaderRecords, shaderRecordSize);
             if (FAILED(hr))
             {
                 return hr;
             }
-            rayGenShaderTable.Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments)));
+            rayGenShaderTable.Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
             m_rayGenShaderTable = rayGenShaderTable.GetResource();
         }
 
@@ -817,15 +812,24 @@ namespace library
 
         // Hit group shader table
         {
-            UINT numShaderRecords = 1;
-            UINT shaderRecordSize = shaderIdentifierSize;
+            struct RootArguments {
+                CubeConstantBuffer cb;
+            } rootArguments;
+            rootArguments.cb = m_cubeCB;
+
+            UINT numShaderRecords = 2;
+            UINT shaderRecordSize = shaderIdentifierSize + sizeof(rootArguments);
             ShaderTable hitGroupShaderTable{};
             hr = hitGroupShaderTable.Initialize(m_device.Get(), numShaderRecords, shaderRecordSize);
             if (FAILED(hr))
             {
                 return hr;
             }
-            hitGroupShaderTable.Push_back(ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize));
+            hitGroupShaderTable.Push_back(ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments)));
+
+            m_cubeCB.albedo = XMFLOAT4(1.0f, 0.f, 0.f, 1.f);
+            rootArguments.cb = m_cubeCB;
+            hitGroupShaderTable.Push_back(ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments)));
             m_hitGroupShaderTable = hitGroupShaderTable.GetResource();
         }
         return hr;
@@ -908,7 +912,7 @@ namespace library
     {
         // Setup materials.
         {
-            m_cubeCB.albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+            m_cubeCB.albedo = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
         }
 
         // Setup camera.
@@ -942,7 +946,7 @@ namespace library
             lightAmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
             m_sceneCB[m_frameIndex].lightAmbientColor = XMLoadFloat4(&lightAmbientColor);
 
-            lightDiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.5f, 1.0f);
+            lightDiffuseColor = XMFLOAT4(1.f, 1.0f, 1.f, 1.0f);
             m_sceneCB[m_frameIndex].lightDiffuseColor = XMLoadFloat4(&lightDiffuseColor);
         }
 
@@ -984,7 +988,6 @@ namespace library
         {
             return hr;
         }
-
         // Map the constant buffer and cache its heap pointers.
         // We don't unmap this until the app closes. Keeping buffer mapped for the lifetime of the resource is okay.
         CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.

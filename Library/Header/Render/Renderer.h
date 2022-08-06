@@ -65,12 +65,11 @@ namespace library
 
         UINT m_rtvDescriptorSize;
         UINT m_frameIndex;
-        // Presentation fence objects.
-        Microsoft::WRL::ComPtr<ID3D12Fence>                 m_fence;
-        UINT64                                              m_fenceValues[FRAME_COUNT];
-        Microsoft::WRL::Wrappers::Event                     m_fenceEvent;
 
-
+        //Ææ½º
+        Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
+        UINT64 m_fenceValues[FRAME_COUNT];
+        Microsoft::WRL::Wrappers::Event m_fenceEvent;
 
         D3D12_CPU_DESCRIPTOR_HANDLE m_indexBufferCpuDescriptorHandle;
         D3D12_GPU_DESCRIPTOR_HANDLE m_indexBufferGpuDescriptorHandle;
