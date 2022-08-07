@@ -2,7 +2,7 @@
 
 namespace library
 {
-	BottomLevelAccelerationStructure::BottomLevelAccelerationStructure(_In_ std::shared_ptr<Renderable>& pRenderable) :
+	BottomLevelAccelerationStructure::BottomLevelAccelerationStructure(_In_ const std::shared_ptr<Renderable>& pRenderable) :
 		m_scratchResource(nullptr),
 		m_bottomLevelAccelerationStructure(nullptr),
 		m_pRenderable(pRenderable)

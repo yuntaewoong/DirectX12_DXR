@@ -4,7 +4,7 @@ namespace library
 {
     Camera::Camera(_In_ const XMVECTOR& position) :
         m_cameraConstantBuffer(),
-        m_mappedBuffer(nullptr),
+        m_mappedData(nullptr),
         m_yaw(0.0f),
         m_pitch(0.0f),
         m_moveLeftRight(0.0f),
@@ -22,14 +22,6 @@ namespace library
         m_view(XMMATRIX())
         
     {}
-    XMMATRIX Camera::GetInverseViewProjectionMatrix() const
-    {
-        float fovAngleY = 45.0f;
-        XMMATRIX view = XMMatrixLookAtLH(m_eye, m_at, m_up);
-        XMMATRIX proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(fovAngleY), 1, 1.0f, 125.0f);
-        XMMATRIX viewProj = view * proj;
-        return XMMatrixInverse(nullptr, viewProj);
-    }
     ComPtr<ID3D12Resource>& Camera::GetConstantBuffer()
     {
         return m_cameraConstantBuffer;
@@ -74,11 +66,17 @@ namespace library
             return hr;
         }
         CD3DX12_RANGE readRange(0, 0);  
-        hr = m_cameraConstantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedBuffer));//m_mappedBuffer에 Constant Buffer에 대한 주소 저장
+        hr = m_cameraConstantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedData));//m_mappedBuffer에 Constant Buffer에 대한 주소 저장
         if (FAILED(hr))
         {
             return hr;
         }
+        //카메라 CB업데이트후 바인딩
+        CameraConstantBuffer cbCamera{
+            .projectionToWorld = XMMatrixTranspose(getInverseViewProjectionMatrix()),
+            .cameraPosition = m_eye
+        };
+        memcpy(m_mappedData, &cbCamera, sizeof(cbCamera));
         return hr;
     }
     void Camera::Update(_In_ FLOAT deltaTime)
@@ -105,13 +103,19 @@ namespace library
         m_at = m_eye + m_at;
 
         m_view = XMMatrixLookAtLH(m_eye, m_at, m_up);
+
+        //카메라 CB업데이트후 바인딩
+        CameraConstantBuffer cbCamera{
+            .projectionToWorld = XMMatrixTranspose(getInverseViewProjectionMatrix()),
+            .cameraPosition = m_eye
+        };
+        memcpy(m_mappedData, &cbCamera, sizeof(cbCamera));
     }
-    void* Camera::GetMappedData() const
+    XMMATRIX Camera::getInverseViewProjectionMatrix() const
     {
-        return m_mappedBuffer;
-    }
-    XMVECTOR Camera::GetEye() const
-    {
-        return m_eye;
+        XMMATRIX view = XMMatrixLookAtLH(m_eye, m_at, m_up);
+        XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 16.f/9.f, 1.0f, 125.0f);
+        XMMATRIX viewProj = view * proj;
+        return XMMatrixInverse(nullptr, viewProj);
     }
 }

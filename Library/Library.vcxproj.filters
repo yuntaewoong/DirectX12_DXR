@@ -61,6 +61,12 @@
     <Filter Include="Source Files\Camera">
       <UniqueIdentifier>{23753212-2368-4702-90c0-88461f50a747}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Light">
+      <UniqueIdentifier>{c9cc5f4e-e04a-4f63-96ae-fd78241ff62b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Light">
+      <UniqueIdentifier>{5322849c-de40-4973-a41c-728f896e4af0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -105,6 +111,9 @@
     <ClInclude Include="Header\Camera\Camera.h">
       <Filter>Header Files\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Light\PointLight.h">
+      <Filter>Header Files\Light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -139,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="Source\Camera\Camera.cpp">
       <Filter>Source Files\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Light\PointLight.cpp">
+      <Filter>Source Files\Light</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

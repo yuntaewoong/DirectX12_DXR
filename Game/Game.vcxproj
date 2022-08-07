@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Cube\BaseCube.cpp" />
+    <ClCompile Include="Source\Light\RotatingLight.cpp" />
     <ClCompile Include="Source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h" />
+    <ClInclude Include="Header\Light\RotatingLight.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

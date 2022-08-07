@@ -35,7 +35,7 @@ namespace library
 			iBlas->Update(deltaTime);
 		}
 	}
-	void AccelerationStructure::AddRenderable(_In_ std::shared_ptr<Renderable>& pRenderable)
+	void AccelerationStructure::AddRenderable(_In_ const std::shared_ptr<Renderable>& pRenderable)
 	{
 		m_bottomLevelAccelerationStructures.push_back(std::make_unique<BottomLevelAccelerationStructure>(pRenderable));
 	}

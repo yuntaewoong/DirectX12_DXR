@@ -48,12 +48,11 @@ namespace library
         std::unique_ptr<AccelerationStructure> m_accelerationStructure;
 
         //Ray tracing Shader에서 접근하는 UAV에 대한 descriptor heap
-        ComPtr<ID3D12DescriptorHeap> m_uavHeap;
+        ComPtr<ID3D12DescriptorHeap> m_descriptorHeap;
         UINT m_descriptorsAllocated;
         UINT m_uavHeapDescriptorSize;
 
-        //RayGeneration Shader Constant Buffer 구조체
-        SceneConstantBuffer m_sceneCB[FRAME_COUNT];
+        
         CubeConstantBuffer m_cubeCB;
 
         //ray tracing Shader Table자원
@@ -79,17 +78,6 @@ namespace library
         D3D12_CPU_DESCRIPTOR_HANDLE m_vertexBufferCpuDescriptorHandle;
         D3D12_GPU_DESCRIPTOR_HANDLE m_vertexBufferGpuDescriptorHandle;
         
-        XMVECTOR m_eye;
-        XMVECTOR m_at;
-        XMVECTOR m_up;
-
-        ComPtr<ID3D12Resource> m_perFrameConstants;
-        union AlignedSceneConstantBuffer
-        {
-            SceneConstantBuffer constants;
-            uint8_t alignmentPadding[D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT];
-        };
-        AlignedSceneConstantBuffer* m_mappedConstantData;
     private:
         HRESULT getHardwareAdapter(
             _In_ IDXGIFactory1* pFactory,
@@ -97,7 +85,6 @@ namespace library
             bool requestHighPerformanceAdapter = false
         );
         HRESULT populateCommandList();
-        //HRESULT waitForPreviousFrame();
         void getWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight);
         HRESULT waitForGPU() noexcept;
         HRESULT moveToNextFrame();
@@ -118,9 +105,5 @@ namespace library
         HRESULT createShaderTable();
         HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
         UINT createBufferSRV(_In_ ID3D12Resource* buffer,_Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize);
-        void initializeScene();
-        void updateCameraMatrix();
-        HRESULT createConstantBuffer();
-
 	};
 }

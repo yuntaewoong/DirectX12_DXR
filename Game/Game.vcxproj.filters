@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Cube">
       <UniqueIdentifier>{7a83dd63-ae73-4d1d-9d96-284890aaf236}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Light">
+      <UniqueIdentifier>{6d3227ae-5b07-40be-a72d-8201f5980d64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Light">
+      <UniqueIdentifier>{a0925b43-caaf-419e-b08c-a93ffc12c416}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">
@@ -27,10 +33,16 @@
     <ClCompile Include="Source\Cube\BaseCube.cpp">
       <Filter>Source Files\Cube</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Light\RotatingLight.cpp">
+      <Filter>Source Files\Light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h">
       <Filter>Header Files\Cube</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Light\RotatingLight.h">
+      <Filter>Header Files\Light</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

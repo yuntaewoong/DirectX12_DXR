@@ -6,7 +6,7 @@ namespace library
 	class BottomLevelAccelerationStructure
 	{
 	public:
-		BottomLevelAccelerationStructure(_In_ std::shared_ptr<Renderable>& pRenderable);
+		BottomLevelAccelerationStructure(_In_ const std::shared_ptr<Renderable>& pRenderable);
 		BottomLevelAccelerationStructure(const BottomLevelAccelerationStructure& other) = delete;
 		BottomLevelAccelerationStructure(BottomLevelAccelerationStructure&& other) = delete;
 		BottomLevelAccelerationStructure& operator=(const BottomLevelAccelerationStructure& other) = delete;

@@ -22,10 +22,9 @@ namespace library
         m_raytracingGlobalRootSignature(nullptr),
         m_raytracingLocalRootSignature(nullptr),
         m_accelerationStructure(std::make_unique<AccelerationStructure>()),
-        m_uavHeap(nullptr),
+        m_descriptorHeap(nullptr),
         m_descriptorsAllocated(0u),
         m_uavHeapDescriptorSize(0u),
-        m_sceneCB(),
         m_cubeCB(),
         m_missShaderTable(nullptr),
         m_hitGroupShaderTable(nullptr),
@@ -41,12 +40,7 @@ namespace library
         m_indexBufferCpuDescriptorHandle(),
         m_indexBufferGpuDescriptorHandle(),
         m_vertexBufferCpuDescriptorHandle(),
-        m_vertexBufferGpuDescriptorHandle(),
-        m_eye(),
-        m_at(),
-        m_up(),
-        m_perFrameConstants(nullptr),
-        m_mappedConstantData(nullptr)
+        m_vertexBufferGpuDescriptorHandle()
     {}
 	HRESULT Renderer::Initialize(_In_ HWND hWnd)
 	{
@@ -124,8 +118,6 @@ namespace library
                 }
             }
         }
-
-        initializeScene();
         hr = m_scene->Initialize(m_device.Get());//Renderable들을 관리하는 Scene초기화
         if (FAILED(hr))
         {
@@ -169,16 +161,11 @@ namespace library
         {
             return hr;
         }
-
-        hr = createConstantBuffer();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
         {//SRV생성
-            std::shared_ptr<Renderable>& tempRenderable = m_scene->GetRenderables()[0];//테스트용 렌더러블 레퍼런스 1개 가져오기
-            createBufferSRV(tempRenderable->GetIndexBuffer().Get(), &m_indexBufferCpuDescriptorHandle, &m_indexBufferGpuDescriptorHandle, tempRenderable->GetNumIndices() / 2, 0);
-            createBufferSRV(tempRenderable->GetVertexBuffer().Get(), &m_vertexBufferCpuDescriptorHandle, &m_vertexBufferGpuDescriptorHandle, tempRenderable->GetNumVertices(), 0);
+            const std::shared_ptr<Renderable>& tempRenderable = m_scene->GetRenderables()[0];//테스트용 렌더러블 레퍼런스 1개 가져오기
+            UINT a = createBufferSRV(tempRenderable->GetIndexBuffer().Get(), &m_indexBufferCpuDescriptorHandle, &m_indexBufferGpuDescriptorHandle, tempRenderable->GetNumIndices()/2, 0);
+            UINT b = createBufferSRV(tempRenderable->GetVertexBuffer().Get(), &m_vertexBufferCpuDescriptorHandle, &m_vertexBufferGpuDescriptorHandle, tempRenderable->GetNumVertices(), sizeof(Vertex));
+            
         }
         hr = createRaytacingOutputResource(hWnd);//output UAV만들기
         if (FAILED(hr))
@@ -219,26 +206,8 @@ namespace library
     }
     void Renderer::Update(_In_ FLOAT deltaTime)
     {
-        // Rotate the camera around Y axis.
-        {
-            float secondsToRotateAround = 24.0f;
-            float angleToRotateBy = 360.0f * (deltaTime / secondsToRotateAround);
-            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
-            m_eye = XMVector3Transform(m_eye, rotate);
-            m_up = XMVector3Transform(m_up, rotate);
-            m_at = XMVector3Transform(m_at, rotate);
-            updateCameraMatrix();
-        }
         m_camera->Update(deltaTime);
-        // Rotate the second light around Y axis.
-        {
-            UINT prevFrameIndex = (m_frameIndex + FRAME_COUNT + 1) % FRAME_COUNT;
-            float secondsToRotateAround = 8.0f;
-            float angleToRotateBy = -360.0f * (deltaTime / secondsToRotateAround);
-            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(angleToRotateBy));
-            const XMVECTOR& prevLightPosition = m_sceneCB[prevFrameIndex].lightPosition;
-            m_sceneCB[m_frameIndex].lightPosition = XMVector3Transform(prevLightPosition, rotate);
-        }
+        m_scene->Update(deltaTime);
     }
     /*
        하드웨어 어뎁터 가져오기
@@ -308,26 +277,10 @@ namespace library
         m_commandList->SetComputeRootSignature(m_raytracingGlobalRootSignature.Get());//compute shader의 루트 시그니처 바인딩  
 
         
-        // Copy the updated scene constant buffer to GPU.
-        memcpy(&m_mappedConstantData[m_frameIndex].constants, &m_sceneCB[m_frameIndex], sizeof(m_sceneCB[m_frameIndex]));
-        auto cbGpuAddress = m_perFrameConstants->GetGPUVirtualAddress() + m_frameIndex * sizeof(m_mappedConstantData[0]);
-        m_commandList->SetComputeRootConstantBufferView(
-            static_cast<UINT>(EGlobalRootSignatureSlot::SceneConstantSlot),
-            cbGpuAddress
-        );
+        
 
-        //카메라 CB업데이트후 바인딩
-        CameraConstantBuffer cbCamera{
-            .projectionToWorld = XMMatrixTranspose(m_camera->GetInverseViewProjectionMatrix()),
-            .cameraPosition = m_camera->GetEye()
-        };
-        memcpy(m_camera->GetMappedData(), &cbCamera, sizeof(cbCamera));
-        m_commandList->SetComputeRootConstantBufferView(
-            4,
-            m_camera->GetConstantBuffer()->GetGPUVirtualAddress()
-        );
+        m_commandList->SetDescriptorHeaps(1, m_descriptorHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩
 
-        m_commandList->SetDescriptorHeaps(1, m_uavHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩(이 CPU heap 매핑된 GPU주소들을 사용하겠다)
         m_commandList->SetComputeRootDescriptorTable(
             static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
             m_raytracingOutputResourceUAVGpuDescriptor
@@ -337,6 +290,16 @@ namespace library
             static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
             m_accelerationStructure->GetTLAS()->GetTLASVirtualAddress()
         );//TLAS 바인딩
+        
+        m_commandList->SetComputeRootConstantBufferView(
+            static_cast<UINT>(EGlobalRootSignatureSlot::CameraConstantSlot),
+            m_camera->GetConstantBuffer()->GetGPUVirtualAddress()
+        );//Camera CB바인딩
+
+        m_commandList->SetComputeRootConstantBufferView(
+            static_cast<UINT>(EGlobalRootSignatureSlot::LightConstantSlot),
+            m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
+        );//Light CB바인딩
 
         m_commandList->SetComputeRootDescriptorTable(
             static_cast<UINT>(EGlobalRootSignatureSlot::VertexBuffersSlot),
@@ -621,12 +584,13 @@ namespace library
             ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);  // 0번 레지스터는 Output UAV텍스처
             ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);  // 1번부터 2개의 레지스터는 Vertex,Index버퍼
 
-            CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE+1] = {};
+            CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE] = {};
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::OutputViewSlot)].InitAsDescriptorTable(1, &ranges[0]);//ranges[0]정보로 초기화
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::AccelerationStructureSlot)].InitAsShaderResourceView(0);//t0번 레지스터는 AS다
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::SceneConstantSlot)].InitAsConstantBufferView(0);//b0번 레지스터는 Constant Buffer다
+            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::CameraConstantSlot)].InitAsConstantBufferView(0);//b0번 레지스터는 Camera Constant Buffer다
+            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::LightConstantSlot)].InitAsConstantBufferView(2);//b3번 레지스터는 Light Constant Buffer다
             rootParameters[static_cast<int>(EGlobalRootSignatureSlot::VertexBuffersSlot)].InitAsDescriptorTable(1, &ranges[1]);//ranges[1]정보로 초기화
-            rootParameters[4].InitAsConstantBufferView(2);//b2번 레지스터는 Constant Buffer다
+            
             CD3DX12_ROOT_SIGNATURE_DESC globalRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
             hr = D3D12SerializeRootSignature(&globalRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
             if (FAILED(hr))
@@ -725,7 +689,7 @@ namespace library
             .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,//shader에서 볼수있다
             .NodeMask = 0
         };
-        hr = m_device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&m_uavHeap));//create
+        hr = m_device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&m_descriptorHeap));//create
         if (FAILED(hr))
         {
             return hr;
@@ -738,7 +702,7 @@ namespace library
         HRESULT hr = S_OK;
         m_commandList->Reset(m_commandAllocator[m_frameIndex].Get(), nullptr);
         {//AS를 이루게 되는 Renderable들 추출
-            std::vector<std::shared_ptr<Renderable>>& renderables = m_scene->GetRenderables();
+            const std::vector<std::shared_ptr<Renderable>>& renderables = m_scene->GetRenderables();
             for (UINT i = 0; i < renderables.size(); i++)
             {
                 m_accelerationStructure->AddRenderable(renderables[i]);
@@ -817,9 +781,11 @@ namespace library
 
         // Hit group shader table
         {
+            
             struct RootArguments {
                 CubeConstantBuffer cb;
             } rootArguments;
+            m_cubeCB.albedo = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
             rootArguments.cb = m_cubeCB;
 
             UINT numShaderRecords = 2;
@@ -866,8 +832,8 @@ namespace library
         {
             return hr;
         }
-        D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapCpuBase = m_uavHeap->GetCPUDescriptorHandleForHeapStart();
-        if (m_raytracingOutputResourceUAVDescriptorHeapIndex >= m_uavHeap->GetDesc().NumDescriptors)
+        D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapCpuBase = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+        if (m_raytracingOutputResourceUAVDescriptorHeapIndex >= m_descriptorHeap->GetDesc().NumDescriptors)
         {
             m_raytracingOutputResourceUAVDescriptorHeapIndex = m_descriptorsAllocated++;
         }
@@ -880,7 +846,7 @@ namespace library
             .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D
         };
         m_device->CreateUnorderedAccessView(m_raytracingOutput.Get(), nullptr, &UAVDesc, uavDescriptorHandle);
-        m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_uavHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_uavHeapDescriptorSize);
+        m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_uavHeapDescriptorSize);
         return hr;
     }
     UINT Renderer::createBufferSRV(_In_ ID3D12Resource* buffer, _Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize)
@@ -902,106 +868,16 @@ namespace library
             srvDesc.Buffer.StructureByteStride = elementSize;
         }
         UINT descriptorIndex = UINT_MAX;
-        auto descriptorHeapCpuBase = m_uavHeap->GetCPUDescriptorHandleForHeapStart();
-        if (descriptorIndex >= m_uavHeap->GetDesc().NumDescriptors)
+        auto descriptorHeapCpuBase = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+        if (descriptorIndex >= m_descriptorHeap->GetDesc().NumDescriptors)
         {
             descriptorIndex = m_descriptorsAllocated++;
         }
-        *cpuDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptorHeapCpuBase, descriptorIndex, m_rtvDescriptorSize);
-
+        *cpuDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptorHeapCpuBase, descriptorIndex, m_uavHeapDescriptorSize);
+        
         m_device->CreateShaderResourceView(buffer, &srvDesc, *cpuDescriptorHandle);
-        *gpuDescriptorHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_uavHeap->GetGPUDescriptorHandleForHeapStart(), descriptorIndex, m_rtvDescriptorSize);
+        *gpuDescriptorHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), descriptorIndex, m_uavHeapDescriptorSize);
         return descriptorIndex;
-    }
-    void Renderer::initializeScene()
-    {
-        // Setup materials.
-        {
-            m_cubeCB.albedo = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-        }
-
-        // Setup camera.
-        {
-            // Initialize the view and projection inverse matrices.
-            m_eye = { 0.0f, 2.0f, -5.0f, 1.0f };
-            m_at = { 0.0f, 0.0f, 0.0f, 1.0f };
-            XMVECTOR right = { 1.0f, 0.0f, 0.0f, 0.0f };
-
-            XMVECTOR direction = XMVector4Normalize(m_at - m_eye);
-            m_up = XMVector3Normalize(XMVector3Cross(direction, right));
-
-            // Rotate camera around Y axis.
-            XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(45.0f));
-            m_eye = XMVector3Transform(m_eye, rotate);
-            m_up = XMVector3Transform(m_up, rotate);
-
-            updateCameraMatrix();
-        }
-
-        // Setup lights.
-        {
-            // Initialize the lighting parameters.
-            XMFLOAT4 lightPosition;
-            XMFLOAT4 lightAmbientColor;
-            XMFLOAT4 lightDiffuseColor;
-
-            lightPosition = XMFLOAT4(0.0f, 1.8f, -3.0f, 0.0f);
-            m_sceneCB[m_frameIndex].lightPosition = XMLoadFloat4(&lightPosition);
-
-            lightAmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-            m_sceneCB[m_frameIndex].lightAmbientColor = XMLoadFloat4(&lightAmbientColor);
-
-            lightDiffuseColor = XMFLOAT4(1.f, 1.0f, 1.f, 1.0f);
-            m_sceneCB[m_frameIndex].lightDiffuseColor = XMLoadFloat4(&lightDiffuseColor);
-        }
-
-        // Apply the initial values to all frames' buffer instances.
-        for (auto& sceneCB : m_sceneCB)
-        {
-            sceneCB = m_sceneCB[m_frameIndex];
-        }
-    }
-    void Renderer::updateCameraMatrix()
-    {
-        m_sceneCB[m_frameIndex].cameraPosition = m_eye;
-        float fovAngleY = 45.0f;
-        XMMATRIX view = XMMatrixLookAtLH(m_eye, m_at, m_up);
-        XMMATRIX proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(fovAngleY), 1, 1.0f, 125.0f);
-        XMMATRIX viewProj = view * proj;
-
-        m_sceneCB[m_frameIndex].projectionToWorld = XMMatrixTranspose(XMMatrixInverse(nullptr, viewProj));
-    }
-    HRESULT Renderer::createConstantBuffer()
-    {
-        HRESULT hr = S_OK;
-        // Create the constant buffer memory and map the CPU and GPU addresses
-        const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-
-        // Allocate one constant buffer per frame, since it gets updated every frame.
-        size_t cbSize = FRAME_COUNT * sizeof(AlignedSceneConstantBuffer);//왜인지는 모르겠지만 Constant버퍼는 256의 배수여야함
-        const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
-
-        hr = m_device->CreateCommittedResource(
-            &uploadHeapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &constantBufferDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_perFrameConstants)
-        );
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        // Map the constant buffer and cache its heap pointers.
-        // We don't unmap this until the app closes. Keeping buffer mapped for the lifetime of the resource is okay.
-        CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-        hr = m_perFrameConstants->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedConstantData));
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        return hr;
     }
 
 }

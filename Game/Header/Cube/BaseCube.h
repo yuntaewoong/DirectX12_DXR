@@ -20,6 +20,7 @@ public:
 	void Update(_In_ FLOAT deltaTime) override;
 	virtual UINT GetNumVertices() const override;
 	virtual UINT GetNumIndices() const override;
+protected:
 	const virtual Vertex* GetVertices() const override;
 	const virtual Index* GetIndices() const override;
 private:

@@ -21,7 +21,7 @@ namespace library
 			_In_ ID3D12GraphicsCommandList4* pCommandList
 		);
 		void Update(_In_ FLOAT deltaTime);
-		void AddRenderable(_In_ std::shared_ptr<Renderable>& pRenderable);//1개의 Renderable당 1개의 BLAS생성
+		void AddRenderable(_In_ const std::shared_ptr<Renderable>& pRenderable);//1개의 Renderable당 1개의 BLAS생성
 		const std::unique_ptr<TopLevelAccelerationStructure>& GetTLAS() const;
 		const std::vector<std::unique_ptr<BottomLevelAccelerationStructure>>& GetBLASVector() const;
 	private:

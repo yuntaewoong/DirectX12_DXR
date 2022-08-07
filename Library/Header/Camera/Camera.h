@@ -15,21 +15,19 @@ namespace library
         Camera& operator=(Camera&& other) = delete;
         virtual ~Camera() = default;
 
-        XMMATRIX GetInverseViewProjectionMatrix() const;
+        
         ComPtr<ID3D12Resource>& GetConstantBuffer();
 
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);
         HRESULT Initialize(_In_ ID3D12Device* pDevice);
         void Update(_In_ FLOAT deltaTime);
-        void* GetMappedData() const;
-        XMVECTOR GetEye() const;
     private:
         static constexpr const XMVECTORF32 DEFAULT_FORWARD = { 0.0f, 0.0f, 1.0f, 0.0f };
         static constexpr const XMVECTORF32 DEFAULT_RIGHT = { 1.0f, 0.0f, 0.0f, 0.0f };
         static constexpr const XMVECTORF32 DEFAULT_UP = { 0.0f, 1.0f, 0.0f, 0.0f };
 
         ComPtr<ID3D12Resource> m_cameraConstantBuffer;
-        void* m_mappedBuffer;
+        void* m_mappedData;
 
         FLOAT m_yaw;
         FLOAT m_pitch;
@@ -51,5 +49,7 @@ namespace library
 
         XMMATRIX m_rotation;
         XMMATRIX m_view;
+    private:
+        XMMATRIX getInverseViewProjectionMatrix() const;
     };
 }
