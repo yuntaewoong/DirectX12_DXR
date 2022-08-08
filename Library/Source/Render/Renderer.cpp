@@ -19,8 +19,8 @@ namespace library
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_dxrStateObject(nullptr),
-        m_raytracingGlobalRootSignature(nullptr),
-        m_raytracingLocalRootSignature(nullptr),
+        m_globalRootSignature(),
+        m_localRootSignature(),
         m_accelerationStructure(std::make_unique<AccelerationStructure>()),
         m_descriptorHeap(nullptr),
         m_descriptorsAllocated(0u),
@@ -274,8 +274,7 @@ namespace library
         {
             return hr;
         }
-        m_commandList->SetComputeRootSignature(m_raytracingGlobalRootSignature.Get());//compute shader의 루트 시그니처 바인딩  
-
+        m_commandList->SetComputeRootSignature(m_globalRootSignature.GetRootSignature().Get());//compute shader의 루트 시그니처 바인딩
         
         
 
@@ -575,52 +574,15 @@ namespace library
     HRESULT Renderer::createRaytracingRootSignature()
     {
         HRESULT hr = S_OK;
-        
-        //global 루트 시그니처: 모든 Shader에서 사용할 자원 정의
+        hr = m_globalRootSignature.Initialize(m_device.Get());
+        if (FAILED(hr))
         {
-            ComPtr<ID3DBlob> signature(nullptr);
-            ComPtr<ID3DBlob> error(nullptr);
-            CD3DX12_DESCRIPTOR_RANGE ranges[2] = {};
-            ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);  // 0번 레지스터는 Output UAV텍스처
-            ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);  // 1번부터 2개의 레지스터는 Vertex,Index버퍼
-
-            CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_GLOBAL_ROOT_SIGNATURE] = {};
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::OutputViewSlot)].InitAsDescriptorTable(1, &ranges[0]);//ranges[0]정보로 초기화
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::AccelerationStructureSlot)].InitAsShaderResourceView(0);//t0번 레지스터는 AS다
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::CameraConstantSlot)].InitAsConstantBufferView(0);//b0번 레지스터는 Camera Constant Buffer다
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::LightConstantSlot)].InitAsConstantBufferView(2);//b3번 레지스터는 Light Constant Buffer다
-            rootParameters[static_cast<int>(EGlobalRootSignatureSlot::VertexBuffersSlot)].InitAsDescriptorTable(1, &ranges[1]);//ranges[1]정보로 초기화
-            
-            CD3DX12_ROOT_SIGNATURE_DESC globalRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
-            hr = D3D12SerializeRootSignature(&globalRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            hr = m_device->CreateRootSignature(1, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_raytracingGlobalRootSignature));//루트 시그니처 생성
-            if (FAILED(hr))
-            {
-                return hr;
-            }
+            return hr;
         }
-        //local 루트 시그니처: 특정 Shader에서 사용할 자원 정의(Shader Table에서 선택)
+        hr = m_localRootSignature.Initialize(m_device.Get());
+        if (FAILED(hr))
         {
-            ComPtr<ID3DBlob> signature(nullptr);
-            ComPtr<ID3DBlob> error(nullptr);
-            CD3DX12_ROOT_PARAMETER rootParameters[NUM_OF_LOCAL_ROOT_SIGNATURE] = {};
-            rootParameters[static_cast<int>(ELocalRootSignatureSlot::CubeConstantSlot)].InitAsConstants(SizeOfInUint32(m_cubeCB), 1);//1번 레지스터 
-            CD3DX12_ROOT_SIGNATURE_DESC localRootSignatureDesc(ARRAYSIZE(rootParameters), rootParameters);
-            localRootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;//이건 로컬이야
-            hr = D3D12SerializeRootSignature(&localRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);// 루트 시그니처의 binary화
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            hr = m_device->CreateRootSignature(1, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_raytracingLocalRootSignature));//루트 시그니처 생성
-            if (FAILED(hr))
-            {
-                return hr;
-            }
+            return hr;
         }
         return hr;
     }
@@ -655,7 +617,7 @@ namespace library
         
         {//미리 만들어둔 local root signature로 서브오브젝트 만들어 파이프라인에 적용(MyRaygenShader에)
             CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT* localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-            localRootSignature->SetRootSignature(m_raytracingLocalRootSignature.Get());// 로컬 루트 시그니처 적용
+            localRootSignature->SetRootSignature(m_localRootSignature.GetRootSignature().Get());
             CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT* rootSignatureAssociation = raytracingPipeline.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
             rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
             rootSignatureAssociation->AddExport(L"MyHitGroup");//My Cloesest Hit 셰이더에서 사용하겠다
@@ -663,8 +625,7 @@ namespace library
 
         //모든 Shader에서 사용할 gloabl root signature서브 오브젝트 적용
         CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT* globalRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();// 글로벌 루트시그니처 서브오브젝트생성
-        globalRootSignature->SetRootSignature(m_raytracingGlobalRootSignature.Get());//바로 적용(글로벌이니 association작업이 필요없다)
-
+        globalRootSignature->SetRootSignature(m_globalRootSignature.GetRootSignature().Get());
         //파이프라인 옵션
         CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT* pipelineConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();// 파이프라인 config 서브오브젝트 생성 
         UINT maxRecursionDepth = 1;//1번만 recursion 하겠다

@@ -4,6 +4,8 @@
 #include "AccelerationStructure\AccelerationStructure.h"
 #include "Scene\Scene.h"
 #include "Camera\Camera.h"
+#include "RootSignature\GlobalRootSignature.h"
+#include "RootSignature\LocalRootSignature.h"
 namespace library
 {
 	class Renderer
@@ -41,8 +43,8 @@ namespace library
         ComPtr<ID3D12StateObject> m_dxrStateObject;
 
         //ray tracingÀü¿ë root signature
-        ComPtr<ID3D12RootSignature> m_raytracingGlobalRootSignature;
-        ComPtr<ID3D12RootSignature> m_raytracingLocalRootSignature;
+        GlobalRootSignature m_globalRootSignature;
+        LocalRootSignature m_localRootSignature;
         
         //ray tracing BLAS,TLAS
         std::unique_ptr<AccelerationStructure> m_accelerationStructure;

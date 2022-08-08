@@ -17,7 +17,6 @@
 #include <string>
 #include <algorithm>
 
-#define SizeOfInUint32(obj) ((sizeof(obj) - 1) / sizeof(UINT32) + 1)
 #define NUM_LIGHT 2
 
 
@@ -32,12 +31,12 @@ enum class EGlobalRootSignatureSlot
     LightConstantSlot,
     VertexBuffersSlot
 };
-const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE = 5;
+const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 5;
 enum class ELocalRootSignatureSlot
 {
     CubeConstantSlot = 0,
 };
-const static INT NUM_OF_LOCAL_ROOT_SIGNATURE = 1;
+const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 1;
 
 struct CameraConstantBuffer
 {

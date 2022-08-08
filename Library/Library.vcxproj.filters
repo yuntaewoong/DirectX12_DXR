@@ -67,6 +67,12 @@
     <Filter Include="Source Files\Light">
       <UniqueIdentifier>{5322849c-de40-4973-a41c-728f896e4af0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\RootSignature">
+      <UniqueIdentifier>{5a4a4316-be19-437a-83e3-43c6fdcb44eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RootSignature">
+      <UniqueIdentifier>{56a52eab-4c1e-48ad-9ab4-b54d749cb5ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -114,6 +120,15 @@
     <ClInclude Include="Header\Light\PointLight.h">
       <Filter>Header Files\Light</Filter>
     </ClInclude>
+    <ClInclude Include="Header\RootSignature\RootSignature.h">
+      <Filter>Header Files\RootSignature</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\RootSignature\GlobalRootSignature.h">
+      <Filter>Header Files\RootSignature</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\RootSignature\LocalRootSignature.h">
+      <Filter>Header Files\RootSignature</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -151,6 +166,15 @@
     </ClCompile>
     <ClCompile Include="Source\Light\PointLight.cpp">
       <Filter>Source Files\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RootSignature\RootSignature.cpp">
+      <Filter>Source Files\RootSignature</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RootSignature\GlobalRootSignature.cpp">
+      <Filter>Source Files\RootSignature</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RootSignature\LocalRootSignature.cpp">
+      <Filter>Source Files\RootSignature</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

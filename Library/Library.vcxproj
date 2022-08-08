@@ -189,6 +189,9 @@
     <ClInclude Include="Header\Light\PointLight.h" />
     <ClInclude Include="Header\Render\Renderable.h" />
     <ClInclude Include="Header\Render\Renderer.h" />
+    <ClInclude Include="Header\RootSignature\GlobalRootSignature.h" />
+    <ClInclude Include="Header\RootSignature\LocalRootSignature.h" />
+    <ClInclude Include="Header\RootSignature\RootSignature.h" />
     <ClInclude Include="Header\Scene\Scene.h" />
     <ClInclude Include="Header\ShaderTable\ShaderRecord.h" />
     <ClInclude Include="Header\ShaderTable\ShaderTable.h" />
@@ -204,6 +207,9 @@
     <ClCompile Include="Source\Light\PointLight.cpp" />
     <ClCompile Include="Source\Render\Renderable.cpp" />
     <ClCompile Include="Source\Render\Renderer.cpp" />
+    <ClCompile Include="Source\RootSignature\GlobalRootSignature.cpp" />
+    <ClCompile Include="Source\RootSignature\LocalRootSignature.cpp" />
+    <ClCompile Include="Source\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp" />
     <ClCompile Include="Source\ShaderTable\ShaderTable.cpp.cpp" />
