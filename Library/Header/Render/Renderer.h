@@ -2,7 +2,8 @@
 
 #include "Common\Common.h"
 #include "Common\ShaderDataType.h"
-#include "AccelerationStructure\AccelerationStructure.h"
+#include "AccelerationStructure\TopLevelAccelerationStructure.h"
+#include "AccelerationStructure\BottomLevelAccelerationStructure.h"
 #include "Scene\Scene.h"
 #include "Camera\Camera.h"
 #include "RootSignature\GlobalRootSignature.h"
@@ -49,7 +50,8 @@ namespace library
         LocalRootSignature m_localRootSignature;
         
         //ray tracing BLAS,TLAS
-        std::unique_ptr<AccelerationStructure> m_accelerationStructure;
+        TopLevelAccelerationStructure m_topLevelAccelerationStructure;
+        std::vector<std::unique_ptr<BottomLevelAccelerationStructure>> m_bottomLevelAccelerationStructures;
 
         //Ray tracing Shader에서 접근하는 UAV에 대한 descriptor heap
         ComPtr<ID3D12DescriptorHeap> m_descriptorHeap;

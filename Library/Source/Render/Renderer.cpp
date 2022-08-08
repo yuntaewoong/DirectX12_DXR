@@ -21,7 +21,8 @@ namespace library
         m_dxrStateObject(nullptr),
         m_globalRootSignature(),
         m_localRootSignature(),
-        m_accelerationStructure(std::make_unique<AccelerationStructure>()),
+        m_topLevelAccelerationStructure(),
+        m_bottomLevelAccelerationStructures(std::vector<std::unique_ptr<BottomLevelAccelerationStructure>>()),
         m_descriptorHeap(nullptr),
         m_descriptorsAllocated(0u),
         m_uavHeapDescriptorSize(0u),
@@ -287,7 +288,7 @@ namespace library
 
         m_commandList->SetComputeRootShaderResourceView(
             static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
-            m_accelerationStructure->GetTLAS()->GetTLASVirtualAddress()
+            m_topLevelAccelerationStructure.GetAccelerationStructure()->GetGPUVirtualAddress()
         );//TLAS 바인딩
         
         m_commandList->SetComputeRootConstantBufferView(
@@ -666,11 +667,19 @@ namespace library
             const std::vector<std::shared_ptr<Renderable>>& renderables = m_scene->GetRenderables();
             for (UINT i = 0; i < renderables.size(); i++)
             {
-                m_accelerationStructure->AddRenderable(renderables[i]);
+                m_bottomLevelAccelerationStructures.push_back(std::make_unique<BottomLevelAccelerationStructure>(renderables[i]));
             }
         }
-        {//TLAS,BLAS초기화
-            hr = m_accelerationStructure->Initialize(m_dxrDevice.Get(), m_dxrCommandList.Get());
+        {//TLAS,BLAS초기화(command List매핑)
+            for (auto& iBlas : m_bottomLevelAccelerationStructures)
+            {
+                hr = iBlas->Initialize(m_dxrDevice.Get(), m_dxrCommandList.Get());
+                if (FAILED(hr))
+                {
+                    return hr;
+                }
+            }
+            hr = m_topLevelAccelerationStructure.Initialize(m_dxrDevice.Get(), m_dxrCommandList.Get(), m_bottomLevelAccelerationStructures);
             if (FAILED(hr))
             {
                 return hr;
