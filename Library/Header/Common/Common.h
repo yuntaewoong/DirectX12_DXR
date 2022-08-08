@@ -13,64 +13,44 @@
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
 #include "d3dx12.h"
-#include <unordered_map>
 #include <string>
 #include <algorithm>
-
-#define NUM_LIGHT 2
-
-
 using namespace Microsoft::WRL;
 using namespace DirectX;
+namespace library
+{
+    enum class EGlobalRootSignatureSlot
+    {
+        OutputViewSlot = 0,
+        AccelerationStructureSlot,
+        CameraConstantSlot,
+        LightConstantSlot,
+        VertexBuffersSlot
+    };
+    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 5;
+    enum class ELocalRootSignatureSlot
+    {
+        CubeConstantSlot = 0,
+    };
+    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 1;
 
-enum class EGlobalRootSignatureSlot
-{
-    OutputViewSlot = 0,
-    AccelerationStructureSlot,
-    CameraConstantSlot,
-    LightConstantSlot,
-    VertexBuffersSlot
-};
-const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 5;
-enum class ELocalRootSignatureSlot
-{
-    CubeConstantSlot = 0,
-};
-const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 1;
-
-struct CameraConstantBuffer
-{
-    XMMATRIX projectionToWorld;
-    XMVECTOR cameraPosition;
-};
-struct PointLightConstantBuffer
-{
-    XMVECTOR position[NUM_LIGHT];
-};
-struct CubeConstantBuffer
-{
-    XMFLOAT4 albedo;
-};
-struct Vertex
-{
-    XMFLOAT3 position;
-    XMFLOAT3 normal;
-};
-struct Index
-{
-    UINT16 index;
-};
-struct DirectionsInput
-{
-    BOOL bFront;
-    BOOL bLeft;
-    BOOL bBack;
-    BOOL bRight;
-    BOOL bUp;
-    BOOL bDown;
-};
-struct MouseRelativeMovement
-{
-    LONG X;
-    LONG Y;
-};
+    struct CameraConstantBuffer
+    {
+        XMMATRIX projectionToWorld;
+        XMVECTOR cameraPosition;
+    };
+    struct DirectionsInput
+    {
+        BOOL bFront;
+        BOOL bLeft;
+        BOOL bBack;
+        BOOL bRight;
+        BOOL bUp;
+        BOOL bDown;
+    };
+    struct MouseRelativeMovement
+    {
+        LONG X;
+        LONG Y;
+    };
+}

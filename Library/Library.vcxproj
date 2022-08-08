@@ -185,6 +185,7 @@
     <ClInclude Include="Header\Camera\Camera.h" />
     <ClInclude Include="Header\Common\Common.h" />
     <ClInclude Include="Header\Common\d3dx12.h" />
+    <ClInclude Include="Header\Common\ShaderDataType.h" />
     <ClInclude Include="Header\Game\Game.h" />
     <ClInclude Include="Header\Light\PointLight.h" />
     <ClInclude Include="Header\Render\Renderable.h" />

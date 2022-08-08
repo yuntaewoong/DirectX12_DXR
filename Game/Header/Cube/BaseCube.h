@@ -1,5 +1,6 @@
 #pragma once
 #include "Common\Common.h"
+#include "Common\ShaderDataType.h"
 #include "Render\Renderable.h"
 
 class BaseCube : public library::Renderable
@@ -21,10 +22,10 @@ public:
 	virtual UINT GetNumVertices() const override;
 	virtual UINT GetNumIndices() const override;
 protected:
-	const virtual Vertex* GetVertices() const override;
-	const virtual Index* GetIndices() const override;
+	const virtual library::Vertex* GetVertices() const override;
+	const virtual library::Index* GetIndices() const override;
 private:
-	static constexpr const Vertex VERTICES[] =
+	static constexpr const library::Vertex VERTICES[] =
 	{
 		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
 		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
@@ -56,7 +57,7 @@ private:
 		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
 	};
-	static constexpr const Index INDICES[] =
+	static constexpr const library::Index INDICES[] =
 	{
 		{3}, {1}, {0},
 		{2},{1},{3},

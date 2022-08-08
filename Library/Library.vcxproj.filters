@@ -129,6 +129,9 @@
     <ClInclude Include="Header\RootSignature\LocalRootSignature.h">
       <Filter>Header Files\RootSignature</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Common\ShaderDataType.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">

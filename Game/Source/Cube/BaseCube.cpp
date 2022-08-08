@@ -29,11 +29,11 @@ UINT BaseCube::GetNumIndices() const
 {
 	return ARRAYSIZE(INDICES);
 }
-const Vertex* BaseCube::GetVertices() const
+const library::Vertex* BaseCube::GetVertices() const
 {
 	return VERTICES;
 }
-const Index* BaseCube::GetIndices() const
+const library::Index* BaseCube::GetIndices() const
 {
 	return INDICES;
 }

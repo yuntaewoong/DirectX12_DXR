@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Common/Common.h"
+#include "Common\Common.h"
+#include "Common\ShaderDataType.h"
 #include "AccelerationStructure\AccelerationStructure.h"
 #include "Scene\Scene.h"
 #include "Camera\Camera.h"
 #include "RootSignature\GlobalRootSignature.h"
 #include "RootSignature\LocalRootSignature.h"
+
 namespace library
 {
 	class Renderer
