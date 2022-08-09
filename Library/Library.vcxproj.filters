@@ -132,6 +132,9 @@
     <ClInclude Include="Header\Common\ShaderDataType.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Render\FundamentalRenderingResources.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -178,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="Source\RootSignature\LocalRootSignature.cpp">
       <Filter>Source Files\RootSignature</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp">
+      <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

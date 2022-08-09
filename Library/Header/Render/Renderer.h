@@ -2,6 +2,7 @@
 
 #include "Common\Common.h"
 #include "Common\ShaderDataType.h"
+#include "Render\FundamentalRenderingResources.h"
 #include "AccelerationStructure\TopLevelAccelerationStructure.h"
 #include "AccelerationStructure\BottomLevelAccelerationStructure.h"
 #include "Scene\Scene.h"
@@ -27,17 +28,9 @@ namespace library
         void Render();
         void Update(_In_ FLOAT deltaTime);
 	private:
-        static const UINT FRAME_COUNT = 3;
-        std::shared_ptr<Scene> m_scene;
+        FundamentalRenderingResources m_renderingResources;
 
-        ComPtr<IDXGIFactory4> m_dxgiFactory;
-        ComPtr<IDXGISwapChain3> m_swapChain;
-        ComPtr<ID3D12Device> m_device;
-        ComPtr<ID3D12Resource> m_renderTargets[FRAME_COUNT];
-        ComPtr<ID3D12CommandAllocator> m_commandAllocator[FRAME_COUNT];
-        ComPtr<ID3D12CommandQueue> m_commandQueue;
-        ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-        ComPtr<ID3D12GraphicsCommandList> m_commandList;
+        std::shared_ptr<Scene> m_scene;
         std::unique_ptr<Camera> m_camera;
 
         // DXR파이프라인 관련
@@ -58,7 +51,7 @@ namespace library
         UINT m_descriptorsAllocated;
         UINT m_uavHeapDescriptorSize;
 
-        
+        //Per Cube Constant Buffer
         CubeConstantBuffer m_cubeCB;
 
         //ray tracing Shader Table자원
@@ -71,13 +64,6 @@ namespace library
         D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputResourceUAVGpuDescriptor;
         UINT m_raytracingOutputResourceUAVDescriptorHeapIndex;
 
-        UINT m_rtvDescriptorSize;
-        UINT m_frameIndex;
-
-        //펜스
-        Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
-        UINT64 m_fenceValues[FRAME_COUNT];
-        Microsoft::WRL::Wrappers::Event m_fenceEvent;
 
         D3D12_CPU_DESCRIPTOR_HANDLE m_indexBufferCpuDescriptorHandle;
         D3D12_GPU_DESCRIPTOR_HANDLE m_indexBufferGpuDescriptorHandle;
@@ -85,24 +71,10 @@ namespace library
         D3D12_GPU_DESCRIPTOR_HANDLE m_vertexBufferGpuDescriptorHandle;
         
     private:
-        HRESULT getHardwareAdapter(
-            _In_ IDXGIFactory1* pFactory,
-            _Outptr_result_maybenull_ IDXGIAdapter1** ppAdapter,
-            bool requestHighPerformanceAdapter = false
-        );
         HRESULT populateCommandList();
-        void getWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight);
-        HRESULT waitForGPU() noexcept;
-        HRESULT moveToNextFrame();
-
-        HRESULT createDevice();
-        HRESULT createCommandQueue();
-        HRESULT createSwapChain(_In_ HWND hWnd);
-        HRESULT createRenderTargetView();
-        HRESULT createCommandAllocator();
 
         //이하 함수는 ray tacing 관련함수
-        BOOL isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const;
+        
         HRESULT createRaytracingInterfaces();
         HRESULT createRaytracingRootSignature();
         HRESULT createRaytracingPipelineStateObject();

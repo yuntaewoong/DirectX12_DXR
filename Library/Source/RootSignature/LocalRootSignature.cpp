@@ -13,7 +13,7 @@ namespace library
         CD3DX12_ROOT_SIGNATURE_DESC localRootSignatureDesc(ARRAYSIZE(m_rootParameter), m_rootParameter);
         localRootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
 
-        hr = createRootSignature(pDevice, localRootSignatureDesc);
+        hr = RootSignature::initialize(pDevice, localRootSignatureDesc);
         if (FAILED(hr))
         {
             return hr;

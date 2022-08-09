@@ -19,7 +19,7 @@ namespace library
         virtual HRESULT Initialize(_In_ ID3D12Device* pDevice) = 0;
         ComPtr<ID3D12RootSignature>& GetRootSignature();
     protected:
-        HRESULT createRootSignature(_In_ ID3D12Device* pDevice,_In_ CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc);
+        HRESULT initialize(_In_ ID3D12Device* pDevice,_In_ CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc);
     private:
         ComPtr<ID3D12RootSignature> m_rootSignature;
 

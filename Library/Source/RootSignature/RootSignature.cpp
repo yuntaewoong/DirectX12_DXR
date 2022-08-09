@@ -9,7 +9,7 @@ namespace library
     {
         return m_rootSignature;
     }
-    HRESULT RootSignature::createRootSignature(_In_ ID3D12Device* pDevice,_In_ CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc)
+    HRESULT RootSignature::initialize(_In_ ID3D12Device* pDevice,_In_ CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc)
     {
         HRESULT hr = S_OK;
         ComPtr<ID3DBlob> signature(nullptr);

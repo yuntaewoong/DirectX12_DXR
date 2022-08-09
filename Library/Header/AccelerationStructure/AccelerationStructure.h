@@ -4,6 +4,9 @@
 #include "Render\Renderable.h"
 namespace library
 {
+	/*
+		AccelerationStructure Base≈¨∑°Ω∫
+	*/
 	class AccelerationStructure
 	{
 	public:

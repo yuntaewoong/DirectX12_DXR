@@ -21,7 +21,7 @@ namespace library
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(ARRAYSIZE(m_rootParameter), m_rootParameter);
 
-        hr = createRootSignature(pDevice, rootSignatureDesc);
+        hr = RootSignature::initialize(pDevice, rootSignatureDesc);
         if (FAILED(hr))
         {
             return hr;
