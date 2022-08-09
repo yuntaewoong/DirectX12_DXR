@@ -2,7 +2,7 @@
 
 #include "Common/Common.h"
 #include "Window/MainWindow.h"
-#include "Render/Renderer.h"
+#include "Render/RaytracingRenderer.h"
 
 namespace library
 {
@@ -21,12 +21,12 @@ namespace library
 
         HRESULT Initialize(_In_ HINSTANCE hInstance, _In_ INT nCmdShow);
         INT Run();
-        std::unique_ptr<Renderer>& GetRenderer();
+        std::unique_ptr<RaytracingRenderer>& GetRenderer();
         PCWSTR GetGameName() const;
         std::unique_ptr<MainWindow>& GetWindow();
     private:
         PCWSTR m_pszGameName;
         std::unique_ptr<MainWindow> m_mainWindow;
-        std::unique_ptr<Renderer> m_renderer;
+        std::unique_ptr<RaytracingRenderer> m_renderer;
     };
 }

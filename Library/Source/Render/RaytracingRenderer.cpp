@@ -1,4 +1,4 @@
-#include "Render\Renderer.h"
+#include "Render\RaytracingRenderer.h"
 #include "ShaderTable\ShaderTable.h"
 
 #include "CompiledShaders\BasicVertexShader.hlsl.h"
@@ -6,7 +6,7 @@
 #include "CompiledShaders\BasicRayTracing.hlsl.h"
 namespace library
 {
-    Renderer::Renderer() :
+    RaytracingRenderer::RaytracingRenderer() :
         m_renderingResources(),
         m_scene(nullptr),
         m_camera(std::make_unique<Camera>(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
@@ -31,7 +31,7 @@ namespace library
         m_vertexBufferCpuDescriptorHandle(),
         m_vertexBufferGpuDescriptorHandle()
     {}
-	HRESULT Renderer::Initialize(_In_ HWND hWnd)
+	HRESULT RaytracingRenderer::Initialize(_In_ HWND hWnd)
 	{
         HRESULT hr = S_OK;
         hr = m_renderingResources.Initialize(hWnd);
@@ -101,27 +101,27 @@ namespace library
         }
         return hr;
 	}
-    void Renderer::HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime)
+    void RaytracingRenderer::HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime)
     {
         m_camera->HandleInput(directions, mouseRelativeMovement, deltaTime);
     }
-    void Renderer::SetMainScene(_In_ std::shared_ptr<Scene>& pScene)
+    void RaytracingRenderer::SetMainScene(_In_ std::shared_ptr<Scene>& pScene)
     {
         m_scene = pScene;
     }
-    void Renderer::Render()
+    void RaytracingRenderer::Render()
     {
         populateCommandList();//command 기록
         m_renderingResources.ExecuteCommandList();//command queue에 담긴 command list들 실행명령(비동기)
         m_renderingResources.PresentSwapChain();
         m_renderingResources.MoveToNextFrame();
     }
-    void Renderer::Update(_In_ FLOAT deltaTime)
+    void RaytracingRenderer::Update(_In_ FLOAT deltaTime)
     {
         m_camera->Update(deltaTime);
         m_scene->Update(deltaTime);
     }
-    HRESULT Renderer::populateCommandList()
+    HRESULT RaytracingRenderer::populateCommandList()
     {
         ComPtr<ID3D12GraphicsCommandList>& pCommandList = m_renderingResources.GetCommandList();
         //command list allocator특: gpu동작 끝나야 Reset가능(펜스로 동기화해라)
@@ -219,7 +219,7 @@ namespace library
         return S_OK;
     }
     
-    HRESULT Renderer::createRaytracingInterfaces()
+    HRESULT RaytracingRenderer::createRaytracingInterfaces()
     {
         HRESULT hr = S_OK;
         hr = m_renderingResources.GetDevice()->QueryInterface(IID_PPV_ARGS(&m_dxrDevice));
@@ -234,7 +234,7 @@ namespace library
         }
         return hr;
     }
-    HRESULT Renderer::createRaytracingRootSignature()
+    HRESULT RaytracingRenderer::createRaytracingRootSignature()
     {
         HRESULT hr = S_OK;
         hr = m_globalRootSignature.Initialize(m_renderingResources.GetDevice().Get());
@@ -249,7 +249,7 @@ namespace library
         }
         return hr;
     }
-    HRESULT Renderer::createRaytracingPipelineStateObject()
+    HRESULT RaytracingRenderer::createRaytracingPipelineStateObject()
     {
         CD3DX12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };//내가 만들 state object는 레이트레이싱 파이프라인
 
@@ -304,7 +304,7 @@ namespace library
         }
         return hr;
     }
-    HRESULT Renderer::createUAVDescriptorHeap()
+    HRESULT RaytracingRenderer::createUAVDescriptorHeap()
     {
         HRESULT hr = S_OK;
         D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {
@@ -321,7 +321,7 @@ namespace library
         m_uavHeapDescriptorSize = m_renderingResources.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);//cpu별로 상이한 descriptor사이즈 가져오기
         return hr;
     }
-    HRESULT Renderer::createAccelerationStructure()
+    HRESULT RaytracingRenderer::createAccelerationStructure()
     {
         HRESULT hr = S_OK;
         hr = m_renderingResources.ResetCommandList();
@@ -361,7 +361,7 @@ namespace library
         }
         return hr;
     }
-    HRESULT Renderer::createShaderTable()
+    HRESULT RaytracingRenderer::createShaderTable()
     {
         HRESULT hr = S_OK;
         ComPtr<ID3D12Device> pDevice = m_renderingResources.GetDevice();
@@ -382,7 +382,7 @@ namespace library
         }
         return hr;
     }
-    HRESULT Renderer::createRaytacingOutputResource(_In_ HWND hWnd)
+    HRESULT RaytracingRenderer::createRaytacingOutputResource(_In_ HWND hWnd)
     {
         HRESULT hr = S_OK;
         //format은 Swap chain의 format과 같아야함!
@@ -423,7 +423,7 @@ namespace library
         m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_uavHeapDescriptorSize);
         return hr;
     }
-    UINT Renderer::createBufferSRV(_In_ ID3D12Resource* buffer, _Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize)
+    UINT RaytracingRenderer::createBufferSRV(_In_ ID3D12Resource* buffer, _Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize)
     {
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;

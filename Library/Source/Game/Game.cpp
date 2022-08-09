@@ -5,7 +5,7 @@ namespace library
 	Game::Game(_In_ PCWSTR pszGameName, _In_ INT nWidth, _In_ INT nHeight) :
 		m_pszGameName(pszGameName),
 		m_mainWindow(std::make_unique<MainWindow>(nWidth,nHeight)),
-		m_renderer(std::make_unique<Renderer>())
+		m_renderer(std::make_unique<RaytracingRenderer>())
 	{ }
 
 	/*
@@ -64,7 +64,7 @@ namespace library
 
 		return static_cast<INT>(msg.wParam);
 	}
-	std::unique_ptr<Renderer>& Game::GetRenderer()
+	std::unique_ptr<RaytracingRenderer>& Game::GetRenderer()
 	{
 		return m_renderer;
 	}

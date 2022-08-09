@@ -15,15 +15,15 @@
 
 namespace library
 {
-	class Renderer
+	class RaytracingRenderer
 	{
 	public:
-		Renderer();
-		Renderer(const Renderer& other) = delete;
-		Renderer(Renderer&& other) = delete;
-		Renderer& operator=(const Renderer& other) = delete;
-		Renderer& operator=(Renderer&& other) = delete;
-		~Renderer() = default;
+        RaytracingRenderer();
+        RaytracingRenderer(const RaytracingRenderer& other) = delete;
+        RaytracingRenderer(RaytracingRenderer&& other) = delete;
+        RaytracingRenderer& operator=(const RaytracingRenderer& other) = delete;
+        RaytracingRenderer& operator=(RaytracingRenderer&& other) = delete;
+		~RaytracingRenderer() = default;
 
         HRESULT Initialize(_In_ HWND hWnd);
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);

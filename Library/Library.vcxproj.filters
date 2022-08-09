@@ -87,7 +87,7 @@
     <ClInclude Include="Header\Game\Game.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Header\Render\Renderer.h">
+    <ClInclude Include="Header\Render\RaytracingRenderer.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
     <ClInclude Include="Header\Common\d3dx12.h">
@@ -152,7 +152,7 @@
     <ClCompile Include="Source\Game\Game.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Render\Renderer.cpp">
+    <ClCompile Include="Source\Render\RaytracingRenderer.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\ShaderTable.cpp">
