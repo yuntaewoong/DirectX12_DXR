@@ -20,10 +20,9 @@ namespace library
         m_descriptorHeap(nullptr),
         m_descriptorsAllocated(0u),
         m_uavHeapDescriptorSize(0u),
-        m_cubeCB(),
-        m_missShaderTable(nullptr),
-        m_hitGroupShaderTable(nullptr),
-        m_rayGenShaderTable(nullptr),
+        m_missShaderTable(),
+        m_hitGroupShaderTable(),
+        m_rayGenShaderTable(),
         m_raytracingOutput(nullptr),
         m_raytracingOutputResourceUAVGpuDescriptor(),
         m_raytracingOutputResourceUAVDescriptorHeapIndex(UINT_MAX),
@@ -166,21 +165,21 @@ namespace library
             m_indexBufferGpuDescriptorHandle
         );//vertex,index버퍼 바인딩
 
-
+        
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
             .RayGenerationShaderRecord = {
-                .StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress(),
-                .SizeInBytes = m_rayGenShaderTable->GetDesc().Width
+                .StartAddress = m_rayGenShaderTable.GetResource()->GetGPUVirtualAddress(),
+                .SizeInBytes = m_rayGenShaderTable.GetResource()->GetDesc().Width
             },
             .MissShaderTable = {
-                .StartAddress = m_missShaderTable->GetGPUVirtualAddress(),
-                .SizeInBytes = m_missShaderTable->GetDesc().Width,
-                .StrideInBytes = m_missShaderTable->GetDesc().Width
+                .StartAddress = m_missShaderTable.GetResource()->GetGPUVirtualAddress(),
+                .SizeInBytes = m_missShaderTable.GetResource()->GetDesc().Width,
+                .StrideInBytes = m_missShaderTable.GetResource()->GetDesc().Width
             },
             .HitGroupTable = {
-                .StartAddress = m_hitGroupShaderTable->GetGPUVirtualAddress(),
-                .SizeInBytes = m_hitGroupShaderTable->GetDesc().Width,
-                .StrideInBytes = m_hitGroupShaderTable->GetDesc().Width /2
+                .StartAddress = m_hitGroupShaderTable.GetResource()->GetGPUVirtualAddress(),
+                .SizeInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width,
+                .StrideInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width / 2
             },
             .Width = 1920,
             .Height = 1080,
@@ -365,87 +364,32 @@ namespace library
     HRESULT Renderer::createShaderTable()
     {
         HRESULT hr = S_OK;
-        void* rayGenShaderIdentifier = nullptr;
-        void* missShaderIdentifier = nullptr;
-        void* hitGroupShaderIdentifier = nullptr;
         ComPtr<ID3D12Device> pDevice = m_renderingResources.GetDevice();
-
-        // Get shader identifiers.
-        UINT shaderIdentifierSize;
+        hr = m_rayGenShaderTable.Initialize(pDevice.Get(),m_dxrStateObject);
+        if (FAILED(hr))
         {
-            ComPtr<ID3D12StateObjectProperties> stateObjectProperties(nullptr);
-            hr = m_dxrStateObject.As(&stateObjectProperties);//m_dxrStateObject가 ID3D12StateObjectProperties의 기능을 사용하겠다
-            rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyRaygenShader");
-            missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyMissShader");
-            hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyHitGroup");
-            shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+            return hr;
         }
-
-        // Ray gen shader table
+        hr = m_missShaderTable.Initialize(pDevice.Get(),m_dxrStateObject);
+        if (FAILED(hr))
         {
-            UINT numShaderRecords = 1;
-            UINT shaderRecordSize = shaderIdentifierSize;
-            ShaderTable rayGenShaderTable{};
-            hr = rayGenShaderTable.Initialize(pDevice.Get(), numShaderRecords, shaderRecordSize);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            rayGenShaderTable.Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
-            m_rayGenShaderTable = rayGenShaderTable.GetResource();
+            return hr;
         }
-
-        // Miss shader table
+        hr = m_hitGroupShaderTable.Initialize(pDevice.Get(),m_dxrStateObject);
+        if (FAILED(hr))
         {
-            UINT numShaderRecords = 1;
-            UINT shaderRecordSize = shaderIdentifierSize;
-            ShaderTable missShaderTable{};
-            hr = missShaderTable.Initialize(pDevice.Get(), numShaderRecords, shaderRecordSize);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            missShaderTable.Push_back(ShaderRecord(missShaderIdentifier, shaderIdentifierSize));
-            m_missShaderTable = missShaderTable.GetResource();
-        }
-
-        // Hit group shader table
-        {
-            
-            struct RootArguments {
-                CubeConstantBuffer cb;
-            } rootArguments;
-            m_cubeCB.albedo = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-            rootArguments.cb = m_cubeCB;
-
-            UINT numShaderRecords = 2;
-            UINT shaderRecordSize = shaderIdentifierSize + sizeof(rootArguments);
-            ShaderTable hitGroupShaderTable{};
-            hr = hitGroupShaderTable.Initialize(pDevice.Get(), numShaderRecords, shaderRecordSize);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            hitGroupShaderTable.Push_back(ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments)));
-
-            m_cubeCB.albedo = XMFLOAT4(1.0f, 0.f, 0.f, 1.f);
-            rootArguments.cb = m_cubeCB;
-            hitGroupShaderTable.Push_back(ShaderRecord(hitGroupShaderIdentifier, shaderIdentifierSize, &rootArguments, sizeof(rootArguments)));
-            m_hitGroupShaderTable = hitGroupShaderTable.GetResource();
+            return hr;
         }
         return hr;
     }
     HRESULT Renderer::createRaytacingOutputResource(_In_ HWND hWnd)
     {
         HRESULT hr = S_OK;
-        UINT width = 0u;
-        UINT height = 0u;
-        m_renderingResources.GetWindowWidthHeight(hWnd, &width, &height);
         //format은 Swap chain의 format과 같아야함!
         CD3DX12_RESOURCE_DESC uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(
             DXGI_FORMAT_R8G8B8A8_UNORM, 
-            width, 
-            height,
+            m_renderingResources.GetWidth(),
+            m_renderingResources.GetHeight(),
             1, 1, 1, 0, 
             D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
         );

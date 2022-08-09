@@ -15,6 +15,7 @@
 #include "d3dx12.h"
 #include <string>
 #include <algorithm>
+#include "Common\ShaderDataType.h"
 using namespace Microsoft::WRL;
 using namespace DirectX;
 namespace library
@@ -33,12 +34,11 @@ namespace library
         CubeConstantSlot = 0,
     };
     const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 1;
-
-    struct CameraConstantBuffer
+    struct LocalRootArgument
     {
-        XMMATRIX projectionToWorld;
-        XMVECTOR cameraPosition;
+        CubeConstantBuffer cb;
     };
+
     struct DirectionsInput
     {
         BOOL bFront;

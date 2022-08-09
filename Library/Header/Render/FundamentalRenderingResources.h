@@ -24,10 +24,12 @@ namespace library
 		HRESULT ResetCommandList();
 		HRESULT ExecuteCommandList();
 		void PresentSwapChain();
-		void GetWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight);
+		
 		ComPtr<ID3D12Device>& GetDevice();
 		ComPtr<ID3D12GraphicsCommandList>& GetCommandList();
 		ComPtr<ID3D12Resource>& GetCurrentRenderTarget();
+		UINT GetWidth() const;
+		UINT GetHeight() const;
 	private:
 		HRESULT getHardwareAdapter(
 			_In_ IDXGIFactory1* pFactory,
@@ -35,11 +37,13 @@ namespace library
 			bool requestHighPerformanceAdapter = false
 		);
 		BOOL isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const;
+		void setWindowWidthHeight(_In_ HWND hWnd);
 		HRESULT createDevice();
 		HRESULT createCommandQueue();
 		HRESULT createSwapChain(_In_ HWND hWnd);
 		HRESULT createRenderTargetView();
 		HRESULT createCommandAllocator();
+		HRESULT createFence();
 	private:
 		static const UINT FRAME_COUNT = 3;
 		UINT m_frameIndex;
@@ -57,5 +61,8 @@ namespace library
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
 		UINT64 m_fenceValues[FRAME_COUNT];
 		Microsoft::WRL::Wrappers::Event m_fenceEvent;
+
+		UINT m_width;//가로 해상도
+		UINT m_height;//세로 해상도
 	};
 }

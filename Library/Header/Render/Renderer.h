@@ -7,6 +7,9 @@
 #include "AccelerationStructure\BottomLevelAccelerationStructure.h"
 #include "Scene\Scene.h"
 #include "Camera\Camera.h"
+#include "ShaderTable\HitGroupShaderTable.h"
+#include "ShaderTable\MissShaderTable.h"
+#include "ShaderTable\RayGenerationShaderTable.h"
 #include "RootSignature\GlobalRootSignature.h"
 #include "RootSignature\LocalRootSignature.h"
 
@@ -51,13 +54,12 @@ namespace library
         UINT m_descriptorsAllocated;
         UINT m_uavHeapDescriptorSize;
 
-        //Per Cube Constant Buffer
-        CubeConstantBuffer m_cubeCB;
+        
 
         //ray tracing Shader Table자원
-        ComPtr<ID3D12Resource> m_missShaderTable;
-        ComPtr<ID3D12Resource> m_hitGroupShaderTable;
-        ComPtr<ID3D12Resource> m_rayGenShaderTable;
+        MissShaderTable m_missShaderTable;
+        HitGroupShaderTable m_hitGroupShaderTable;
+        RayGenerationShaderTable m_rayGenShaderTable;
 
         // Raytracing  결과 UAV자원
         ComPtr<ID3D12Resource> m_raytracingOutput;

@@ -1,12 +1,17 @@
 #pragma once
-#include "Common\Common.h"
+#include <DirectXMath.h>
 #define NUM_LIGHT 2
-
+using namespace DirectX;
 /*
     Shader에서 사용되는 struct들 type정의
 */
 namespace library
 {
+    struct CameraConstantBuffer
+    {
+        XMMATRIX projectionToWorld;
+        XMVECTOR cameraPosition;
+    };
     struct PointLightConstantBuffer
     {
         XMVECTOR position[NUM_LIGHT];

@@ -3,7 +3,7 @@
 #include "ShaderTable\ShaderRecord.h"
 namespace library
 {
-    class ShaderTable final
+    class ShaderTable
     {
     public:
         ShaderTable();
@@ -12,11 +12,12 @@ namespace library
         ShaderTable& operator=(const ShaderTable& other) = delete;
         ShaderTable& operator=(ShaderTable&& other) = delete;
         ~ShaderTable();
-
-        HRESULT Initialize(_In_ ID3D12Device* device, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize);
+        virtual HRESULT Initialize(_In_ ID3D12Device* pDevice, _In_ ComPtr<ID3D12StateObject>& pStateObject) = 0;
         HRESULT Push_back(const ShaderRecord& shaderRecord);
         UINT GetShaderRecordSize() const;
         ComPtr<ID3D12Resource>& GetResource();
+    protected:
+        HRESULT initialize(_In_ ID3D12Device* pDevice, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize);
     private:
         UINT align(_In_ UINT size,_In_ UINT alignment);
         HRESULT mapCpuWriteOnly();

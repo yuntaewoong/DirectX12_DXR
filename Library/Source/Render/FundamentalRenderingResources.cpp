@@ -21,6 +21,7 @@ namespace library
 	{
         HRESULT hr = S_OK;
         UINT dxgiFactoryFlags = 0;
+        setWindowWidthHeight(hWnd);//해상도 값 세팅
 #if defined(_DEBUG)//디버그 빌드시
         {
             ComPtr<ID3D12Debug> debugController(nullptr);
@@ -75,23 +76,10 @@ namespace library
                 return hr;
             }
         }
-        {//fence만들기
-            hr = m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-            m_fenceValues[m_frameIndex]++;
-
-            m_fenceEvent.Attach(CreateEvent(nullptr, FALSE, FALSE, nullptr));
-            if (m_fenceEvent == nullptr)
-            {
-                hr = HRESULT_FROM_WIN32(GetLastError());
-                if (FAILED(hr))
-                {
-                    return hr;
-                }
-            }
+        hr = createFence();
+        if (FAILED(hr))
+        {
+            return hr;
         }
         ComPtr<IDXGIAdapter1> tempAdapter(nullptr);
         ComPtr<IDXGIFactory1> tempFactory(nullptr);
@@ -181,20 +169,6 @@ namespace library
         }
         return hr;
     }
-    void FundamentalRenderingResources::GetWindowWidthHeight(_In_ HWND hWnd, _Out_ PUINT pWidth, _Out_ PUINT pHeight)
-    {
-        *pWidth = 0u;
-        *pHeight = 0u;
-        RECT rc = {
-            .left = 0u,
-            .top = 0u,
-            .right = 0u,
-            .bottom = 0u
-        };
-        GetClientRect(hWnd, &rc);
-        *pWidth = static_cast<UINT>(rc.right - rc.left);
-        *pHeight = static_cast<UINT>(rc.bottom - rc.top);
-    }
     ComPtr<ID3D12Device>& FundamentalRenderingResources::GetDevice()
     {
         return m_device;
@@ -202,6 +176,18 @@ namespace library
     ComPtr<ID3D12GraphicsCommandList>& FundamentalRenderingResources::GetCommandList()
     {
         return m_commandList;
+    }
+    ComPtr<ID3D12Resource>& FundamentalRenderingResources::GetCurrentRenderTarget()
+    {
+        return m_renderTargets[m_frameIndex];
+    }
+    UINT FundamentalRenderingResources::GetWidth() const
+    {
+        return m_width;
+    }
+    UINT FundamentalRenderingResources::GetHeight() const
+    {
+        return m_height;
     }
     BOOL FundamentalRenderingResources::isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const
     {
@@ -212,9 +198,17 @@ namespace library
             && SUCCEEDED(testDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &featureSupportData, sizeof(featureSupportData)))
             && featureSupportData.RaytracingTier != D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
     }
-    ComPtr<ID3D12Resource>& FundamentalRenderingResources::GetCurrentRenderTarget()
+    void FundamentalRenderingResources::setWindowWidthHeight(_In_ HWND hWnd)
     {
-        return m_renderTargets[m_frameIndex];
+        RECT rc = {
+            .left = 0u,
+            .top = 0u,
+            .right = 0u,
+            .bottom = 0u
+        };
+        GetClientRect(hWnd, &rc);
+        m_width = static_cast<UINT>(rc.right - rc.left);
+        m_height = static_cast<UINT>(rc.bottom - rc.top);
     }
     HRESULT FundamentalRenderingResources::getHardwareAdapter(
         _In_ IDXGIFactory1* pFactory,
@@ -300,12 +294,10 @@ namespace library
     HRESULT FundamentalRenderingResources::createSwapChain(_In_ HWND hWnd)//스왑체인 생성
     {
         HRESULT hr = S_OK;
-        UINT width = 0u;
-        UINT height = 0u;
-        GetWindowWidthHeight(hWnd, &width, &height);
+        
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {
-            .Width = width,                                 //가로
-            .Height = height,                               //세로
+            .Width = m_width,                                 //가로
+            .Height = m_height,                               //세로
             .Format = DXGI_FORMAT_R8G8B8A8_UNORM,           //각 픽셀에 담을 데이터포맷
             .Stereo = false,                                //풀 스크린인가?
             .SampleDesc = {
@@ -388,6 +380,27 @@ namespace library
             }
         }
 
+        return hr;
+    }
+    HRESULT FundamentalRenderingResources::createFence()
+    {
+        HRESULT hr = S_OK;
+        hr = m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        m_fenceValues[m_frameIndex]++;
+
+        m_fenceEvent.Attach(CreateEvent(nullptr, FALSE, FALSE, nullptr));
+        if (m_fenceEvent == nullptr)
+        {
+            hr = HRESULT_FROM_WIN32(GetLastError());
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+        }
         return hr;
     }
 }

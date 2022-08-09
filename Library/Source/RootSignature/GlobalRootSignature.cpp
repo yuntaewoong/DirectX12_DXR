@@ -6,9 +6,7 @@ namespace library
         m_rootParameter()
     {}
     HRESULT GlobalRootSignature::Initialize(_In_ ID3D12Device* pDevice)
-    {
-        HRESULT hr = S_OK;
-
+    {   
         CD3DX12_DESCRIPTOR_RANGE ranges[2] = {};
         ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);  // 0번 레지스터는 Output UAV텍스처
         ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);  // 1번부터 2개의 레지스터는 Vertex,Index버퍼
@@ -21,11 +19,6 @@ namespace library
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(ARRAYSIZE(m_rootParameter), m_rootParameter);
 
-        hr = RootSignature::initialize(pDevice, rootSignatureDesc);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        return hr;
+        return RootSignature::initialize(pDevice, rootSignatureDesc);;
     }
 }

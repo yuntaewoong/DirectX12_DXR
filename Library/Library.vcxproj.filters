@@ -135,6 +135,15 @@
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Header\ShaderTable\RayGenerationShaderTable.h">
+      <Filter>Header Files\ShaderTable</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ShaderTable\HitGroupShaderTable.h">
+      <Filter>Header Files\ShaderTable</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ShaderTable\MissShaderTable.h">
+      <Filter>Header Files\ShaderTable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -146,7 +155,7 @@
     <ClCompile Include="Source\Render\Renderer.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ShaderTable\ShaderTable.cpp.cpp">
+    <ClCompile Include="Source\ShaderTable\ShaderTable.cpp">
       <Filter>Source Files\ShaderTable</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp">
@@ -184,6 +193,15 @@
     </ClCompile>
     <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp">
       <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShaderTable\RayGenerationShaderTable.cpp">
+      <Filter>Source Files\ShaderTable</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShaderTable\HitGroupShaderTable.cpp">
+      <Filter>Source Files\ShaderTable</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShaderTable\MissShaderTable.cpp">
+      <Filter>Source Files\ShaderTable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

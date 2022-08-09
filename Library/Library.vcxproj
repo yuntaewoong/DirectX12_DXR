@@ -195,6 +195,9 @@
     <ClInclude Include="Header\RootSignature\LocalRootSignature.h" />
     <ClInclude Include="Header\RootSignature\RootSignature.h" />
     <ClInclude Include="Header\Scene\Scene.h" />
+    <ClInclude Include="Header\ShaderTable\HitGroupShaderTable.h" />
+    <ClInclude Include="Header\ShaderTable\MissShaderTable.h" />
+    <ClInclude Include="Header\ShaderTable\RayGenerationShaderTable.h" />
     <ClInclude Include="Header\ShaderTable\ShaderRecord.h" />
     <ClInclude Include="Header\ShaderTable\ShaderTable.h" />
     <ClInclude Include="Header\Window\BaseWindow.h" />
@@ -214,8 +217,11 @@
     <ClCompile Include="Source\RootSignature\LocalRootSignature.cpp" />
     <ClCompile Include="Source\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
+    <ClCompile Include="Source\ShaderTable\HitGroupShaderTable.cpp" />
+    <ClCompile Include="Source\ShaderTable\MissShaderTable.cpp" />
+    <ClCompile Include="Source\ShaderTable\RayGenerationShaderTable.cpp" />
     <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp" />
-    <ClCompile Include="Source\ShaderTable\ShaderTable.cpp.cpp" />
+    <ClCompile Include="Source\ShaderTable\ShaderTable.cpp" />
     <ClCompile Include="Source\Window\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
