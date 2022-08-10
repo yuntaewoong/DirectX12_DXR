@@ -27,14 +27,14 @@ namespace library
 
         HRESULT Initialize(_In_ HWND hWnd);
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);
-        void SetMainScene(_In_ std::shared_ptr<Scene>& pScene);
+        void SetMainScene(_In_ const std::shared_ptr<Scene>& pScene);
         void Render();
         void Update(_In_ FLOAT deltaTime);
 	private:
         FundamentalRenderingResources m_renderingResources;
 
         std::shared_ptr<Scene> m_scene;
-        std::unique_ptr<Camera> m_camera;
+        Camera m_camera;
 
         // DXR파이프라인 관련
         ComPtr<ID3D12Device5> m_dxrDevice;

@@ -9,7 +9,7 @@ namespace library
     {
         HRESULT hr = S_OK;
         UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-        UINT numShaderRecords = 2;
+        UINT numShaderRecords = 3;
         UINT shaderRecordSize = shaderIdentifierSize + sizeof(LocalRootArgument);
         hr = ShaderTable::initialize(pDevice, numShaderRecords, shaderRecordSize);
         if (FAILED(hr))
@@ -26,6 +26,8 @@ namespace library
         };
         Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize,&rootArgument,sizeof(rootArgument)));
         rootArgument.cb.albedo = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
+        Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
+        rootArgument.cb.albedo = XMFLOAT4(1.f, 1.f, 0.f, 1.f);
         Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
         return hr;
     }

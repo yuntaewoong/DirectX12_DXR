@@ -9,7 +9,7 @@ namespace library
     RaytracingRenderer::RaytracingRenderer() :
         m_renderingResources(),
         m_scene(nullptr),
-        m_camera(std::make_unique<Camera>(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
+        m_camera(Camera(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_dxrStateObject(nullptr),
@@ -88,7 +88,7 @@ namespace library
             return hr;
         }
 
-        hr = m_camera->Initialize(m_renderingResources.GetDevice().Get());
+        hr = m_camera.Initialize(m_renderingResources.GetDevice().Get());
         if (FAILED(hr))
         {
             return hr;
@@ -103,9 +103,9 @@ namespace library
 	}
     void RaytracingRenderer::HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime)
     {
-        m_camera->HandleInput(directions, mouseRelativeMovement, deltaTime);
+        m_camera.HandleInput(directions, mouseRelativeMovement, deltaTime);
     }
-    void RaytracingRenderer::SetMainScene(_In_ std::shared_ptr<Scene>& pScene)
+    void RaytracingRenderer::SetMainScene(_In_ const std::shared_ptr<Scene>& pScene)
     {
         m_scene = pScene;
     }
@@ -118,7 +118,7 @@ namespace library
     }
     void RaytracingRenderer::Update(_In_ FLOAT deltaTime)
     {
-        m_camera->Update(deltaTime);
+        m_camera.Update(deltaTime);
         m_scene->Update(deltaTime);
     }
     HRESULT RaytracingRenderer::populateCommandList()
@@ -139,7 +139,7 @@ namespace library
         
         
         pCommandList->SetComputeRootSignature(m_globalRootSignature.GetRootSignature().Get());//compute shader의 루트 시그니처 바인딩
-        pCommandList->SetDescriptorHeaps(1, m_descriptorHeap.GetAddressOf());//command list에 cpu descriptor heap을 바인딩
+        pCommandList->SetDescriptorHeaps(1, m_descriptorHeap.GetAddressOf());//command list에 descriptor heap을 바인딩
         pCommandList->SetComputeRootDescriptorTable(
             static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
             m_raytracingOutputResourceUAVGpuDescriptor
@@ -152,7 +152,7 @@ namespace library
         
         pCommandList->SetComputeRootConstantBufferView(
             static_cast<UINT>(EGlobalRootSignatureSlot::CameraConstantSlot),
-            m_camera->GetConstantBuffer()->GetGPUVirtualAddress()
+            m_camera.GetConstantBuffer()->GetGPUVirtualAddress()
         );//Camera CB바인딩
 
         pCommandList->SetComputeRootConstantBufferView(
@@ -179,7 +179,7 @@ namespace library
             .HitGroupTable = {
                 .StartAddress = m_hitGroupShaderTable.GetResource()->GetGPUVirtualAddress(),
                 .SizeInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width,
-                .StrideInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width / 2
+                .StrideInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width / 3
             },
             .Width = 1920,
             .Height = 1080,

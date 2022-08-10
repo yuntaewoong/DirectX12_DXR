@@ -15,18 +15,27 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(
 		XMVectorSet(0.5f, 0.f, 2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(0.3f, 0.3f, 0.3f, 0.3f)
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
 	);
 
 	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(
 		XMVectorSet(-0.5f, 0.f, 2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(0.3f, 0.3f, 0.3f, 0.3f)
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
 	);
+
+	std::shared_ptr<library::Renderable> plane = std::make_shared<BaseCube>(
+		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(20.f, 0.1f, 20.f, 1.f)
+	);
+
+
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -20.f,1.f));
 
 	scene->AddRenderable(cube1);
 	scene->AddRenderable(cube2);
+	scene->AddRenderable(plane);
 	scene->AddLight(light1);
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
