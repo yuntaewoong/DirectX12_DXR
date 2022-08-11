@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Common\Common.h"
-#include "Common\ShaderDataType.h"
 namespace library
 {
 	class Renderable

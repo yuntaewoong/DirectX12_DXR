@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Common\Common.h"
-#include "Common\ShaderDataType.h"
 #include "Render\FundamentalRenderingResources.h"
 #include "AccelerationStructure\TopLevelAccelerationStructure.h"
 #include "AccelerationStructure\BottomLevelAccelerationStructure.h"

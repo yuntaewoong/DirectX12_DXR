@@ -2,35 +2,10 @@
 #define RAYTRACING_HLSL
 
 #define HLSL
+#include "Include/DataTypeSharedBothHLSLAndCPP.h"
+
 #define NUM_LIGHTS 2
-struct CameraConstantBuffer
-{
-    float4x4 projectionToWorld;
-    float4 cameraPosition;
-};
-struct LightConstantBuffer
-{
-    float4 lightPosition[NUM_LIGHTS];
-};
-struct CubeConstantBuffer
-{
-    float4 albedo;
-};
 
-struct Vertex
-{
-    float3 position;
-    float3 normal;
-};
-struct RayPayload
-{
-    float4 color;
-};
-
-struct ShadowRayPayload
-{
-    float hit; // 1이면 Hit, 0이면 Miss
-};
 /*=================================================================
     g_(variable_name) ===> global root signature로 정의되는 Resource(매 프레임 1번씩 세팅)
 ==================================================================*/
@@ -39,7 +14,7 @@ RWTexture2D<float4> g_renderTarget : register(u0);
 ByteAddressBuffer g_indices : register(t1, space0);
 StructuredBuffer<Vertex> g_vertices : register(t2, space0);
 ConstantBuffer<CameraConstantBuffer> g_cameraCB : register(b0);
-ConstantBuffer<LightConstantBuffer> g_lightCB : register(b2);
+ConstantBuffer<PointLightConstantBuffer> g_lightCB : register(b2);
 
 /*================================================================================
     l_(variable_name) ===> local root signature로 정의되는 Resource(매 프레임 Shader Table 각각 알맞게 세팅)
@@ -112,7 +87,7 @@ inline void GenerateCameraRay(uint2 index, out float3 origin, out float3 directi
 // Diffuse계산
 float4 CalculateDiffuseLighting(float3 hitPosition, float3 normal)
 {
-    float3 pixelToLight = normalize(g_lightCB.lightPosition[0].xyz - hitPosition);
+    float3 pixelToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
     float nDotL = max(0.0f, dot(pixelToLight, normal));
     return l_cubeCB.albedo * nDotL;
 }
@@ -176,7 +151,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
 {
     float3 hitPosition = HitWorldPosition();
     
-    if (IsInShadow(hitPosition, g_lightCB.lightPosition[0].xyz))//shadow ray를 이용한 그림자 검사
+    if (IsInShadow(hitPosition, g_lightCB.position[0].xyz))//shadow ray를 이용한 그림자 검사
     {
         payload.color = float4(0.1f, 0.1f, 0.1f, 1.f); //어두운 그림자
         return;
@@ -199,7 +174,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
  
     float3 triangleNormal = HitAttribute(vertexNormals, attr);//무게중심 좌표계로 normal값 보간하기
     float4 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal);
-    float4 color = float4(0.2f,0.2f,0.2f,1.f) * l_cubeCB.albedo + diffuseColor;
+    float4 color = float4(0.2f, 0.2f, 0.2f, 1.f) * l_cubeCB.albedo + diffuseColor;
     payload.color = color;
 
 }

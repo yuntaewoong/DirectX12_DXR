@@ -1,6 +1,6 @@
 #pragma once
 #include "ShaderTable\ShaderTable.h"
-#include "Common\ShaderDataType.h"
+#include "Render\Renderable.h"
 namespace library
 {
     /*
@@ -15,6 +15,7 @@ namespace library
         HitGroupShaderTable& operator=(const HitGroupShaderTable& other) = delete;
         HitGroupShaderTable& operator=(HitGroupShaderTable&& other) = delete;
 
-        virtual HRESULT Initialize(_In_ ID3D12Device* pDevice, _In_ ComPtr<ID3D12StateObject>& pStateObject) override;
+        HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice, _In_ const ComPtr<ID3D12StateObject>& pStateObject,_In_ const std::vector<std::shared_ptr<Renderable>>& renderables);
+    private:
     };
 }

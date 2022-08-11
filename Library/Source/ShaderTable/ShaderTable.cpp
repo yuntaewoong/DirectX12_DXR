@@ -30,11 +30,19 @@ namespace library
     {
         return m_shaderRecordSize;
     }
-    ComPtr<ID3D12Resource>& ShaderTable::GetResource()
+    D3D12_GPU_VIRTUAL_ADDRESS ShaderTable::GetShaderTableGPUVirtualAddress() const
     {
-        return m_resource;
+        return m_resource->GetGPUVirtualAddress();
     }
-    HRESULT ShaderTable::initialize(_In_ ID3D12Device* pDevice, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize)
+    UINT64 ShaderTable::GetShaderTableSizeInBytes() const
+    {
+        return m_resource->GetDesc().Width;
+    }
+    UINT64 ShaderTable::GetShaderTableStrideInBytes() const
+    {
+        return m_resource->GetDesc().Width / m_shaderRecords.size();
+    }
+    HRESULT ShaderTable::initialize(_In_ const ComPtr<ID3D12Device>& pDevice, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize)
     {
         HRESULT hr = S_OK;
         m_shaderRecordSize = align(shaderRecordSize, D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT);//32바이트 단위로

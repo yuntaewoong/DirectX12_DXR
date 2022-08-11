@@ -5,7 +5,7 @@ namespace library
         ShaderTable::ShaderTable()
     {}
 
-    HRESULT RayGenerationShaderTable::Initialize(_In_ ID3D12Device* pDevice, _In_ ComPtr<ID3D12StateObject>& pStateObject)
+    HRESULT RayGenerationShaderTable::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice, _In_ const ComPtr<ID3D12StateObject>& pStateObject)
     {
         HRESULT hr = S_OK;
         UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;

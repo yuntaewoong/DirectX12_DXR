@@ -73,6 +73,9 @@
     <Filter Include="Source Files\RootSignature">
       <UniqueIdentifier>{56a52eab-4c1e-48ad-9ab4-b54d749cb5ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Include">
+      <UniqueIdentifier>{c955895e-d541-4252-816d-d9bfd8965871}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -129,9 +132,6 @@
     <ClInclude Include="Header\RootSignature\LocalRootSignature.h">
       <Filter>Header Files\RootSignature</Filter>
     </ClInclude>
-    <ClInclude Include="Header\Common\ShaderDataType.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
@@ -143,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="Header\ShaderTable\MissShaderTable.h">
       <Filter>Header Files\ShaderTable</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
+      <Filter>Shader\Include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

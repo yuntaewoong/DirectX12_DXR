@@ -165,18 +165,18 @@ namespace library
 
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
             .RayGenerationShaderRecord = {
-                .StartAddress = m_rayGenShaderTable.GetResource()->GetGPUVirtualAddress(),
-                .SizeInBytes = m_rayGenShaderTable.GetResource()->GetDesc().Width
+                .StartAddress = m_rayGenShaderTable.GetShaderTableGPUVirtualAddress(),
+                .SizeInBytes = m_rayGenShaderTable.GetShaderTableSizeInBytes()
             },
             .MissShaderTable = {
-                .StartAddress = m_missShaderTable.GetResource()->GetGPUVirtualAddress(),
-                .SizeInBytes = m_missShaderTable.GetResource()->GetDesc().Width,
-                .StrideInBytes = m_missShaderTable.GetResource()->GetDesc().Width / 2
+                .StartAddress = m_missShaderTable.GetShaderTableGPUVirtualAddress(),
+                .SizeInBytes = m_missShaderTable.GetShaderTableSizeInBytes(),
+                .StrideInBytes = m_missShaderTable.GetShaderTableStrideInBytes()
             },
             .HitGroupTable = {
-                .StartAddress = m_hitGroupShaderTable.GetResource()->GetGPUVirtualAddress(),
-                .SizeInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width,
-                .StrideInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width / 6
+                .StartAddress = m_hitGroupShaderTable.GetShaderTableGPUVirtualAddress(),
+                .SizeInBytes = m_hitGroupShaderTable.GetShaderTableSizeInBytes(),
+                .StrideInBytes = m_hitGroupShaderTable.GetShaderTableStrideInBytes()
             },
             .Width = 1920,
             .Height = 1080,
@@ -279,8 +279,8 @@ namespace library
         }
         {//Shader Config서브오브젝트 생성
             CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT* shaderConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-            UINT payloadSize = max(4 * sizeof(float), sizeof(float));   // float4 color, float hit 둘중 큰값을 할당
-            UINT attributeSize = 2 * sizeof(float); // float2 barycentrics
+            UINT payloadSize = max(sizeof(RayPayload), sizeof(ShadowRayPayload));   //  둘중 큰값을 할당
+            UINT attributeSize = sizeof(XMFLOAT2); //barycentrics
             shaderConfig->Config(payloadSize, attributeSize);// payload, attribute사이즈 정의(셰이더에서 인자로 사용됨)
         }
         
@@ -297,7 +297,7 @@ namespace library
         globalRootSignature->SetRootSignature(m_globalRootSignature.GetRootSignature().Get());
         //파이프라인 옵션
         CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT* pipelineConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();// 파이프라인 config 서브오브젝트 생성 
-        UINT maxRecursionDepth = 2;//2번만 recursion 하겠다(1: 기본 shading용, 2:shadow ray용)
+        UINT maxRecursionDepth = MAX_RECURSION_DEPTH;//2번만 recursion 하겠다(1: 기본 shading용, 2:shadow ray용)
         pipelineConfig->Config(maxRecursionDepth);//적용
 
 
@@ -371,17 +371,17 @@ namespace library
     {
         HRESULT hr = S_OK;
         ComPtr<ID3D12Device> pDevice = m_renderingResources.GetDevice();
-        hr = m_rayGenShaderTable.Initialize(pDevice.Get(),m_dxrStateObject);
+        hr = m_rayGenShaderTable.Initialize(pDevice,m_dxrStateObject);
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = m_missShaderTable.Initialize(pDevice.Get(),m_dxrStateObject);
+        hr = m_missShaderTable.Initialize(pDevice,m_dxrStateObject);
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = m_hitGroupShaderTable.Initialize(pDevice.Get(),m_dxrStateObject);
+        hr = m_hitGroupShaderTable.Initialize(pDevice,m_dxrStateObject,m_scene->GetRenderables());//hit group table을 초기화 하기 위해서는 renderable들의 정보가 필요
         if (FAILED(hr))
         {
             return hr;
