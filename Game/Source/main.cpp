@@ -10,16 +10,16 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
-	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 3D CUBE 렌더링",1920,1080);
+	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Shadow Ray테스트",1920,1080);
 	std::shared_ptr<library::Scene> scene = std::make_shared<library::Scene>();
 	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(
-		XMVectorSet(0.5f, 0.f, 2.f, 1.0f),
+		XMVectorSet(0.5f, 0.6f, 2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
 	);
 
 	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(
-		XMVectorSet(-0.5f, 0.f, 2.f, 1.0f),
+		XMVectorSet(-0.5f, 0.6f, 2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
 	);
@@ -27,11 +27,11 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Renderable> plane = std::make_shared<BaseCube>(
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(20.f, 0.1f, 20.f, 1.f)
+		XMVectorSet(5.f, 0.1f, 5.f, 1.f)
 	);
 
 
-	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -20.f,1.f));
+	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 20.f, -20.f,1.f));
 
 	scene->AddRenderable(cube1);
 	scene->AddRenderable(cube2);

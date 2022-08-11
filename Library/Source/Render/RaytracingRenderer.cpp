@@ -1,8 +1,6 @@
 #include "Render\RaytracingRenderer.h"
 #include "ShaderTable\ShaderTable.h"
 
-#include "CompiledShaders\BasicVertexShader.hlsl.h"
-#include "CompiledShaders\BasicPixelShader.hlsl.h"
 #include "CompiledShaders\BasicRayTracing.hlsl.h"
 namespace library
 {
@@ -165,7 +163,6 @@ namespace library
             m_indexBufferGpuDescriptorHandle
         );//vertex,index버퍼 바인딩
 
-        
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
             .RayGenerationShaderRecord = {
                 .StartAddress = m_rayGenShaderTable.GetResource()->GetGPUVirtualAddress(),
@@ -174,17 +171,18 @@ namespace library
             .MissShaderTable = {
                 .StartAddress = m_missShaderTable.GetResource()->GetGPUVirtualAddress(),
                 .SizeInBytes = m_missShaderTable.GetResource()->GetDesc().Width,
-                .StrideInBytes = m_missShaderTable.GetResource()->GetDesc().Width
+                .StrideInBytes = m_missShaderTable.GetResource()->GetDesc().Width / 2
             },
             .HitGroupTable = {
                 .StartAddress = m_hitGroupShaderTable.GetResource()->GetGPUVirtualAddress(),
                 .SizeInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width,
-                .StrideInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width / 3
+                .StrideInBytes = m_hitGroupShaderTable.GetResource()->GetDesc().Width / 6
             },
             .Width = 1920,
             .Height = 1080,
             .Depth = 1
         };
+        auto aa = m_hitGroupShaderTable.GetShaderRecordSize();
         m_dxrCommandList->SetPipelineState1(m_dxrStateObject.Get());//열심히 만든 ray tracing pipeline바인딩
         m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
         
@@ -262,28 +260,36 @@ namespace library
             lib->DefineExport(L"MyRaygenShader");//ray generation shader진입점 정의
             lib->DefineExport(L"MyClosestHitShader");//closest hit shader진입점 정의
             lib->DefineExport(L"MyMissShader");//miss shader shader진입점 정의
+
+            lib->DefineExport(L"MyShadowRayClosestHitShader");//ShadowRay closest hit shader진입점 정의
+            lib->DefineExport(L"MyShadowRayMissShader");// ShadowRay miss shader shader진입점 정의
         }
 
+        {//radiance hit group 서브 오브젝트 생성
+            CD3DX12_HIT_GROUP_SUBOBJECT* hitGroup = raytracingPipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+            hitGroup->SetClosestHitShaderImport(L"MyClosestHitShader");//히트그룹과 연결될 셰이더진입점
+            hitGroup->SetHitGroupExport(L"MyHitGroup");//히트 그룹 수출
+            hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);//이 히트그룹은 삼각형
+        }
+        {//Shadow hit group 서브 오브젝트 생성
+            CD3DX12_HIT_GROUP_SUBOBJECT* hitGroup = raytracingPipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+            hitGroup->SetClosestHitShaderImport(L"MyShadowRayClosestHitShader");//히트그룹과 연결될 셰이더진입점
+            hitGroup->SetHitGroupExport(L"MyShadowRayHitGroup");//히트 그룹 수출
+            hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);//이 히트그룹은 삼각형
+        }
+        {//Shader Config서브오브젝트 생성
+            CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT* shaderConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
+            UINT payloadSize = max(4 * sizeof(float), sizeof(float));   // float4 color, float hit 둘중 큰값을 할당
+            UINT attributeSize = 2 * sizeof(float); // float2 barycentrics
+            shaderConfig->Config(payloadSize, attributeSize);// payload, attribute사이즈 정의(셰이더에서 인자로 사용됨)
+        }
         
-        CD3DX12_HIT_GROUP_SUBOBJECT* hitGroup = raytracingPipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();//hit group 서브 오브젝트 생성
-        
-        hitGroup->SetClosestHitShaderImport(L"MyClosestHitShader");//히트그룹과 연결될 셰이더진입점
-        hitGroup->SetHitGroupExport(L"MyHitGroup");//히트 그룹 수출
-        hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);//이 히트그룹은 삼각형
-
-        
-        CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT* shaderConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();//Shader Config서브오브젝트 생성
-        UINT payloadSize = 4 * sizeof(float);   // float4 color
-        UINT attributeSize = 2 * sizeof(float); // float2 barycentrics
-        shaderConfig->Config(payloadSize, attributeSize);// payload, attribute사이즈 정의(ray tracomg 셰이더에서 인자로 사용됨)
-
-        
-        {//미리 만들어둔 local root signature로 서브오브젝트 만들어 파이프라인에 적용(MyRaygenShader에)
+        {//미리 만들어둔 local root signature로 서브오브젝트 만들어 파이프라인에 적용
             CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT* localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
             localRootSignature->SetRootSignature(m_localRootSignature.GetRootSignature().Get());
             CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT* rootSignatureAssociation = raytracingPipeline.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
             rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
-            rootSignatureAssociation->AddExport(L"MyHitGroup");//My Cloesest Hit 셰이더에서 사용하겠다
+            rootSignatureAssociation->AddExport(L"MyHitGroup");//My Hit Group에서 사용하겠다
         }
 
         //모든 Shader에서 사용할 gloabl root signature서브 오브젝트 적용
@@ -291,7 +297,7 @@ namespace library
         globalRootSignature->SetRootSignature(m_globalRootSignature.GetRootSignature().Get());
         //파이프라인 옵션
         CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT* pipelineConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();// 파이프라인 config 서브오브젝트 생성 
-        UINT maxRecursionDepth = 1;//1번만 recursion 하겠다
+        UINT maxRecursionDepth = 2;//2번만 recursion 하겠다(1: 기본 shading용, 2:shadow ray용)
         pipelineConfig->Config(maxRecursionDepth);//적용
 
 

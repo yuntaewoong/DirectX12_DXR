@@ -9,7 +9,7 @@ namespace library
     {
         HRESULT hr = S_OK;
         UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-        UINT numShaderRecords = 1;
+        UINT numShaderRecords = 2;
         UINT shaderRecordSize = shaderIdentifierSize;
         hr = ShaderTable::initialize(pDevice, numShaderRecords, shaderRecordSize);
         if (FAILED(hr))
@@ -18,9 +18,11 @@ namespace library
         }
         ComPtr<ID3D12StateObjectProperties> stateObjectProperties(nullptr);
         pStateObject.As(&stateObjectProperties);
-        void* rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyMissShader");
-        
-        Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
+
+        void* missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyMissShader");
+        Push_back(ShaderRecord(missShaderIdentifier, shaderIdentifierSize));
+        void* shadowRayMissShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyShadowRayMissShader");
+        Push_back(ShaderRecord(shadowRayMissShaderIdentifier, shaderIdentifierSize));
 
         return hr;
     }
