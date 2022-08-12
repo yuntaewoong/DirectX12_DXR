@@ -21,6 +21,31 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 namespace library
 {
+    /*===========================================
+    Shader 진입점,
+    Hit Group 진입점 정의
+    =====================================*/
+    constexpr LPCWSTR RAY_GEN_SHADER_NAME = L"MyRaygenShader";
+    constexpr LPCWSTR CLOSEST_HIT_SHADER_NAMES[RayType::Count] =
+    {
+        L"MyClosestHitShader",
+        L"MyShadowRayClosestHitShader",
+    };
+    constexpr LPCWSTR MISS_SHADER_NAMES[RayType::Count] =
+    {
+        L"MyMissShader",
+        L"MyShadowRayMissShader"
+    };
+    constexpr LPCWSTR HIT_GROUP_NAMES[RayType::Count] =
+    {
+        L"MyHitGroup", 
+        L"MyShadowRayHitGroup"
+    };
+
+    /*==========================================
+    Global Root Signature Slot
+    Local Root Signature Slot상수 정의
+    ======================================*/
     enum class EGlobalRootSignatureSlot
     {
         OutputViewSlot = 0,
@@ -40,6 +65,10 @@ namespace library
         CubeConstantBuffer cb;
     };
 
+
+    /*=============
+    키보드 인풋 정의
+    ==========*/
     struct DirectionsInput
     {
         BOOL bFront;
@@ -49,6 +78,10 @@ namespace library
         BOOL bUp;
         BOOL bDown;
     };
+
+    /*======
+    마우스 인풋 정의
+    ======*/
     struct MouseRelativeMovement
     {
         LONG X;

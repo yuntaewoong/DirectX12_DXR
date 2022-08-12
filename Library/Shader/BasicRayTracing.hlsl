@@ -1,3 +1,9 @@
+/*================================================================
+빌드전에 Error List들에 뜨는 Error들은 Intellisense가 멍청해서 뱉는 에러, 신경쓰지 말것
+
+==================================================================*/
+
+
 #ifndef RAYTRACING_HLSL
 #define RAYTRACING_HLSL
 
@@ -105,14 +111,14 @@ bool IsInShadow(in float3 hitPosition, in float3 lightPosition)
     shadowPayload.hit = 1.f;//closest hit시 값으로 초기화
     
     TraceRay(
-        g_scene,                         //acceleration structure
-        RAY_FLAG_SKIP_CLOSEST_HIT_SHADER,//closest hit shader무시(속도 향상)(나중에 필요해질때는 무시 안하게될듯)
-        ~0,                              //instance mask딱히 설정 x
-        3,                               //hit group index(instance개수에 따라 달라짐)
-        1,                               //shader table에서 geometry들 간의 간격(현재 각 instnance당 geometry는 1개라 딱히 의미없음)
-        1,                               //miss shader table에서 사용할 miss shader의 index
-        rayDesc,                         //ray 정보
-        shadowPayload                    //payload
+        g_scene,                                               //acceleration structure
+        RAY_FLAG_SKIP_CLOSEST_HIT_SHADER,                      //closest hit shader무시(속도 향상)(나중에 필요해질때는 무시 안하게될듯)
+        TraceRayParameters::InstanceMask,                      //instance mask딱히 설정 x
+        TraceRayParameters::HitGroupOffset[RayType::Shadow],   //hit group index(instance개수에 따라 달라짐)
+        1,                                                     //shader table에서 geometry들 간의 간격(현재 각 instnance당 geometry는 1개라 딱히 의미없음)
+        TraceRayParameters::MissShaderOffset[RayType::Shadow], //miss shader table에서 사용할 miss shader의 index
+        rayDesc,                                               //ray 정보
+        shadowPayload                                          //payload
     );
     return shadowPayload.hit > 0.5f;//0.5f보다 크다는 의미는 miss shader가 호출되지 않아서 그림자 영역에 존재한다는 의미
 }
@@ -132,14 +138,14 @@ void MyRaygenShader()
     ray.TMax = 10000.0;
     RayPayload payload = { float4(0, 0, 0, 0) };
     TraceRay(
-        g_scene,        //acceleration structure
-        RAY_FLAG_NONE,  //딱히 플래그를 주지 않음
-        ~0,             //instance mask
-        0,              //hit group base index설정(공식:trace ray설정 index+ instance index + (geometry index * geometry stride)
-        1,              //geometry stride, 내 구현에서는 딱히 신경안써도됨
-        0,              //miss shader index, 0번은 기본 miss shader
-        ray,            //ray 정보
-        payload         //payload
+        g_scene,                                                    //acceleration structure
+        RAY_FLAG_NONE,                                              //딱히 플래그를 주지 않음
+        TraceRayParameters::InstanceMask,                           //instance mask
+        TraceRayParameters::HitGroupOffset[RayType::Radiance],       //hit group base index설정(공식:trace ray설정 index+ instance index + (geometry index * geometry stride)
+        1,                                                          //geometry stride, 내 구현에서는 딱히 신경안써도됨
+        TraceRayParameters::MissShaderOffset[RayType::Radiance],     //miss shader index, 0번은 기본 miss shader
+        ray,                                                        //ray 정보
+        payload                                                     //payload
     );
  
     g_renderTarget[DispatchRaysIndex().xy] = payload.color;

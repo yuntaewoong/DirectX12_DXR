@@ -9,7 +9,7 @@ namespace library
     {
         HRESULT hr = S_OK;
         UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-        UINT numShaderRecords = static_cast<UINT>(renderables.size()) * 2u;
+        UINT numShaderRecords = static_cast<UINT>(renderables.size()) * RayType::Count;
         UINT shaderRecordSize = shaderIdentifierSize + sizeof(LocalRootArgument);
         hr = ShaderTable::initialize(pDevice, numShaderRecords, shaderRecordSize);
         if (FAILED(hr))
@@ -18,26 +18,34 @@ namespace library
         }
         ComPtr<ID3D12StateObjectProperties> stateObjectProperties(nullptr);
         pStateObject.As(&stateObjectProperties);
-        void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyHitGroup");
-        void* shadowRayHitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyShadowRayHitGroup");
+
+        /*=====================================
+        현재 HitGroup SBT은
+        Renderable당 Radiance ray Hitgroup를 가리키는 Shader Record,
+        Shadow Ray Hit Group을 가리키는 Shader Record가 존재함.
+
+        구조는 아래와 같음
+        record[0] == Renderable[0] radiance hit group
+        record[1] == Renderable[1] radiance hit group
+        record[2] == Renderable[2] radiance hit group
+        record[3] == Renderable[0] shadow hit group
+        record[4] == Renderable[1] shadow hit group
+        record[5] == Renderable[2] shadow hit group
+        ======================================*/
         LocalRootArgument rootArgument = {
             .cb = {
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f)
             }
         };
-        Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize,&rootArgument,sizeof(rootArgument)));
-        rootArgument.cb.albedo = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
-        Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
-        rootArgument.cb.albedo = XMFLOAT4(0.f, 1.f, 1.f, 1.f);
-        Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
-
-
-
-        Push_back(ShaderRecord(shadowRayHitGroupIdentifier, shaderIdentifierSize));
-        Push_back(ShaderRecord(shadowRayHitGroupIdentifier, shaderIdentifierSize));
-        Push_back(ShaderRecord(shadowRayHitGroupIdentifier, shaderIdentifierSize));
-        
-
+        for (UINT i = 0; i < RayType::Count; i++)
+        {
+            for (UINT j = 0; j < renderables.size(); j++)
+            {
+                void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(HIT_GROUP_NAMES[i]);
+                rootArgument.cb.albedo = XMFLOAT4((FLOAT)(i+1)/RayType::Count, (FLOAT)(j+1)/renderables.size()*2.f, 0.f, 1.f);
+                Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
+            }
+        }
         return hr;
     }
 }
