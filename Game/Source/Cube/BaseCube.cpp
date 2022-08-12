@@ -3,9 +3,10 @@
 BaseCube::BaseCube(
 	_In_ XMVECTOR location,
 	_In_ XMVECTOR rotation,
-	_In_ XMVECTOR scale
+	_In_ XMVECTOR scale,
+	_In_ XMFLOAT4 color
 ) :
-	Renderable::Renderable(location,rotation,scale)
+	Renderable::Renderable(location,rotation,scale,color)
 {}
 HRESULT BaseCube::Initialize(_In_ ID3D12Device* pDevice)
 {

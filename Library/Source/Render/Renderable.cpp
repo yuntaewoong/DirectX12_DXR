@@ -5,11 +5,13 @@ namespace library
 	Renderable::Renderable(
         _In_ XMVECTOR location,
         _In_ XMVECTOR rotation,
-        _In_ XMVECTOR scale
+        _In_ XMVECTOR scale,
+        _In_ XMFLOAT4 color
     ) :
 		m_vertexBuffer(nullptr),
 		m_indexBuffer(nullptr),
-        m_world(XMMatrixIdentity())
+        m_world(XMMatrixIdentity()),
+        m_color(color)
 	{
         m_world = m_world *
             XMMatrixRotationRollPitchYawFromVector(rotation) *
@@ -28,6 +30,10 @@ namespace library
     XMMATRIX Renderable::GetWorldMatrix() const
     {
         return m_world;
+    }
+    XMFLOAT4 Renderable::GetColor() const
+    {
+        return m_color;
     }
     HRESULT Renderable::initialize(_In_ ID3D12Device* pDevice)
 	{

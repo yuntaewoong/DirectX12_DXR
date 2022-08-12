@@ -42,7 +42,8 @@ namespace library
             for (UINT j = 0; j < renderables.size(); j++)
             {
                 void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(HIT_GROUP_NAMES[i]);
-                rootArgument.cb.albedo = XMFLOAT4((FLOAT)(i+1)/RayType::Count, (FLOAT)(j+1)/renderables.size()*2.f, 0.f, 1.f);
+                //rootArgument.cb.albedo = XMFLOAT4((FLOAT)(i+1)/RayType::Count, (FLOAT)(j+1)/renderables.size()*2.f, 0.f, 1.f);
+                rootArgument.cb.albedo = renderables[j]->GetColor();
                 Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
             }
         }

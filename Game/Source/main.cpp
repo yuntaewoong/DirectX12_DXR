@@ -1,10 +1,11 @@
 
 
-#include "Common/Common.h"
+#include "Common\Common.h"
 #include "Scene\Scene.h"
-#include "Game/Game.h"
+#include "Game\Game.h"
 #include "Cube\BaseCube.h"
 #include "Light\RotatingLight.h"
+#include <DirectXColors.h>
 
 INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ INT nCmdShow)
 {
@@ -12,22 +13,30 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	UNREFERENCED_PARAMETER(nCmdShow);
 	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Shadow Ray테스트",1920,1080);
 	std::shared_ptr<library::Scene> scene = std::make_shared<library::Scene>();
+	
+	XMFLOAT4 color;
+	XMStoreFloat4(&color, Colors::Azure);
 	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(
 		XMVectorSet(0.5f, 0.6f, 2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
+		color
 	);
 
+	XMStoreFloat4(&color, Colors::Aquamarine);
 	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(
 		XMVectorSet(-0.5f, 0.6f, 2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
+		color
 	);
 
+	XMStoreFloat4(&color, Colors::Aqua);
 	std::shared_ptr<library::Renderable> plane = std::make_shared<BaseCube>(
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(5.f, 0.1f, 5.f, 1.f)
+		XMVectorSet(5.f, 0.1f, 5.f, 1.f),
+		color
 	);
 
 

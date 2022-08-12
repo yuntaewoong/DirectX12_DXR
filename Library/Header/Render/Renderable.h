@@ -9,7 +9,8 @@ namespace library
 		Renderable(
 			_In_ XMVECTOR location,
 			_In_ XMVECTOR rotation,
-			_In_ XMVECTOR scale
+			_In_ XMVECTOR scale,
+			_In_ XMFLOAT4 color
 		);
 		Renderable(const Renderable& other) = delete;
 		Renderable(Renderable&& other) = delete;
@@ -24,6 +25,7 @@ namespace library
 		virtual UINT GetNumVertices() const = 0;
 		virtual UINT GetNumIndices() const = 0;
 		XMMATRIX GetWorldMatrix() const;
+		XMFLOAT4 GetColor() const;
 	protected:
 		const virtual Vertex* GetVertices() const = 0;
 		const virtual Index* GetIndices() const = 0;
@@ -36,5 +38,6 @@ namespace library
 		ComPtr<ID3D12Resource> m_vertexBuffer;
 		ComPtr<ID3D12Resource> m_indexBuffer;
 		XMMATRIX m_world;
+		XMFLOAT4 m_color;
 	};
 }
