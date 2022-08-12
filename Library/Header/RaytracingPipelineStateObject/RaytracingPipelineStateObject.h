@@ -23,7 +23,8 @@ namespace library
         );
         ComPtr<ID3D12StateObject>& GetStateObject();
     private:
-        void createDXILSubobject();
+        void createDXILSubobjects();
+        void createDXILSubobject(_In_ const void* pShaderByteCode, _In_ SIZE_T shaderByteCodeSize, _In_ LPCWSTR entryPointName);
         void createHitGroupSubobject();
         void createShaderConfigSubobject();
         void createLocalRootSignatureSubobject(_In_ const ComPtr<ID3D12RootSignature>& pLocalRootSignature);

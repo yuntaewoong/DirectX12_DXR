@@ -1,5 +1,11 @@
 #include "RaytracingPipelineStateObject\RaytracingPipelineStateObject.h"
-#include "CompiledShaders\BasicRayTracing.hlsl.h"//컴파일된 Shader
+
+#include "CompiledShaders\RadianceRayGeneration.hlsl.h"
+#include "CompiledShaders\RadianceRayClosestHit.hlsl.h"
+#include "CompiledShaders\ShadowRayClosestHit.hlsl.h"
+#include "CompiledShaders\RadianceRayMiss.hlsl.h"
+#include "CompiledShaders\ShadowRayMiss.hlsl.h"
+
 
 namespace library
 {
@@ -14,7 +20,7 @@ namespace library
     )
     {
         HRESULT hr = S_OK;
-        createDXILSubobject();
+        createDXILSubobjects();
         createHitGroupSubobject();
         createShaderConfigSubobject();
         createLocalRootSignatureSubobject(pLocalRootSignature);
@@ -31,20 +37,20 @@ namespace library
     {
         return m_stateObject;
     }
-    void RaytracingPipelineStateObject::createDXILSubobject()
+    void RaytracingPipelineStateObject::createDXILSubobjects()
     {
-        CD3DX12_DXIL_LIBRARY_SUBOBJECT* lib = m_stateObjectDesc.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();//셰이더를 wrapping하는 DXIL라이브러리 서브오브젝트 생성
-        D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE(static_cast<const void*>(g_pBasicRayTracing), ARRAYSIZE(g_pBasicRayTracing));//빌드 타임 컴파일 셰이더 바이트코드 가져오기
-        lib->SetDXILLibrary(&libdxil);//DXIL-Raytacing Shader 연결
-        {
-            lib->DefineExport(RAY_GEN_SHADER_NAME);//ray generation shader진입점 정의
-
-            for (UINT i = 0; i < RayType::Count; i++)
-            {
-                lib->DefineExport(CLOSEST_HIT_SHADER_NAMES[i]); //closest hit shader진입점들 정의
-                lib->DefineExport(MISS_SHADER_NAMES[i]);        //miss shader shader진입점들 정의
-            }
-        }
+        createDXILSubobject(static_cast<const void*>(g_pRadianceRayGeneration), ARRAYSIZE(g_pRadianceRayGeneration), RAY_GEN_SHADER_NAME);
+        createDXILSubobject(static_cast<const void*>(g_pRadianceRayClosestHit), ARRAYSIZE(g_pRadianceRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Radiance]);
+        createDXILSubobject(static_cast<const void*>(g_pShadowRayClosestHit), ARRAYSIZE(g_pShadowRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Shadow]);
+        createDXILSubobject(static_cast<const void*>(g_pRadianceRayMiss), ARRAYSIZE(g_pRadianceRayMiss), MISS_SHADER_NAMES[RayType::Radiance]);
+        createDXILSubobject(static_cast<const void*>(g_pShadowRayMiss), ARRAYSIZE(g_pShadowRayMiss), MISS_SHADER_NAMES[RayType::Shadow]);
+    }
+    void RaytracingPipelineStateObject::createDXILSubobject(_In_ const void* pShaderByteCode, _In_ SIZE_T shaderByteCodeSize, _In_ LPCWSTR entryPointName)
+    {
+        CD3DX12_DXIL_LIBRARY_SUBOBJECT* lib = m_stateObjectDesc.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
+        D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE(pShaderByteCode, shaderByteCodeSize);
+        lib->SetDXILLibrary(&libdxil);
+        lib->DefineExport(entryPointName);
     }
     void RaytracingPipelineStateObject::createHitGroupSubobject()
     {

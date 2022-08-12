@@ -149,8 +149,15 @@
       <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
     </Lib>
     <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-      <ShaderType>Effect</ShaderType>
+      <ShaderModel>6.3</ShaderModel>
+      <ShaderType>Library</ShaderType>
+      <HeaderFileOutput>$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <EntryPointName />
+      <VariableName>g_p%(Filename)</VariableName>
+      <AssemblerOutput>AssemblyCode</AssemblerOutput>
+      <AssemblerOutputFile>$(OutDir)%(Filename)d.pdb</AssemblerOutputFile>
+      <DisableOptimizations>true</DisableOptimizations>
+      <ObjectFileOutput>$(OutDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -227,21 +234,25 @@
     <ClCompile Include="Source\Window\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shader\BasicRayTracing.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.3</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">g_p%(Filename)</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </EntryPointName>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RadianceRayClosestHit.hlsl">
+      <FileType>Document</FileType>
     </FxCompile>
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\ShadowRayClosestHit.hlsl">
+      <FileType>Document</FileType>
+    </FxCompile>
+    <FxCompile Include="Shader\MissShader\RadianceRayMiss.hlsl">
+      <FileType>Document</FileType>
+    </FxCompile>
+    <FxCompile Include="Shader\MissShader\ShadowRayMiss.hlsl">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)Shader\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FileType>Document</FileType>
+    </FxCompile>
+    <FxCompile Include="Shader\RayGenerationShader\RadianceRayGeneration.hlsl">
+      <FileType>Document</FileType>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Include\HLSLCommon.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

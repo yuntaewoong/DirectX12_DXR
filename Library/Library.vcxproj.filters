@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Header Files\Window">
       <UniqueIdentifier>{540fdd38-c525-47f2-bde0-f8065bc3a1b3}</UniqueIdentifier>
     </Filter>
@@ -81,6 +77,18 @@
     </Filter>
     <Filter Include="Source Files\RaytracingPipelineStateObject">
       <UniqueIdentifier>{e8060c37-ddaf-482d-bf29-92da75fb5825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\RayGenerationShader">
+      <UniqueIdentifier>{72ab5eab-b683-4dcb-8bb7-b6c1e54a8f72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HitGroupShader">
+      <UniqueIdentifier>{7ff694f7-6333-4173-a002-3d45280b9dfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\MissShader">
+      <UniqueIdentifier>{44d2f074-0b3b-4ba7-a114-8b63e1cf8951}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HitGroupShader\ClosestHitShader">
+      <UniqueIdentifier>{dcf80f3d-f35b-40a4-b774-3fd073362c87}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -220,8 +228,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shader\BasicRayTracing.hlsl">
-      <Filter>Shader</Filter>
+    <FxCompile Include="Shader\RayGenerationShader\RadianceRayGeneration.hlsl">
+      <Filter>Shader\RayGenerationShader</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RadianceRayClosestHit.hlsl">
+      <Filter>Shader\HitGroupShader\ClosestHitShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\ShadowRayClosestHit.hlsl">
+      <Filter>Shader\HitGroupShader\ClosestHitShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MissShader\RadianceRayMiss.hlsl">
+      <Filter>Shader\MissShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MissShader\ShadowRayMiss.hlsl">
+      <Filter>Shader\MissShader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Include\HLSLCommon.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
   </ItemGroup>
 </Project>
