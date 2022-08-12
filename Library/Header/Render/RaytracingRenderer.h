@@ -11,6 +11,7 @@
 #include "ShaderTable\RayGenerationShaderTable.h"
 #include "RootSignature\GlobalRootSignature.h"
 #include "RootSignature\LocalRootSignature.h"
+#include "RaytracingPipelineStateObject\RaytracingPipelineStateObject.h"
 
 namespace library
 {
@@ -38,7 +39,9 @@ namespace library
         // DXR파이프라인 관련
         ComPtr<ID3D12Device5> m_dxrDevice;
         ComPtr<ID3D12GraphicsCommandList4> m_dxrCommandList;
-        ComPtr<ID3D12StateObject> m_dxrStateObject;
+
+        // Pipeline State Object
+        RaytracingPipelineStateObject m_raytracingPipelineStateObject;
 
         //ray tracing전용 root signature
         GlobalRootSignature m_globalRootSignature;

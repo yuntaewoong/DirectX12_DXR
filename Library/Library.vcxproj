@@ -187,6 +187,7 @@
     <ClInclude Include="Header\Common\d3dx12.h" />
     <ClInclude Include="Header\Game\Game.h" />
     <ClInclude Include="Header\Light\PointLight.h" />
+    <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h" />
     <ClInclude Include="Header\Render\Renderable.h" />
     <ClInclude Include="Header\Render\RaytracingRenderer.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Source\Camera\Camera.cpp" />
     <ClCompile Include="Source\Game\Game.cpp" />
     <ClCompile Include="Source\Light\PointLight.cpp" />
+    <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp" />
     <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp" />
     <ClCompile Include="Source\Render\Renderable.cpp" />
     <ClCompile Include="Source\Render\RaytracingRenderer.cpp" />

@@ -1,7 +1,5 @@
 #include "Render\RaytracingRenderer.h"
 #include "ShaderTable\ShaderTable.h"
-
-#include "CompiledShaders\BasicRayTracing.hlsl.h"
 namespace library
 {
     RaytracingRenderer::RaytracingRenderer() :
@@ -10,7 +8,7 @@ namespace library
         m_camera(Camera(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
-        m_dxrStateObject(nullptr),
+        m_raytracingPipelineStateObject(),
         m_globalRootSignature(),
         m_localRootSignature(),
         m_topLevelAccelerationStructure(),
@@ -161,6 +159,7 @@ namespace library
             m_indexBufferGpuDescriptorHandle
         );//vertex,index버퍼 바인딩
 
+        
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
             .RayGenerationShaderRecord = {
                 .StartAddress = m_rayGenShaderTable.GetShaderTableGPUVirtualAddress(),
@@ -176,12 +175,11 @@ namespace library
                 .SizeInBytes = m_hitGroupShaderTable.GetShaderTableSizeInBytes(),
                 .StrideInBytes = m_hitGroupShaderTable.GetShaderTableStrideInBytes()
             },
-            .Width = 1920,
-            .Height = 1080,
+            .Width = m_renderingResources.GetWidth(),
+            .Height = m_renderingResources.GetHeight(),
             .Depth = 1
         };
-        auto aa = m_hitGroupShaderTable.GetShaderRecordSize();
-        m_dxrCommandList->SetPipelineState1(m_dxrStateObject.Get());//열심히 만든 ray tracing pipeline바인딩
+        m_dxrCommandList->SetPipelineState1(m_raytracingPipelineStateObject.GetStateObject().Get());//열심히 만든 ray tracing pipeline바인딩
         m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
         
         ComPtr<ID3D12Resource>& currentRenderTarget = m_renderingResources.GetCurrentRenderTarget();
@@ -244,53 +242,12 @@ namespace library
     }
     HRESULT RaytracingRenderer::createRaytracingPipelineStateObject()
     {
-        CD3DX12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };//내가 만들 state object는 레이트레이싱 파이프라인
-        //DXIL subobject
-        CD3DX12_DXIL_LIBRARY_SUBOBJECT* lib = raytracingPipeline.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();//셰이더를 wrapping하는 DXIL라이브러리 서브오브젝트 생성
-        D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE(static_cast<const void*>(g_pBasicRayTracing), ARRAYSIZE(g_pBasicRayTracing));//빌드 타임 컴파일 셰이더 바이트코드 가져오기
-        lib->SetDXILLibrary(&libdxil);//DXIL-Raytacing Shader 연결
-        {
-            lib->DefineExport(RAY_GEN_SHADER_NAME);//ray generation shader진입점 정의
-
-            for (UINT i = 0; i < RayType::Count; i++)
-            {
-                lib->DefineExport(CLOSEST_HIT_SHADER_NAMES[i]); //closest hit shader진입점들 정의
-                lib->DefineExport(MISS_SHADER_NAMES[i]);        //miss shader shader진입점들 정의
-            }
-        }
-        for (UINT i = 0; i < RayType::Count; i++)
-        {
-            CD3DX12_HIT_GROUP_SUBOBJECT* hitGroup = raytracingPipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-            hitGroup->SetClosestHitShaderImport(CLOSEST_HIT_SHADER_NAMES[i]);//히트그룹과 연결될 셰이더진입점
-            hitGroup->SetHitGroupExport(HIT_GROUP_NAMES[i]);                 //히트 그룹 수출
-            hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);       //이 히트그룹은 삼각형
-        }
-        {//Shader Config서브오브젝트 생성
-            CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT* shaderConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-            UINT payloadSize = max(sizeof(RayPayload), sizeof(ShadowRayPayload));   //  둘중 큰값을 할당
-            UINT attributeSize = sizeof(XMFLOAT2); //barycentrics
-            shaderConfig->Config(payloadSize, attributeSize);// payload, attribute사이즈 정의(셰이더에서 인자로 사용됨)
-        }
-        
-        {//미리 만들어둔 local root signature로 서브오브젝트 만들어 파이프라인에 적용
-            CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT* localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-            localRootSignature->SetRootSignature(m_localRootSignature.GetRootSignature().Get());
-            CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT* rootSignatureAssociation = raytracingPipeline.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-            rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
-            rootSignatureAssociation->AddExport(HIT_GROUP_NAMES[RayType::Radiance]);//Radiance Hit Group에서 사용하겠다
-        }
-
-        //모든 Shader에서 사용할 gloabl root signature서브 오브젝트 적용
-        CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT* globalRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();// 글로벌 루트시그니처 서브오브젝트생성
-        globalRootSignature->SetRootSignature(m_globalRootSignature.GetRootSignature().Get());
-        //파이프라인 옵션
-        CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT* pipelineConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();// 파이프라인 config 서브오브젝트 생성 
-        UINT maxRecursionDepth = MAX_RECURSION_DEPTH;//2번만 recursion 하겠다(1: 기본 shading용, 2:shadow ray용)
-        pipelineConfig->Config(maxRecursionDepth);//적용
-
-        //재료가지고 최종 StateObejct생성
         HRESULT hr = S_OK;
-        hr = m_dxrDevice->CreateStateObject(raytracingPipeline, IID_PPV_ARGS(&m_dxrStateObject));//레이트레이싱 커스텀 파이프라인 생성
+        hr = m_raytracingPipelineStateObject.Initialize(
+            m_dxrDevice,
+            m_localRootSignature.GetRootSignature(),
+            m_globalRootSignature.GetRootSignature()
+        );
         if (FAILED(hr))
         {
             return hr;
@@ -358,17 +315,21 @@ namespace library
     {
         HRESULT hr = S_OK;
         ComPtr<ID3D12Device> pDevice = m_renderingResources.GetDevice();
-        hr = m_rayGenShaderTable.Initialize(pDevice,m_dxrStateObject);
+        hr = m_rayGenShaderTable.Initialize(pDevice,m_raytracingPipelineStateObject.GetStateObject());
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = m_missShaderTable.Initialize(pDevice,m_dxrStateObject);
+        hr = m_missShaderTable.Initialize(pDevice, m_raytracingPipelineStateObject.GetStateObject());
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = m_hitGroupShaderTable.Initialize(pDevice,m_dxrStateObject,m_scene->GetRenderables());//hit group table을 초기화 하기 위해서는 renderable들의 정보가 필요
+        hr = m_hitGroupShaderTable.Initialize(
+            pDevice,
+            m_raytracingPipelineStateObject.GetStateObject(),
+            m_scene->GetRenderables()
+        );//hit group table을 초기화 하기 위해서는 renderable들의 정보가 필요
         if (FAILED(hr))
         {
             return hr;

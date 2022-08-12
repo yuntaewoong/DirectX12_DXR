@@ -28,23 +28,14 @@
     <Filter Include="Source Files\Game">
       <UniqueIdentifier>{724b0101-5678-4606-ba64-396daacd8702}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Render">
-      <UniqueIdentifier>{21c86803-102c-4efe-a649-2578a3ec67de}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Render">
       <UniqueIdentifier>{60c56767-982b-455d-b5f9-6a5d897f26e6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader">
       <UniqueIdentifier>{0b809e7b-2e1a-4f3f-a48d-e506d61e0c97}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ShaderTable">
-      <UniqueIdentifier>{62ebf4cd-361a-414a-8a91-74baa1d68fa3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\ShaderTable">
       <UniqueIdentifier>{78193f6f-d303-4437-9de9-7dbe0daaaac9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\AccelerationStructure">
-      <UniqueIdentifier>{e9066c21-7d93-41c1-8e07-5cc49d03d910}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\AccelerationStructure">
       <UniqueIdentifier>{e746fb4d-fa83-4592-848d-a3144934f233}</UniqueIdentifier>
@@ -67,14 +58,29 @@
     <Filter Include="Source Files\Light">
       <UniqueIdentifier>{5322849c-de40-4973-a41c-728f896e4af0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\RootSignature">
-      <UniqueIdentifier>{5a4a4316-be19-437a-83e3-43c6fdcb44eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\RootSignature">
       <UniqueIdentifier>{56a52eab-4c1e-48ad-9ab4-b54d749cb5ca}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader\Include">
       <UniqueIdentifier>{c955895e-d541-4252-816d-d9bfd8965871}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render">
+      <UniqueIdentifier>{21c86803-102c-4efe-a649-2578a3ec67de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\AccelerationStructure">
+      <UniqueIdentifier>{e9066c21-7d93-41c1-8e07-5cc49d03d910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RootSignature">
+      <UniqueIdentifier>{5a4a4316-be19-437a-83e3-43c6fdcb44eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ShaderTable">
+      <UniqueIdentifier>{62ebf4cd-361a-414a-8a91-74baa1d68fa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RaytracingPipelineStateObject">
+      <UniqueIdentifier>{c811678f-da05-4abc-8edf-dc79880affb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RaytracingPipelineStateObject">
+      <UniqueIdentifier>{e8060c37-ddaf-482d-bf29-92da75fb5825}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +153,9 @@
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
       <Filter>Shader\Include</Filter>
     </ClInclude>
+    <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h">
+      <Filter>Header Files\RaytracingPipelineStateObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -205,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\MissShaderTable.cpp">
       <Filter>Source Files\ShaderTable</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp">
+      <Filter>Source Files\RaytracingPipelineStateObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
