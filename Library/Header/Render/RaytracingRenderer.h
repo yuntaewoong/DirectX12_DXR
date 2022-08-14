@@ -12,6 +12,7 @@
 #include "RootSignature\GlobalRootSignature.h"
 #include "RootSignature\LocalRootSignature.h"
 #include "RaytracingPipelineStateObject\RaytracingPipelineStateObject.h"
+#include "Texture\Texture.h"
 
 namespace library
 {
@@ -76,6 +77,7 @@ namespace library
         ComPtr<ID3D12Resource> m_raytracingOutput;
         D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputResourceUAVGpuDescriptor;
         UINT m_raytracingOutputResourceUAVDescriptorHeapIndex;
+
 
 	};
 }

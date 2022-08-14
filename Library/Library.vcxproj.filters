@@ -90,6 +90,15 @@
     <Filter Include="Shader\HitGroupShader\ClosestHitShader">
       <UniqueIdentifier>{dcf80f3d-f35b-40a4-b774-3fd073362c87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Texture">
+      <UniqueIdentifier>{d611c84f-8748-4f7c-8a92-697bcc9e50df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Texture">
+      <UniqueIdentifier>{c908750f-be0d-46c8-8ce8-f838bb97d79b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ThirdPartyHeader">
+      <UniqueIdentifier>{ba8800ff-c2ab-4886-8dda-8044f1c8d325}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -164,6 +173,24 @@
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h">
       <Filter>Header Files\RaytracingPipelineStateObject</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Texture\Texture.h">
+      <Filter>Header Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ThirdPartyHeader\DDSTextureLoader.h">
+      <Filter>Header Files\ThirdPartyHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ThirdPartyHeader\GraphicsMemory.h">
+      <Filter>Header Files\ThirdPartyHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ThirdPartyHeader\ResourceUploadBatch.h">
+      <Filter>Header Files\ThirdPartyHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ThirdPartyHeader\WICTextureLoader.h">
+      <Filter>Header Files\ThirdPartyHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Texture\Material.h">
+      <Filter>Header Files\Texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -225,6 +252,12 @@
     </ClCompile>
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp">
       <Filter>Source Files\RaytracingPipelineStateObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Texture\Texture.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Texture\Material.cpp">
+      <Filter>Source Files\Texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

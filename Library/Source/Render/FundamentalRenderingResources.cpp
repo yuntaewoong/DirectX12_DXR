@@ -181,6 +181,10 @@ namespace library
     {
         return m_renderTargets[m_frameIndex];
     }
+    ComPtr<ID3D12CommandQueue>& FundamentalRenderingResources::GetCommandQueue()
+    {
+        return m_commandQueue;
+    }
     UINT FundamentalRenderingResources::GetWidth() const
     {
         return m_width;

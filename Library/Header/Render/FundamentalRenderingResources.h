@@ -28,6 +28,7 @@ namespace library
 		ComPtr<ID3D12Device>& GetDevice();
 		ComPtr<ID3D12GraphicsCommandList>& GetCommandList();
 		ComPtr<ID3D12Resource>& GetCurrentRenderTarget();
+		ComPtr<ID3D12CommandQueue>& GetCommandQueue();
 		UINT GetWidth() const;
 		UINT GetHeight() const;
 	private:

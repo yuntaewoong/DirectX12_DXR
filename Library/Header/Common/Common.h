@@ -15,6 +15,7 @@
 #include "d3dx12.h"
 #include <string>
 #include <algorithm>
+#include <filesystem>
 #include "DataTypeSharedBothHLSLAndCPP.h"
 
 using namespace Microsoft::WRL;

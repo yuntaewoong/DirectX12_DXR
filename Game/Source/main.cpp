@@ -5,6 +5,7 @@
 #include "Game\Game.h"
 #include "Cube\BaseCube.h"
 #include "Light\RotatingLight.h"
+#include "Texture\Texture.h"
 #include <DirectXColors.h>
 
 INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ INT nCmdShow)
@@ -47,6 +48,10 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	scene->AddRenderable(plane);
 	scene->AddLight(light1);
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
+
+
+
+
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
 	{
 		return 0;

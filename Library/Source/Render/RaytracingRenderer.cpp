@@ -79,7 +79,11 @@ namespace library
         {
             return hr;
         }
-
+        hr = m_textureTest->Initialize(m_renderingResources.GetDevice(), m_renderingResources.GetCommandQueue());
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         hr = m_renderingResources.WaitForGPU();
         if (FAILED(hr))
         {

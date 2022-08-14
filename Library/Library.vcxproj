@@ -146,7 +146,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTK12.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\ThirdParty\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
       <ShaderModel>6.3</ShaderModel>
@@ -207,6 +208,12 @@
     <ClInclude Include="Header\ShaderTable\RayGenerationShaderTable.h" />
     <ClInclude Include="Header\ShaderTable\ShaderRecord.h" />
     <ClInclude Include="Header\ShaderTable\ShaderTable.h" />
+    <ClInclude Include="Header\Texture\Material.h" />
+    <ClInclude Include="Header\Texture\Texture.h" />
+    <ClInclude Include="Header\ThirdPartyHeader\DDSTextureLoader.h" />
+    <ClInclude Include="Header\ThirdPartyHeader\GraphicsMemory.h" />
+    <ClInclude Include="Header\ThirdPartyHeader\ResourceUploadBatch.h" />
+    <ClInclude Include="Header\ThirdPartyHeader\WICTextureLoader.h" />
     <ClInclude Include="Header\Window\BaseWindow.h" />
     <ClInclude Include="Header\Window\MainWindow.h" />
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h" />
@@ -231,6 +238,8 @@
     <ClCompile Include="Source\ShaderTable\RayGenerationShaderTable.cpp" />
     <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp" />
     <ClCompile Include="Source\ShaderTable\ShaderTable.cpp" />
+    <ClCompile Include="Source\Texture\Material.cpp" />
+    <ClCompile Include="Source\Texture\Texture.cpp" />
     <ClCompile Include="Source\Window\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
