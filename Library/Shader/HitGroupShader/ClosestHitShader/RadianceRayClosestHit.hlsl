@@ -1,12 +1,14 @@
 #define HLSL
 #include "../../Include/HLSLCommon.hlsli"
 
+
+
 /*================================================================================
     l_(variable_name) ===> local root signature로 정의되는 Resource(매 프레임 Shader Table 각각 알맞게 세팅)
 ================================================================================*/
+StructuredBuffer<Vertex> l_vertices : register(t2, space0);
+ByteAddressBuffer l_indices : register(t3, space0);
 ConstantBuffer<CubeConstantBuffer> l_cubeCB : register(b1);
-
-
 
 //byteaddress buffer에서 3개의 index를 가져오는 함수
 uint3 Load3x16BitIndices(uint offsetBytes)
@@ -17,7 +19,7 @@ uint3 Load3x16BitIndices(uint offsetBytes)
     //하지만 index데이터는 2바이트(16비트) * 3 = 6바이트(48비트)임
     //인덱스 데이터 3개를 얻기위해 64비트를 load한 후에 48비트를 취하는 방식을 사용
     const uint dwordAlignedOffset = offsetBytes & ~3;
-    const uint2 four16BitIndices = g_indices.Load2(dwordAlignedOffset);
+    const uint2 four16BitIndices = l_indices.Load2(dwordAlignedOffset);
  
     
     if (dwordAlignedOffset == offsetBytes)
@@ -75,8 +77,8 @@ bool IsInShadow(in float3 hitPosition, in float3 lightPosition)
         g_scene, //acceleration structure
         RAY_FLAG_SKIP_CLOSEST_HIT_SHADER, //closest hit shader무시(속도 향상)(나중에 필요해질때는 무시 안하게될듯)
         TraceRayParameters::InstanceMask, //instance mask딱히 설정 x
-        TraceRayParameters::HitGroupOffset[RayType::Shadow], //hit group index(instance개수에 따라 달라짐)
-        1, //shader table에서 geometry들 간의 간격(현재 각 instnance당 geometry는 1개라 딱히 의미없음)
+        TraceRayParameters::HitGroupOffset[RayType::Shadow], //hit group index
+        TraceRayParameters::GeometryStride, //shader table에서 geometry들 간의 간격
         TraceRayParameters::MissShaderOffset[RayType::Shadow], //miss shader table에서 사용할 miss shader의 index
         rayDesc, //ray 정보
         shadowPayload //payload
@@ -105,9 +107,9 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     //index값으로 vertex normal값 가져오기
     float3 vertexNormals[3] =
     {
-        g_vertices[indices[0]].normal,
-        g_vertices[indices[1]].normal,
-        g_vertices[indices[2]].normal 
+        l_vertices[indices[0]].normal,
+        l_vertices[indices[1]].normal,
+        l_vertices[indices[2]].normal 
     };
  
     float3 triangleNormal = HitAttribute(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기

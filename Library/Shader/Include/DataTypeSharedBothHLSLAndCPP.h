@@ -66,7 +66,7 @@ namespace TraceRayParameters
     static const UINT InstanceMask = ~0; 
     static const UINT HitGroupOffset[RayType::Count] = {
         0, // Radiance ray
-        3  // Shadow ray Hit Group시작 인덱스, Renderable개수에 따라 다름
+        1  // Shadow ray
     };
     static const UINT GeometryStride = RayType::Count;
     static const UINT MissShaderOffset[RayType::Count] = {

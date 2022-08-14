@@ -30,9 +30,20 @@ namespace library
         void SetMainScene(_In_ const std::shared_ptr<Scene>& pScene);
         void Render();
         void Update(_In_ FLOAT deltaTime);
-	private:
-        FundamentalRenderingResources m_renderingResources;
+    private:
+        HRESULT populateCommandList();
 
+        //이하 함수는 ray tacing 관련함수
+
+        HRESULT createRaytracingInterfaces();
+        HRESULT createRaytracingRootSignature();
+        HRESULT createRaytracingPipelineStateObject();
+        HRESULT createDescriptorHeap();
+        HRESULT createAccelerationStructure();
+        HRESULT createShaderTable();
+        HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
+    private:
+        FundamentalRenderingResources m_renderingResources;
         std::shared_ptr<Scene> m_scene;
         Camera m_camera;
 
@@ -54,9 +65,7 @@ namespace library
         //Ray tracing Shader에서 접근하는 UAV에 대한 descriptor heap
         ComPtr<ID3D12DescriptorHeap> m_descriptorHeap;
         UINT m_descriptorsAllocated;
-        UINT m_uavHeapDescriptorSize;
-
-        
+        UINT m_descriptorSize;
 
         //ray tracing Shader Table자원
         MissShaderTable m_missShaderTable;
@@ -68,24 +77,5 @@ namespace library
         D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputResourceUAVGpuDescriptor;
         UINT m_raytracingOutputResourceUAVDescriptorHeapIndex;
 
-
-        D3D12_CPU_DESCRIPTOR_HANDLE m_indexBufferCpuDescriptorHandle;
-        D3D12_GPU_DESCRIPTOR_HANDLE m_indexBufferGpuDescriptorHandle;
-        D3D12_CPU_DESCRIPTOR_HANDLE m_vertexBufferCpuDescriptorHandle;
-        D3D12_GPU_DESCRIPTOR_HANDLE m_vertexBufferGpuDescriptorHandle;
-        
-    private:
-        HRESULT populateCommandList();
-
-        //이하 함수는 ray tacing 관련함수
-        
-        HRESULT createRaytracingInterfaces();
-        HRESULT createRaytracingRootSignature();
-        HRESULT createRaytracingPipelineStateObject();
-        HRESULT createUAVDescriptorHeap();
-        HRESULT createAccelerationStructure();
-        HRESULT createShaderTable();
-        HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
-        UINT createBufferSRV(_In_ ID3D12Resource* buffer,_Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize);
 	};
 }

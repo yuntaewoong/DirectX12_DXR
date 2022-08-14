@@ -51,18 +51,21 @@ namespace library
         OutputViewSlot = 0,
         AccelerationStructureSlot,
         CameraConstantSlot,
-        LightConstantSlot,
-        VertexBuffersSlot
+        LightConstantSlot
     };
-    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 5;
+    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 4;
     enum class ELocalRootSignatureSlot
     {
         CubeConstantSlot = 0,
+        VertexBufferSlot = 1,
+        IndexBufferSlot = 2
     };
-    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 1;
+    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 3;
     struct LocalRootArgument
     {
         CubeConstantBuffer cb;
+        D3D12_GPU_VIRTUAL_ADDRESS vbGPUAddress;
+        D3D12_GPU_VIRTUAL_ADDRESS ibGPUAddress;
     };
 
 

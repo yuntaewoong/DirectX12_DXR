@@ -15,17 +15,13 @@ namespace library
         m_bottomLevelAccelerationStructures(std::vector<std::unique_ptr<BottomLevelAccelerationStructure>>()),
         m_descriptorHeap(nullptr),
         m_descriptorsAllocated(0u),
-        m_uavHeapDescriptorSize(0u),
+        m_descriptorSize(0u),
         m_missShaderTable(),
         m_hitGroupShaderTable(),
         m_rayGenShaderTable(),
         m_raytracingOutput(nullptr),
         m_raytracingOutputResourceUAVGpuDescriptor(),
-        m_raytracingOutputResourceUAVDescriptorHeapIndex(UINT_MAX),
-        m_indexBufferCpuDescriptorHandle(),
-        m_indexBufferGpuDescriptorHandle(),
-        m_vertexBufferCpuDescriptorHandle(),
-        m_vertexBufferGpuDescriptorHandle()
+        m_raytracingOutputResourceUAVDescriptorHeapIndex(UINT_MAX)
     {}
 	HRESULT RaytracingRenderer::Initialize(_In_ HWND hWnd)
 	{
@@ -57,7 +53,7 @@ namespace library
         {
             return hr;
         }
-        hr = createUAVDescriptorHeap();//ray tracing결과 그릴 UAV텍스처에 대한 descriptor heap만들기
+        hr = createDescriptorHeap();//ray tracing결과 그릴 UAV텍스처에 대한 descriptor heap만들기
         if (FAILED(hr))
         {
             return hr;
@@ -71,12 +67,6 @@ namespace library
         if (FAILED(hr))
         {
             return hr;
-        }
-        {//SRV생성
-            const std::shared_ptr<Renderable>& tempRenderable = m_scene->GetRenderables()[0];//테스트용 렌더러블 레퍼런스 1개 가져오기
-            UINT a = createBufferSRV(tempRenderable->GetIndexBuffer().Get(), &m_indexBufferCpuDescriptorHandle, &m_indexBufferGpuDescriptorHandle, tempRenderable->GetNumIndices()/2, 0);
-            UINT b = createBufferSRV(tempRenderable->GetVertexBuffer().Get(), &m_vertexBufferCpuDescriptorHandle, &m_vertexBufferGpuDescriptorHandle, tempRenderable->GetNumVertices(), sizeof(Vertex));
-            
         }
         hr = createRaytacingOutputResource(hWnd);//output UAV만들기
         if (FAILED(hr))
@@ -154,10 +144,6 @@ namespace library
             m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
         );//Light CB바인딩
 
-        pCommandList->SetComputeRootDescriptorTable(
-            static_cast<UINT>(EGlobalRootSignatureSlot::VertexBuffersSlot),
-            m_indexBufferGpuDescriptorHandle
-        );//vertex,index버퍼 바인딩
 
         
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
@@ -254,7 +240,7 @@ namespace library
         }
         return hr;
     }
-    HRESULT RaytracingRenderer::createUAVDescriptorHeap()
+    HRESULT RaytracingRenderer::createDescriptorHeap()
     {
         HRESULT hr = S_OK;
         D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {
@@ -268,7 +254,7 @@ namespace library
         {
             return hr;
         }
-        m_uavHeapDescriptorSize = m_renderingResources.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);//cpu별로 상이한 descriptor사이즈 가져오기
+        m_descriptorSize = m_renderingResources.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);//cpu별로 상이한 descriptor사이즈 가져오기
         return hr;
     }
     HRESULT RaytracingRenderer::createAccelerationStructure()
@@ -368,43 +354,13 @@ namespace library
         D3D12_CPU_DESCRIPTOR_HANDLE uavDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
             descriptorHeapCpuBase, 
             m_raytracingOutputResourceUAVDescriptorHeapIndex,
-            m_uavHeapDescriptorSize
+            m_descriptorSize
         );
         D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {
             .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D
         };
         m_renderingResources.GetDevice()->CreateUnorderedAccessView(m_raytracingOutput.Get(), nullptr, &UAVDesc, uavDescriptorHandle);
-        m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_uavHeapDescriptorSize);
+        m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_descriptorSize);
         return hr;
     }
-    UINT RaytracingRenderer::createBufferSRV(_In_ ID3D12Resource* buffer, _Out_ D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle, _Out_ D3D12_GPU_DESCRIPTOR_HANDLE* gpuDescriptorHandle, _In_ UINT numElements, _In_ UINT elementSize)
-    {
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Buffer.NumElements = numElements;
-        if (elementSize == 0)
-        {
-            srvDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-            srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
-            srvDesc.Buffer.StructureByteStride = 0;
-        }
-        else
-        {
-            srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-            srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-            srvDesc.Buffer.StructureByteStride = elementSize;
-        }
-        UINT descriptorIndex = UINT_MAX;
-        auto descriptorHeapCpuBase = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-        if (descriptorIndex >= m_descriptorHeap->GetDesc().NumDescriptors)
-        {
-            descriptorIndex = m_descriptorsAllocated++;
-        }
-        *cpuDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptorHeapCpuBase, descriptorIndex, m_uavHeapDescriptorSize);
-        m_renderingResources.GetDevice()->CreateShaderResourceView(buffer, &srvDesc, *cpuDescriptorHandle);
-        *gpuDescriptorHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), descriptorIndex, m_uavHeapDescriptorSize);
-        return descriptorIndex;
-    }
-
 }

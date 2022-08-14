@@ -38,8 +38,8 @@ void MyRaygenShader()
         RAY_FLAG_NONE, //딱히 플래그를 주지 않음
         TraceRayParameters::InstanceMask, //instance mask
         TraceRayParameters::HitGroupOffset[RayType::Radiance], //hit group base index설정(공식:trace ray설정 index+ instance index + (geometry index * geometry stride)
-        1, //geometry stride, 내 구현에서는 딱히 신경안써도됨
-        TraceRayParameters::MissShaderOffset[RayType::Radiance], //miss shader index, 0번은 기본 miss shader
+        TraceRayParameters::GeometryStride, //geometry stride
+        TraceRayParameters::MissShaderOffset[RayType::Radiance], //miss shader index
         ray, //ray 정보
         payload //payload
     );

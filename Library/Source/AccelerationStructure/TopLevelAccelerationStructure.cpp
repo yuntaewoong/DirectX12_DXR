@@ -58,7 +58,7 @@ namespace library
                 },
                 .InstanceID = static_cast<UINT>(i),
                 .InstanceMask = 1,
-                .InstanceContributionToHitGroupIndex = static_cast<UINT>(i),
+                .InstanceContributionToHitGroupIndex = static_cast<UINT>(i) * RayType::Count,//일단 각 Renderable에는 Geometry가 1개만 있다고 생각(추후 모델 추가할때 변경)
                 .AccelerationStructure = m_bottomLevelAccelerationStructures[i]->GetAccelerationStructure   ()->GetGPUVirtualAddress()
             };
         }

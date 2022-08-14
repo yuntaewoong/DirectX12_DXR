@@ -26,24 +26,27 @@ namespace library
 
         구조는 아래와 같음
         record[0] == Renderable[0] radiance hit group
-        record[1] == Renderable[1] radiance hit group
-        record[2] == Renderable[2] radiance hit group
-        record[3] == Renderable[0] shadow hit group
-        record[4] == Renderable[1] shadow hit group
+        record[1] == Renderable[0] shadow hit group
+        record[2] == Renderable[1] radiance hit group
+        record[3] == Renderable[1] shadow hit group
+        record[4] == Renderable[2] radiance hit group
         record[5] == Renderable[2] shadow hit group
         ======================================*/
         LocalRootArgument rootArgument = {
             .cb = {
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f)
-            }
+            },
+            .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
+            .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS()
         };
-        for (UINT i = 0; i < RayType::Count; i++)
+        for (UINT i = 0; i < renderables.size(); i++)
         {
-            for (UINT j = 0; j < renderables.size(); j++)
+            for (UINT j = 0; j < RayType::Count; j++)
             {
-                void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(HIT_GROUP_NAMES[i]);
-                //rootArgument.cb.albedo = XMFLOAT4((FLOAT)(i+1)/RayType::Count, (FLOAT)(j+1)/renderables.size()*2.f, 0.f, 1.f);
-                rootArgument.cb.albedo = renderables[j]->GetColor();
+                void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(HIT_GROUP_NAMES[j]);
+                rootArgument.cb.albedo = renderables[i]->GetColor();
+                rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
+                rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
                 Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
             }
         }
