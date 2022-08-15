@@ -6,9 +6,14 @@
 /*================================================================================
     l_(variable_name) ===> local root signature로 정의되는 Resource(매 프레임 Shader Table 각각 알맞게 세팅)
 ================================================================================*/
+//SRV
 StructuredBuffer<Vertex> l_vertices : register(t2, space0);
 ByteAddressBuffer l_indices : register(t3, space0);
+Texture2D l_diffuseTexture : register(t4);
+//CBV
 ConstantBuffer<CubeConstantBuffer> l_cubeCB : register(b1);
+//Static Sampler
+SamplerState l_sampler : register(s0,space0);
 
 //byteaddress buffer에서 3개의 index를 가져오는 함수
 uint3 Load3x16BitIndices(uint offsetBytes)
@@ -46,8 +51,15 @@ float3 HitWorldPosition()
     //WorldRayDirection() => hit한 Ray의 direction
 }
 
-//보간할 vertex값, hit지점의 barycentric값을 넣어주면 보간 결과를 리턴
-float3 HitAttribute(float3 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr)
+//보간할 vertex값, hit지점의 barycentric값을 넣어주면 보간 결과를 리턴(Float3버전)
+float3 HitAttributeFloat3(float3 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr)
+{
+    return vertexAttribute[0] +
+        attr.barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
+        attr.barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
+}
+//보간할 vertex값, hit지점의 barycentric값을 넣어주면 보간 결과를 리턴(Float2버전)
+float2 HitAttributeFloat2(float2 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr)
 {
     return vertexAttribute[0] +
         attr.barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
@@ -55,11 +67,12 @@ float3 HitAttribute(float3 vertexAttribute[3], BuiltInTriangleIntersectionAttrib
 }
 
 // Diffuse계산
-float4 CalculateDiffuseLighting(float3 hitPosition, float3 normal)
+float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
 {
     float3 pixelToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
     float nDotL = max(0.0f, dot(pixelToLight, normal));
-    return l_cubeCB.albedo * nDotL;
+    //float3 diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv,0).xyz;//Shadel Model lib 6_3에서는 Sample함수 컴파일에러남
+    return l_cubeCB.albedo * nDotL;// * diffuseTexelColor;
 }
 // Shadow Ray를 이용해 그림자이면 true, 아니면 false리턴
 bool IsInShadow(in float3 hitPosition, in float3 lightPosition)
@@ -104,17 +117,25 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     
     const uint3 indices = Load3x16BitIndices(baseIndex); //base부터 3개의 index값 로드6
 
-    //index값으로 vertex normal값 가져오기
     float3 vertexNormals[3] =
-    {
+    { //index값으로 vertex normal값 가져오기
         l_vertices[indices[0]].normal,
         l_vertices[indices[1]].normal,
         l_vertices[indices[2]].normal 
     };
- 
-    float3 triangleNormal = HitAttribute(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
-    float4 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal);
-    float4 color = float4(0.2f, 0.2f, 0.2f, 1.f) * l_cubeCB.albedo + diffuseColor;
-    payload.color = color;
+    float2 vertexUV[3] =
+    { //index값으로 vertex uv값 가져오기
+        l_vertices[indices[0]].uv,
+        l_vertices[indices[1]].uv,
+        l_vertices[indices[2]].uv 
+    };
+    
+    
+    float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
+    float2 triangleUV = HitAttributeFloat2(vertexUV, attr);//무게중심 좌표계로 UV값 보간하기
+    float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
+    float3 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal,triangleUV);
+    float3 color = ambientColor + diffuseColor;
+    payload.color = float4(color,1);
 
 }

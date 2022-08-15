@@ -16,7 +16,7 @@ namespace library
         PointLight& operator=(const PointLight& other) = delete;
         PointLight& operator=(PointLight&& other) = delete;
         ~PointLight() = default;
-        HRESULT Initialize(_In_ ID3D12Device* pDevice);
+        HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice);
         virtual void Update(_In_ FLOAT deltaTime) = 0;
         XMVECTOR GetPosition() const;
     protected:

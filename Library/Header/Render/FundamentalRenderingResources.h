@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Common\Common.h"
+#include "DescriptorHeap\RTVDescriptorHeap.h"
+#include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
 namespace library
 {
 	/*
@@ -29,6 +31,7 @@ namespace library
 		ComPtr<ID3D12GraphicsCommandList>& GetCommandList();
 		ComPtr<ID3D12Resource>& GetCurrentRenderTarget();
 		ComPtr<ID3D12CommandQueue>& GetCommandQueue();
+		CBVSRVUAVDescriptorHeap& GetCBVSRVUAVDescriptorHeap();
 		UINT GetWidth() const;
 		UINT GetHeight() const;
 	private:
@@ -55,8 +58,8 @@ namespace library
 		ComPtr<ID3D12CommandAllocator> m_commandAllocator[FRAME_COUNT];
 		ComPtr<ID3D12CommandQueue> m_commandQueue;
 		ComPtr<ID3D12GraphicsCommandList> m_commandList;
-		ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-		UINT m_rtvDescriptorSize;
+		RTVDescriptorHeap m_rtvDescriptorHeap;
+		CBVSRVUAVDescriptorHeap m_cbvSrvUavDescriptorHeap;
 
 		//Ææ½º
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;

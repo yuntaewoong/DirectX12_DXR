@@ -37,7 +37,8 @@ namespace library
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f)
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
-            .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS()
+            .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
+            .diffuseTextureDescriptorHandle = D3D12_GPU_DESCRIPTOR_HANDLE()
         };
         for (UINT i = 0; i < renderables.size(); i++)
         {
@@ -47,6 +48,8 @@ namespace library
                 rootArgument.cb.albedo = renderables[i]->GetColor();
                 rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
                 rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
+                D3D12_GPU_DESCRIPTOR_HANDLE textureSRVHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
+                memcpy(&rootArgument.diffuseTextureDescriptorHandle, &textureSRVHandle, sizeof(textureSRVHandle));
                 Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
             }
         }

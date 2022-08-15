@@ -39,19 +39,20 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		XMVectorSet(5.f, 0.1f, 5.f, 1.f),
 		color
 	);
-
-
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 20.f, -20.f,1.f));
+
+	std::shared_ptr<library::Material> material1 = std::make_shared<library::Material>();
+	material1->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/seafloor.dds"));
+	cube1->SetMaterial(material1);
+	cube2->SetMaterial(material1);
+	plane->SetMaterial(material1);
 
 	scene->AddRenderable(cube1);
 	scene->AddRenderable(cube2);
 	scene->AddRenderable(plane);
 	scene->AddLight(light1);
+	scene->AddMaterial(material1);
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
-
-
-
-
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
 	{
 		return 0;

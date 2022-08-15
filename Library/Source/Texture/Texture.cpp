@@ -1,6 +1,5 @@
 #include "Texture\Texture.h"
 #include "ThirdPartyHeader\DDSTextureLoader.h"
-#include "ThirdPartyHeader\GraphicsMemory.h"
 #include "ThirdPartyHeader\WICTextureLoader.h"
 #include "ThirdPartyHeader\ResourceUploadBatch.h"
 
@@ -10,26 +9,17 @@ namespace library
         m_filePath(filePath),
         m_textureResource(nullptr)
     {}
-
-    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Texture::Initialize
-
-      Summary:  Initializes the texture and samplers if not initialized
-
-      Args:     ID3D11Device* pDevice
-                  The Direct3D device to create the buffers
-                ID3D11DeviceContext* pImmediateContext
-                  The Direct3D context to set buffers
-
-      Modifies: [m_textureRV].
-    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    HRESULT Texture::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice,_In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue)
+    HRESULT Texture::Initialize(
+        _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap
+    )
     {
         HRESULT hr = S_OK;
         ResourceUploadBatch resourceUpload(pDevice.Get());
-        resourceUpload.Begin();
+        resourceUpload.Begin();//upload명령 기록시작
 
-        hr = CreateDDSTextureFromFile(
+        hr = CreateWICTextureFromFile(
             pDevice.Get(),
             resourceUpload,
             m_filePath.c_str(),
@@ -37,16 +27,45 @@ namespace library
         );
         if (FAILED(hr))
         {
+            hr = CreateDDSTextureFromFile(
+                pDevice.Get(),
+                resourceUpload,
+                m_filePath.c_str(),
+                m_textureResource.GetAddressOf()
+            );
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+        }
+        std::future<void> finish = resourceUpload.End(pCommandQueue.Get());//업로드 명령 기록끝, GPU 업로드 작업 시작
+        finish.wait();//현재 Thread의 UploadBatch작업 완료 대기
+
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            .ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
+            .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+            .Texture2D = {
+                .MipLevels = 1
+            }
+        };
+
+        hr = cbvSrvUavDescriptorHeap.CreateSRV(
+            pDevice,
+            m_textureResource,
+            srvDesc,
+            &m_descriptorHandle
+        );
+        if (FAILED(hr))
+        {
             return hr;
         }
-        // Upload the resources to the GPU.
-        std::future<void> finish = resourceUpload.End(pCommandQueue.Get());
-        finish.wait();//현재 Thread의 UploadBatch작업 완료 대기
+
 
         return hr;
     }
-    ComPtr<ID3D12Resource>& Texture::GetTextureResource()
+    D3D12_GPU_DESCRIPTOR_HANDLE Texture::GetDescriptorHandle() const
     {
-        return m_textureResource;
+        return m_descriptorHandle;
     }
 }

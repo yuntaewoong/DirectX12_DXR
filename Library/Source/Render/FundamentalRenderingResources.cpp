@@ -11,8 +11,8 @@ namespace library
 		m_commandAllocator(),
 		m_commandQueue(nullptr),
 		m_commandList(nullptr),
-		m_rtvHeap(nullptr),
-		m_rtvDescriptorSize(0u),
+		m_rtvDescriptorHeap(FRAME_COUNT),
+        m_cbvSrvUavDescriptorHeap(),
 		m_fence(nullptr),
 		m_fenceValues(),
 		m_fenceEvent()
@@ -48,6 +48,16 @@ namespace library
             return hr;
         }
         hr = createSwapChain(hWnd);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = m_rtvDescriptorHeap.Initialize(m_device);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = m_cbvSrvUavDescriptorHeap.Initialize(m_device);
         if (FAILED(hr))
         {
             return hr;
@@ -184,6 +194,10 @@ namespace library
     ComPtr<ID3D12CommandQueue>& FundamentalRenderingResources::GetCommandQueue()
     {
         return m_commandQueue;
+    }
+    CBVSRVUAVDescriptorHeap& FundamentalRenderingResources::GetCBVSRVUAVDescriptorHeap()
+    {
+        return m_cbvSrvUavDescriptorHeap;
     }
     UINT FundamentalRenderingResources::GetWidth() const
     {
@@ -343,31 +357,17 @@ namespace library
     HRESULT FundamentalRenderingResources::createRenderTargetView()
     {
         HRESULT hr = S_OK;
-        {//RTV용 descriptor heap 생성
-            D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {
-                .Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,     //렌더타겟뷰 descriptor heap
-                .NumDescriptors = FRAME_COUNT,              //FRAME개수 만큼
-                .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-                .NodeMask = 0u
-            };
-            hr = m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
+        for (UINT n = 0; n < FRAME_COUNT; n++)//프레임 개수만큼
+        {
+            hr = m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n]));//스왑체인에서 Render Target으로 쓸 버퍼 가져오기
             if (FAILED(hr))
             {
                 return hr;
             }
-            m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);//descriptor heap 각 요소 사이즈(운영체제마다 상이)
-        }
-        {//RTV생성
-            CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());//첫번째 descriptor가져오기(iterator로 사용됨)
-            for (UINT n = 0; n < FRAME_COUNT; n++)//프레임 개수만큼
+            hr = m_rtvDescriptorHeap.CreateRTV(m_device, m_renderTargets[n]);
+            if (FAILED(hr))
             {
-                hr = m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n]));//스왑체인에서 버퍼 가져오기
-                if (FAILED(hr))
-                {
-                    return hr;
-                }
-                m_device->CreateRenderTargetView(m_renderTargets[n].Get(), nullptr, rtvHandle);
-                rtvHandle.Offset(1, m_rtvDescriptorSize);
+                return hr;
             }
         }
         return hr;

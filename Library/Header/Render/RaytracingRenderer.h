@@ -39,7 +39,6 @@ namespace library
         HRESULT createRaytracingInterfaces();
         HRESULT createRaytracingRootSignature();
         HRESULT createRaytracingPipelineStateObject();
-        HRESULT createDescriptorHeap();
         HRESULT createAccelerationStructure();
         HRESULT createShaderTable();
         HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
@@ -63,11 +62,6 @@ namespace library
         TopLevelAccelerationStructure m_topLevelAccelerationStructure;
         std::vector<std::unique_ptr<BottomLevelAccelerationStructure>> m_bottomLevelAccelerationStructures;
 
-        //Ray tracing Shader에서 접근하는 UAV에 대한 descriptor heap
-        ComPtr<ID3D12DescriptorHeap> m_descriptorHeap;
-        UINT m_descriptorsAllocated;
-        UINT m_descriptorSize;
-
         //ray tracing Shader Table자원
         MissShaderTable m_missShaderTable;
         HitGroupShaderTable m_hitGroupShaderTable;
@@ -75,8 +69,7 @@ namespace library
 
         // Raytracing  결과 UAV자원
         ComPtr<ID3D12Resource> m_raytracingOutput;
-        D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputResourceUAVGpuDescriptor;
-        UINT m_raytracingOutputResourceUAVDescriptorHeapIndex;
+        D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputGPUHandle;
 
 
 	};

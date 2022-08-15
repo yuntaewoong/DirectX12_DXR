@@ -8,7 +8,7 @@ BaseCube::BaseCube(
 ) :
 	Renderable::Renderable(location,rotation,scale,color)
 {}
-HRESULT BaseCube::Initialize(_In_ ID3D12Device* pDevice)
+HRESULT BaseCube::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
 {
 	HRESULT hr = S_OK;
 	hr = Renderable::initialize(pDevice);

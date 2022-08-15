@@ -17,7 +17,7 @@ public:
 	BaseCube& operator=(Renderable&& other) = delete;
 	~BaseCube() = default;
 
-	HRESULT Initialize(_In_ ID3D12Device* pDevice) override;
+	HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice) override;
 	void Update(_In_ FLOAT deltaTime) override;
 	virtual UINT GetNumVertices() const override;
 	virtual UINT GetNumIndices() const override;
@@ -27,35 +27,35 @@ protected:
 private:
 	static constexpr const Vertex VERTICES[] =
 	{
-		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f, 1.0f, -1.0f), .uv = XMFLOAT2(1.0f, 0.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f, 1.0f, -1.0f), .uv = XMFLOAT2(0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f, 1.0f,  1.0f), .uv = XMFLOAT2(0.0f, 1.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f, 1.0f,  1.0f), .uv = XMFLOAT2(1.0f, 1.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f) },
 
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f, -1.0f, -1.0f), .uv = XMFLOAT2(0.0f, 0.0f), .normal = XMFLOAT3(0.0f, -1.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f, -1.0f, -1.0f), .uv = XMFLOAT2(1.0f, 0.0f), .normal = XMFLOAT3(0.0f, -1.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f, -1.0f,  1.0f), .uv = XMFLOAT2(1.0f, 1.0f), .normal = XMFLOAT3(0.0f, -1.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f, -1.0f,  1.0f), .uv = XMFLOAT2(0.0f, 1.0f), .normal = XMFLOAT3(0.0f, -1.0f, 0.0f) },
 
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f, -1.0f,  1.0f), .uv = XMFLOAT2(0.0f, 1.0f), .normal = XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f, -1.0f, -1.0f), .uv = XMFLOAT2(1.0f, 1.0f), .normal = XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f,  1.0f, -1.0f), .uv = XMFLOAT2(1.0f, 0.0f), .normal = XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(-1.0f,  1.0f,  1.0f), .uv = XMFLOAT2(0.0f, 0.0f), .normal = XMFLOAT3(-1.0f, 0.0f, 0.0f) },
 
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f, -1.0f,  1.0f), .uv = XMFLOAT2(1.0f, 1.0f), .normal = XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f, -1.0f, -1.0f), .uv = XMFLOAT2(0.0f, 1.0f), .normal = XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f,  1.0f, -1.0f), .uv = XMFLOAT2(0.0f, 0.0f), .normal = XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{.position = XMFLOAT3(1.0f,  1.0f,  1.0f), .uv = XMFLOAT2(1.0f, 0.0f), .normal = XMFLOAT3(1.0f, 0.0f, 0.0f) },
 
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{.position = XMFLOAT3(-1.0f, -1.0f, -1.0f), .uv = XMFLOAT2(0.0f, 1.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{.position = XMFLOAT3(1.0f, -1.0f, -1.0f), .uv = XMFLOAT2(1.0f, 1.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{.position = XMFLOAT3(1.0f,  1.0f, -1.0f), .uv = XMFLOAT2(1.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{.position = XMFLOAT3(-1.0f,  1.0f, -1.0f), .uv = XMFLOAT2(0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{.position = XMFLOAT3(-1.0f, -1.0f, 1.0f), .uv = XMFLOAT2(1.0f, 1.0f), .normal = XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{.position = XMFLOAT3(1.0f, -1.0f, 1.0f), .uv = XMFLOAT2(0.0f, 1.0f), .normal = XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{.position = XMFLOAT3(1.0f,  1.0f, 1.0f), .uv = XMFLOAT2(0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{.position = XMFLOAT3(-1.0f,  1.0f, 1.0f), .uv = XMFLOAT2(1.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, 1.0f) },
 	};
 	static constexpr const Index INDICES[] =
 	{

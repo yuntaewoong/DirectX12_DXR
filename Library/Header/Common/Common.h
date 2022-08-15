@@ -22,6 +22,8 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 namespace library
 {
+    const static UINT NUM_DESCRIPTORS_DEFAULT = 50u;
+
     /*===========================================
     Shader 진입점,
     Hit Group 진입점 정의
@@ -59,14 +61,16 @@ namespace library
     {
         CubeConstantSlot = 0,
         VertexBufferSlot = 1,
-        IndexBufferSlot = 2
+        IndexBufferSlot = 2,
+        DiffuseTextureSlot = 3,
     };
-    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 3;
+    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 4;
     struct LocalRootArgument
     {
-        CubeConstantBuffer cb;
-        D3D12_GPU_VIRTUAL_ADDRESS vbGPUAddress;
-        D3D12_GPU_VIRTUAL_ADDRESS ibGPUAddress;
+        CubeConstantBuffer cb;//Root Constant
+        D3D12_GPU_VIRTUAL_ADDRESS vbGPUAddress;//Inline Descriptor
+        D3D12_GPU_VIRTUAL_ADDRESS ibGPUAddress;//Inline Descriptor
+        D3D12_GPU_DESCRIPTOR_HANDLE diffuseTextureDescriptorHandle;//Descriptor Table
     };
 
 

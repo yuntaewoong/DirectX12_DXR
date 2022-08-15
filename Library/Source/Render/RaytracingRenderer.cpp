@@ -1,5 +1,6 @@
 #include "Render\RaytracingRenderer.h"
 #include "ShaderTable\ShaderTable.h"
+#include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
 namespace library
 {
     RaytracingRenderer::RaytracingRenderer() :
@@ -13,15 +14,11 @@ namespace library
         m_localRootSignature(),
         m_topLevelAccelerationStructure(),
         m_bottomLevelAccelerationStructures(std::vector<std::unique_ptr<BottomLevelAccelerationStructure>>()),
-        m_descriptorHeap(nullptr),
-        m_descriptorsAllocated(0u),
-        m_descriptorSize(0u),
         m_missShaderTable(),
         m_hitGroupShaderTable(),
         m_rayGenShaderTable(),
         m_raytracingOutput(nullptr),
-        m_raytracingOutputResourceUAVGpuDescriptor(),
-        m_raytracingOutputResourceUAVDescriptorHeapIndex(UINT_MAX)
+        m_raytracingOutputGPUHandle()
     {}
 	HRESULT RaytracingRenderer::Initialize(_In_ HWND hWnd)
 	{
@@ -31,7 +28,11 @@ namespace library
         {
             return hr;
         }
-        hr = m_scene->Initialize(m_renderingResources.GetDevice().Get());//Renderable들을 관리하는 Scene초기화
+        hr = m_scene->Initialize(
+            m_renderingResources.GetDevice(),
+            m_renderingResources.GetCommandQueue(),
+            m_renderingResources.GetCBVSRVUAVDescriptorHeap()
+        );//Renderable들을 관리하는 Scene초기화
         if (FAILED(hr))
         {
             return hr;
@@ -53,11 +54,6 @@ namespace library
         {
             return hr;
         }
-        hr = createDescriptorHeap();//ray tracing결과 그릴 UAV텍스처에 대한 descriptor heap만들기
-        if (FAILED(hr))
-        {
-            return hr;
-        }
         hr = createAccelerationStructure();//ray tracing할 geometry들 TLAS,BLAS자료구조로 잘 정리하기
         if (FAILED(hr))
         {
@@ -75,11 +71,6 @@ namespace library
         }
 
         hr = m_camera.Initialize(m_renderingResources.GetDevice().Get());
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = m_textureTest->Initialize(m_renderingResources.GetDevice(), m_renderingResources.GetCommandQueue());
         if (FAILED(hr))
         {
             return hr;
@@ -127,27 +118,26 @@ namespace library
             return hr;
         }
         pCommandList->SetComputeRootSignature(m_globalRootSignature.GetRootSignature().Get());//compute shader의 루트 시그니처 바인딩
-        pCommandList->SetDescriptorHeaps(1, m_descriptorHeap.GetAddressOf());//command list에 descriptor heap을 바인딩
-        pCommandList->SetComputeRootDescriptorTable(
-            static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
-            m_raytracingOutputResourceUAVGpuDescriptor
-        );//아웃풋 UAV텍스쳐 바인딩
-
-        pCommandList->SetComputeRootShaderResourceView(
-            static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
-            m_topLevelAccelerationStructure.GetAccelerationStructure()->GetGPUVirtualAddress()
-        );//TLAS 바인딩
+        pCommandList->SetDescriptorHeaps(1, m_renderingResources.GetCBVSRVUAVDescriptorHeap().GetDescriptorHeap().GetAddressOf());//command list에 descriptor heap을 바인딩
         
-        pCommandList->SetComputeRootConstantBufferView(
-            static_cast<UINT>(EGlobalRootSignatureSlot::CameraConstantSlot),
-            m_camera.GetConstantBuffer()->GetGPUVirtualAddress()
-        );//Camera CB바인딩
-
-        pCommandList->SetComputeRootConstantBufferView(
-            static_cast<UINT>(EGlobalRootSignatureSlot::LightConstantSlot),
-            m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
-        );//Light CB바인딩
-
+        {//Global root signature바인딩
+            pCommandList->SetComputeRootDescriptorTable(
+                static_cast<UINT>(EGlobalRootSignatureSlot::OutputViewSlot),
+                m_raytracingOutputGPUHandle
+            );//아웃풋 UAV텍스쳐 바인딩
+            pCommandList->SetComputeRootShaderResourceView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot),
+                m_topLevelAccelerationStructure.GetAccelerationStructure()->GetGPUVirtualAddress()
+            );//TLAS 바인딩
+            pCommandList->SetComputeRootConstantBufferView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::CameraConstantSlot),
+                m_camera.GetConstantBuffer()->GetGPUVirtualAddress()
+            );//Camera CB바인딩
+            pCommandList->SetComputeRootConstantBufferView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::LightConstantSlot),
+                m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
+            );//Light CB바인딩
+        }
 
         
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
@@ -244,23 +234,6 @@ namespace library
         }
         return hr;
     }
-    HRESULT RaytracingRenderer::createDescriptorHeap()
-    {
-        HRESULT hr = S_OK;
-        D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {
-            .Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,//CBV,SRV,UAV타입이다
-            .NumDescriptors = 3u,
-            .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,//shader에서 볼수있다
-            .NodeMask = 0
-        };
-        hr = m_renderingResources.GetDevice()->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&m_descriptorHeap));//create
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        m_descriptorSize = m_renderingResources.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);//cpu별로 상이한 descriptor사이즈 가져오기
-        return hr;
-    }
     HRESULT RaytracingRenderer::createAccelerationStructure()
     {
         HRESULT hr = S_OK;
@@ -338,7 +311,7 @@ namespace library
             D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
         );
         CD3DX12_HEAP_PROPERTIES defaultHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-        hr = m_renderingResources.GetDevice()->CreateCommittedResource(//결과물 UAV버퍼 생성
+        hr = m_renderingResources.GetDevice()->CreateCommittedResource(//결과물 UA버퍼 생성
             &defaultHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &uavDesc, 
@@ -350,21 +323,21 @@ namespace library
         {
             return hr;
         }
-        D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapCpuBase = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-        if (m_raytracingOutputResourceUAVDescriptorHeapIndex >= m_descriptorHeap->GetDesc().NumDescriptors)
-        {
-            m_raytracingOutputResourceUAVDescriptorHeapIndex = m_descriptorsAllocated++;
-        }
-        D3D12_CPU_DESCRIPTOR_HANDLE uavDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-            descriptorHeapCpuBase, 
-            m_raytracingOutputResourceUAVDescriptorHeapIndex,
-            m_descriptorSize
-        );
         D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {
             .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D
         };
-        m_renderingResources.GetDevice()->CreateUnorderedAccessView(m_raytracingOutput.Get(), nullptr, &UAVDesc, uavDescriptorHandle);
-        m_raytracingOutputResourceUAVGpuDescriptor = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(), m_raytracingOutputResourceUAVDescriptorHeapIndex, m_descriptorSize);
+        CBVSRVUAVDescriptorHeap& descriptorHeap =  m_renderingResources.GetCBVSRVUAVDescriptorHeap();
+
+        hr = descriptorHeap.CreateUAV(// UA버퍼에 대한 UAV생성
+            m_renderingResources.GetDevice(),
+            m_raytracingOutput,
+            UAVDesc,
+            &m_raytracingOutputGPUHandle
+        );
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         return hr;
     }
 }

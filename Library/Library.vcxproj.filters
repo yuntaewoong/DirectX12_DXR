@@ -99,6 +99,12 @@
     <Filter Include="Header Files\ThirdPartyHeader">
       <UniqueIdentifier>{ba8800ff-c2ab-4886-8dda-8044f1c8d325}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DescriptorHeap">
+      <UniqueIdentifier>{baae10d3-7657-4842-b763-7740a0b4c1f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DescriptorHeap">
+      <UniqueIdentifier>{46883919-04a4-470b-90a3-90540355e85c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Window\BaseWindow.h">
@@ -191,6 +197,15 @@
     <ClInclude Include="Header\Texture\Material.h">
       <Filter>Header Files\Texture</Filter>
     </ClInclude>
+    <ClInclude Include="Header\DescriptorHeap\DescriptorHeap.h">
+      <Filter>Header Files\DescriptorHeap</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\DescriptorHeap\RTVDescriptorHeap.h">
+      <Filter>Header Files\DescriptorHeap</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\DescriptorHeap\CBVSRVUAVDescriptorHeap.h">
+      <Filter>Header Files\DescriptorHeap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -258,6 +273,15 @@
     </ClCompile>
     <ClCompile Include="Source\Texture\Material.cpp">
       <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DescriptorHeap\DescriptorHeap.cpp">
+      <Filter>Source Files\DescriptorHeap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DescriptorHeap\RTVDescriptorHeap.cpp">
+      <Filter>Source Files\DescriptorHeap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DescriptorHeap\CBVSRVUAVDescriptorHeap.cpp">
+      <Filter>Source Files\DescriptorHeap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

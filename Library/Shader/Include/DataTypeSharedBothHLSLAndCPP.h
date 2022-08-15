@@ -41,6 +41,7 @@ struct CubeConstantBuffer
 struct Vertex
 {
     XMFLOAT3 position;
+    XMFLOAT2 uv;
     XMFLOAT3 normal;
 };
 struct RayPayload

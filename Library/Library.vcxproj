@@ -193,6 +193,9 @@
     <ClInclude Include="Header\Camera\Camera.h" />
     <ClInclude Include="Header\Common\Common.h" />
     <ClInclude Include="Header\Common\d3dx12.h" />
+    <ClInclude Include="Header\DescriptorHeap\CBVSRVUAVDescriptorHeap.h" />
+    <ClInclude Include="Header\DescriptorHeap\DescriptorHeap.h" />
+    <ClInclude Include="Header\DescriptorHeap\RTVDescriptorHeap.h" />
     <ClInclude Include="Header\Game\Game.h" />
     <ClInclude Include="Header\Light\PointLight.h" />
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
@@ -223,6 +226,9 @@
     <ClCompile Include="Source\AccelerationStructure\BottomLevelAccelerationStructure.cpp" />
     <ClCompile Include="Source\AccelerationStructure\TopLevelAccelerationStructure.cpp" />
     <ClCompile Include="Source\Camera\Camera.cpp" />
+    <ClCompile Include="Source\DescriptorHeap\CBVSRVUAVDescriptorHeap.cpp" />
+    <ClCompile Include="Source\DescriptorHeap\DescriptorHeap.cpp" />
+    <ClCompile Include="Source\DescriptorHeap\RTVDescriptorHeap.cpp" />
     <ClCompile Include="Source\Game\Game.cpp" />
     <ClCompile Include="Source\Light\PointLight.cpp" />
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp" />

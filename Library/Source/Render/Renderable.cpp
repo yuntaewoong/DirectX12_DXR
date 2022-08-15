@@ -11,13 +11,13 @@ namespace library
 		m_vertexBuffer(nullptr),
 		m_indexBuffer(nullptr),
         m_world(XMMatrixIdentity()),
-        m_color(color)
+        m_color(color),
+        m_material()
 	{
         m_world = m_world *
             XMMatrixRotationRollPitchYawFromVector(rotation) *
             XMMatrixScalingFromVector(scale) *
             XMMatrixTranslationFromVector(location);
-        m_world = m_world;
     }
     ComPtr<ID3D12Resource>& Renderable::GetVertexBuffer()
     {
@@ -35,7 +35,15 @@ namespace library
     {
         return m_color;
     }
-    HRESULT Renderable::initialize(_In_ ID3D12Device* pDevice)
+    const std::shared_ptr<Material>& Renderable::GetMaterial() const
+    {
+        return m_material;
+    }
+    void Renderable::SetMaterial(_In_ const std::shared_ptr<Material>& pMaterial)
+    {
+        m_material = pMaterial;
+    }
+    HRESULT Renderable::initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
 		HRESULT hr = S_OK;
         hr = createVertexBuffer(pDevice);
@@ -50,7 +58,7 @@ namespace library
         }
 		return hr;
 	}
-	HRESULT Renderable::createVertexBuffer(_In_ ID3D12Device* pDevice)
+	HRESULT Renderable::createVertexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
         HRESULT hr = S_OK;
         const Vertex* triangleVertices = GetVertices();
@@ -80,7 +88,7 @@ namespace library
         m_vertexBuffer->Unmap(0, nullptr);//매핑 해제
         return hr;
 	}
-	HRESULT Renderable::createIndexBuffer(_In_ ID3D12Device* pDevice)
+	HRESULT Renderable::createIndexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
         HRESULT hr = S_OK;
         const Index* indices = GetIndices();
