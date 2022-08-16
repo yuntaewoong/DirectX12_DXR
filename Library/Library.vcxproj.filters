@@ -206,6 +206,9 @@
     <ClInclude Include="Header\DescriptorHeap\CBVSRVUAVDescriptorHeap.h">
       <Filter>Header Files\DescriptorHeap</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Common\pch.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -282,6 +285,9 @@
     </ClCompile>
     <ClCompile Include="Source\DescriptorHeap\CBVSRVUAVDescriptorHeap.cpp">
       <Filter>Source Files\DescriptorHeap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\pch.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

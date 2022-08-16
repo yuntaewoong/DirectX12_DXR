@@ -1,5 +1,4 @@
 #pragma once
-#include "Common\Common.h"
 #include "Render\Renderable.h"
 
 class BaseCube : public library::Renderable

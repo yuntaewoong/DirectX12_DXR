@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "RootSignature\RootSignature.h"
 
 namespace library

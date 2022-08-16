@@ -140,6 +140,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(IntDir);$(ProjectDir)..\Library\Shader\Include;$(ProjectDir)..\Library\Header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Common\pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -193,6 +195,7 @@
     <ClInclude Include="Header\Camera\Camera.h" />
     <ClInclude Include="Header\Common\Common.h" />
     <ClInclude Include="Header\Common\d3dx12.h" />
+    <ClInclude Include="Header\Common\pch.h" />
     <ClInclude Include="Header\DescriptorHeap\CBVSRVUAVDescriptorHeap.h" />
     <ClInclude Include="Header\DescriptorHeap\DescriptorHeap.h" />
     <ClInclude Include="Header\DescriptorHeap\RTVDescriptorHeap.h" />
@@ -231,6 +234,9 @@
     <ClCompile Include="Source\DescriptorHeap\RTVDescriptorHeap.cpp" />
     <ClCompile Include="Source\Game\Game.cpp" />
     <ClCompile Include="Source\Light\PointLight.cpp" />
+    <ClCompile Include="Source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp" />
     <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp" />
     <ClCompile Include="Source\Render\Renderable.cpp" />

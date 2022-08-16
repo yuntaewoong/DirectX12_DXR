@@ -22,10 +22,14 @@
     <ClCompile Include="Source\Cube\BaseCube.cpp" />
     <ClCompile Include="Source\Light\RotatingLight.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h" />
     <ClInclude Include="Header\Light\RotatingLight.h" />
+    <ClInclude Include="Header\pch.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -149,6 +153,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)\Header;$(ProjectDir)..\Library\Shader\Include;$(ProjectDir)..\Library\Header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Render\RaytracingRenderer.h"
 #include "ShaderTable\ShaderTable.h"
 #include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"

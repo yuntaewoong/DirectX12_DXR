@@ -6,16 +6,8 @@
 #ifndef UNICODE
 #define UNICODE
 #endif 
-#include <memory>
-#include <wrl.h>
-#include <Windows.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <DirectXMath.h>
-#include "d3dx12.h"
-#include <string>
-#include <algorithm>
-#include <filesystem>
+
+#include "pch.h"
 #include "DataTypeSharedBothHLSLAndCPP.h"
 
 using namespace Microsoft::WRL;

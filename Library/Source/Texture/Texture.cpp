@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Texture\Texture.h"
 #include "ThirdPartyHeader\DDSTextureLoader.h"
 #include "ThirdPartyHeader\WICTextureLoader.h"

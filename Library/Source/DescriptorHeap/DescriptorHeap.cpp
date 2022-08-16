@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "DescriptorHeap\DescriptorHeap.h"
 
 namespace library

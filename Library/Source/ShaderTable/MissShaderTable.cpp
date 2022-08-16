@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "ShaderTable\MissShaderTable.h"
 namespace library
 {

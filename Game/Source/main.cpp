@@ -1,6 +1,5 @@
 
-
-#include "Common\Common.h"
+#include "pch.h"
 #include "Scene\Scene.h"
 #include "Game\Game.h"
 #include "Cube\BaseCube.h"

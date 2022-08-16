@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Texture\Material.h"
 
 namespace library

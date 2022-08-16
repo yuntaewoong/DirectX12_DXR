@@ -32,6 +32,9 @@
     <ClCompile Include="Source\Light\RotatingLight.cpp">
       <Filter>Source Files\Light</Filter>
     </ClCompile>
+    <ClCompile Include="Source\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h">
@@ -39,6 +42,9 @@
     </ClInclude>
     <ClInclude Include="Header\Light\RotatingLight.h">
       <Filter>Header Files\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\pch.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

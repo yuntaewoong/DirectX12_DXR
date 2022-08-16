@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Render\FundamentalRenderingResources.h"
 
 namespace library

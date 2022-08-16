@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Window/MainWindow.h"
 
 namespace library

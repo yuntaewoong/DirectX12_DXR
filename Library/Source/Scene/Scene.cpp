@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Scene\Scene.h"
 namespace library
 {

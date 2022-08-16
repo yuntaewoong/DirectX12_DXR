@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "Camera\Camera.h"
 
 namespace library

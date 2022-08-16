@@ -1,3 +1,4 @@
+#include "Common\pch.h"
 #include "AccelerationStructure\TopLevelAccelerationStructure.h"
 
 namespace library
