@@ -15,6 +15,7 @@ namespace library
 		}
 		pDevice->CreateRenderTargetView(pRenderTarget.Get(), nullptr, rtvCPUHandle);
 		m_numAllocated++;
+		return hr;
 	}
 	D3D12_DESCRIPTOR_HEAP_DESC RTVDescriptorHeap::createDescriptorHeapDesc()
 	{

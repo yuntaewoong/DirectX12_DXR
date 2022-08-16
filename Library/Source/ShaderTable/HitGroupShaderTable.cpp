@@ -48,8 +48,8 @@ namespace library
                 rootArgument.cb.albedo = renderables[i]->GetColor();
                 rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
                 rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
-                D3D12_GPU_DESCRIPTOR_HANDLE textureSRVHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
-                memcpy(&rootArgument.diffuseTextureDescriptorHandle, &textureSRVHandle, sizeof(textureSRVHandle));
+                if(renderables[i]->GetMaterial()->HasDiffuseTexture())
+                    rootArgument.diffuseTextureDescriptorHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
                 Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
             }
         }

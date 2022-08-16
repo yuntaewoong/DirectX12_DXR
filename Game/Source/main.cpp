@@ -12,13 +12,13 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
-	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Shadow Ray테스트",1920,1080);
+	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Texturing테스트",1920,1080);
 	std::shared_ptr<library::Scene> scene = std::make_shared<library::Scene>();
 	
 	XMFLOAT4 color;
 	XMStoreFloat4(&color, Colors::Azure);
 	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(
-		XMVectorSet(0.5f, 0.6f, 2.f, 1.0f),
+		XMVectorSet(0.5f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
 		color
@@ -26,7 +26,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 	XMStoreFloat4(&color, Colors::Aquamarine);
 	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(
-		XMVectorSet(-0.5f, 0.6f, 2.f, 1.0f),
+		XMVectorSet(-0.5f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
 		color
@@ -39,7 +39,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		XMVectorSet(5.f, 0.1f, 5.f, 1.f),
 		color
 	);
-	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 20.f, -20.f,1.f));
+	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
 
 	std::shared_ptr<library::Material> material1 = std::make_shared<library::Material>();
 	material1->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/seafloor.dds"));

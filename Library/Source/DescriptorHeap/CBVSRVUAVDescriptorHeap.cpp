@@ -18,10 +18,10 @@ namespace library
 			return hr;
 		}
 		pDevice->CreateConstantBufferView(&cbvDesc, cbvCPUHandle);
-		m_numAllocated++;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
 		getLastAllocatedDescriptorGPUHandle(&gpuHandle);
 		*gpuDescriptorHandle = gpuHandle;
+		m_numAllocated++;
 		return hr;
 	}
 	HRESULT CBVSRVUAVDescriptorHeap::CreateSRV(
@@ -39,10 +39,10 @@ namespace library
 			return hr;
 		}
 		pDevice->CreateShaderResourceView(pSRVResource.Get(), &srvDesc, srvCPUHandle);
-		m_numAllocated++;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
 		getLastAllocatedDescriptorGPUHandle(&gpuHandle);
 		*gpuDescriptorHandle = gpuHandle;
+		m_numAllocated++;
 		return hr;
 	}
 	HRESULT CBVSRVUAVDescriptorHeap::CreateUAV(
@@ -60,10 +60,10 @@ namespace library
 			return hr;
 		}
 		pDevice->CreateUnorderedAccessView(pUAVResource.Get(), nullptr, &uavDesc, uavCPUHandle);
-		m_numAllocated++;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
 		getLastAllocatedDescriptorGPUHandle(&gpuHandle);
 		*gpuDescriptorHandle = gpuHandle;
+		m_numAllocated++;
 		return hr;
 	}
 	D3D12_DESCRIPTOR_HEAP_DESC CBVSRVUAVDescriptorHeap::createDescriptorHeapDesc()

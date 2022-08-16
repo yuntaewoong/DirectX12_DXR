@@ -48,5 +48,6 @@ namespace library
 			m_numAllocated,
 			m_descriptorSize
 		);
+		return S_OK;
 	}
 }
