@@ -15,7 +15,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Scene> scene = std::make_shared<library::Scene>();
 	
 	XMFLOAT4 color;
-	XMStoreFloat4(&color, Colors::Azure);
+	XMStoreFloat4(&color, Colors::White);
 	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(
 		XMVectorSet(0.5f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
@@ -23,7 +23,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		color
 	);
 
-	XMStoreFloat4(&color, Colors::Aquamarine);
+	XMStoreFloat4(&color, Colors::White);
 	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(
 		XMVectorSet(-0.5f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
@@ -31,7 +31,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		color
 	);
 
-	XMStoreFloat4(&color, Colors::Aqua);
+	XMStoreFloat4(&color, Colors::White);
 	std::shared_ptr<library::Renderable> plane = std::make_shared<BaseCube>(
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
@@ -40,17 +40,27 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
 
-	std::shared_ptr<library::Material> material1 = std::make_shared<library::Material>();
-	material1->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/seafloor.dds"));
-	cube1->SetMaterial(material1);
-	cube2->SetMaterial(material1);
-	plane->SetMaterial(material1);
+	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();
+	floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/seafloor.dds"));
 
-	scene->AddRenderable(cube1);
-	scene->AddRenderable(cube2);
-	scene->AddRenderable(plane);
-	scene->AddLight(light1);
-	scene->AddMaterial(material1);
+	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();
+	woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/wood.jpg"));
+
+
+	
+	{//초기화해줄 Object들 Pass
+		scene->AddRenderable(cube1);
+		scene->AddRenderable(cube2);
+		scene->AddRenderable(plane);
+		scene->AddLight(light1);
+		scene->AddMaterial(floorMaterial);
+		scene->AddMaterial(woodMaterial);
+	}
+
+	cube1->SetMaterial(woodMaterial);
+	cube2->SetMaterial(woodMaterial);
+	plane->SetMaterial(floorMaterial);
+
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
 	{

@@ -33,7 +33,7 @@ namespace library
                 return hr;
             }
         }
-        for (UINT i = 0; i < m_lights.size(); i++)
+        for (UINT i = 0; i < m_materials.size(); i++)
         {
             hr = m_materials[i]->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
             if (FAILED(hr))

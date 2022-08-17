@@ -42,8 +42,9 @@ namespace library
         std::future<void> finish = resourceUpload.End(pCommandQueue.Get());//업로드 명령 기록끝, GPU 업로드 작업 시작
         finish.wait();//현재 Thread의 UploadBatch작업 완료 대기
 
+        
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {
-            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            .Format = m_textureResource->GetDesc().Format,
             .ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
             .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
             .Texture2D = {
@@ -51,7 +52,7 @@ namespace library
             }
         };
 
-        hr = cbvSrvUavDescriptorHeap.CreateSRV(
+        hr = cbvSrvUavDescriptorHeap.CreateSRV(//Descriptor Heap에 SRV생성
             pDevice,
             m_textureResource,
             srvDesc,

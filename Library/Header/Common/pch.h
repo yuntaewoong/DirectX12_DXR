@@ -1,4 +1,8 @@
 #pragma once
+/*
+미리 컴파일된 헤더,
+절대 수정안될 헤더들을 넣으면 빌드시간이 빨라진다..
+*/
 #include <memory>
 #include <wrl.h>
 #include <Windows.h>
