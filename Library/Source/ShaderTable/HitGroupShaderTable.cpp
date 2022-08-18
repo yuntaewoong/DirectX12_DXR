@@ -39,7 +39,8 @@ namespace library
         LocalRootArgument rootArgument = {
             .cb = {
                 .world = XMMATRIX(),
-                .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f)
+                .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f),
+                .hasTexture = 0
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
             .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
@@ -52,8 +53,14 @@ namespace library
             rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
             if (renderables[i]->GetMaterial()->HasDiffuseTexture())
+            {
+                rootArgument.cb.hasTexture = 1u;
                 rootArgument.diffuseTextureDescriptorHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
-
+            }
+            else
+            {
+                rootArgument.cb.hasTexture = 0u;
+            }
             for (UINT j = 0; j < RayType::Count; j++)
             {
                 void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(HIT_GROUP_NAMES[j]);

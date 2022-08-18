@@ -43,6 +43,15 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		XMVectorSet(5.f, 1.f, 5.f, 1.f),
 		color
 	);
+
+	XMStoreFloat4(&color, Colors::White);
+	std::shared_ptr<library::Renderable> mirror = std::make_shared<BasePlane>(//거울
+		XMVectorSet(0.f, 0.6f, 2.5f, 1.0f),
+		XMVectorSet(0.f, XM_PIDIV2, XM_PIDIV2, 1.0f),
+		XMVectorSet(5.f, 1.f, 5.f, 1.f),
+		color
+	);
+
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
 	
 	std::filesystem::path projectDirPath;
@@ -60,21 +69,26 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();//목재 텍스처
 	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
 	woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
-	std::filesystem::current_path();
+	
+	std::shared_ptr<library::Material> emptyMaterial = std::make_shared<library::Material>();//Texture없는 Material
 
 	
 	{//Scene에서 초기화해줄 Object들 Pass
 		scene->AddRenderable(cube1);
 		scene->AddRenderable(cube2);
 		scene->AddRenderable(plane);
+		scene->AddRenderable(mirror);
+
 		scene->AddLight(light1);
 		scene->AddMaterial(floorMaterial);
 		scene->AddMaterial(woodMaterial);
+		scene->AddMaterial(emptyMaterial);
 	}
 	{//Renderable=>Material 대응 세팅
 		cube1->SetMaterial(woodMaterial);
 		cube2->SetMaterial(woodMaterial);
 		plane->SetMaterial(floorMaterial);
+		mirror->SetMaterial(emptyMaterial);
 	}
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))

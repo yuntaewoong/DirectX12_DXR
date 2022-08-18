@@ -71,7 +71,11 @@ float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
 {
     float3 pixelToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
     float3 nDotL = max(0.0f, dot(pixelToLight, normal));
-    float3 diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남
+    float3 diffuseTexelColor = float3(1.f, 1.f, 1.f);
+    if(l_renderableCB.hasTexture == 1)
+    {
+        diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남       
+    }
     return l_renderableCB.albedo * nDotL * diffuseTexelColor;
 }
 
@@ -82,7 +86,7 @@ float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal, float2 uv)
     float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition);
     float3 reflectDirection = normalize(reflect(lightToHit, normal));
     
-    return pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 50.0f) * l_renderableCB.albedo;
+    return pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_renderableCB.albedo;
 }
 
 
@@ -145,8 +149,11 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     
     float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr);//무게중심 좌표계로 UV값 보간하기
-    
-    float3 ambientColor = float3(0.2f, 0.2f, 0.2f) * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+    float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
+    if(l_renderableCB.hasTexture == 1)
+    {
+        ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+    }
     float3 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal,triangleUV);
     float3 specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
     if(isInShadow)
@@ -155,7 +162,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         specullarColor = specullarColor * float3(0.1f, 0.1f, 0.1f);
     }
     
-    float3 color = ambientColor + diffuseColor + specullarColor;
+    float3 color = ambientColor + diffuseColor+ specullarColor;
     payload.color = float4(color, 1);
     
     

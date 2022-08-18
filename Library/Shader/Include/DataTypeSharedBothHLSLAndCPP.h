@@ -38,6 +38,8 @@ struct RenderableConstantBuffer
 {
     XMMATRIX world;
     XMFLOAT4 albedo;
+    UINT hasTexture;//1이면 texture있음, 0이면 없음
+    FLOAT padding[3];//32비트 4단위를 맞추기 위한 padding
 };
 struct Vertex
 {
