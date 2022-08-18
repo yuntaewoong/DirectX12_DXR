@@ -22,14 +22,15 @@
     <ClCompile Include="Source\Cube\BaseCube.cpp" />
     <ClCompile Include="Source\Light\RotatingLight.cpp" />
     <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\pch.cpp">
+    <ClCompile Include="Source\pch_game.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch_game.h</PrecompiledHeaderFile>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h" />
     <ClInclude Include="Header\Light\RotatingLight.h" />
-    <ClInclude Include="Header\pch.h" />
+    <ClInclude Include="Header\pch_game.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -154,7 +155,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)\Header;$(ProjectDir)..\Library\Shader\Include;$(ProjectDir)..\Library\Header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch_game.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

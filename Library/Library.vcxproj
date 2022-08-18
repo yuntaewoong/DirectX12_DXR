@@ -141,7 +141,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(IntDir);$(ProjectDir)..\Library\Shader\Include;$(ProjectDir)..\Library\Header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Common\pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -195,16 +195,16 @@
     <ClInclude Include="Header\Camera\Camera.h" />
     <ClInclude Include="Header\Common\Common.h" />
     <ClInclude Include="Header\Common\d3dx12.h" />
-    <ClInclude Include="Header\Common\pch.h" />
     <ClInclude Include="Header\DescriptorHeap\CBVSRVUAVDescriptorHeap.h" />
     <ClInclude Include="Header\DescriptorHeap\DescriptorHeap.h" />
     <ClInclude Include="Header\DescriptorHeap\RTVDescriptorHeap.h" />
     <ClInclude Include="Header\Game\Game.h" />
     <ClInclude Include="Header\Light\PointLight.h" />
+    <ClInclude Include="Header\pch.h" />
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h" />
-    <ClInclude Include="Header\Render\Renderable.h" />
     <ClInclude Include="Header\Render\RaytracingRenderer.h" />
+    <ClInclude Include="Header\Render\Renderable.h" />
     <ClInclude Include="Header\RootSignature\GlobalRootSignature.h" />
     <ClInclude Include="Header\RootSignature\LocalRootSignature.h" />
     <ClInclude Include="Header\RootSignature\RootSignature.h" />

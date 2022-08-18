@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch_game.h"
 #include "Cube\BaseCube.h"
 
 BaseCube::BaseCube(

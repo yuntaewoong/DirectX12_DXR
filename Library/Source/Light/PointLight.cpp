@@ -1,4 +1,4 @@
-#include "Common\pch.h"
+#include "pch.h"
 #include "Light\PointLight.h"
 
 namespace library

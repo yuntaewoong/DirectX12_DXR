@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch_game.h"
 #include "Light\RotatingLight.h"
 
 RotatingLight::RotatingLight(_In_ XMVECTOR position) :

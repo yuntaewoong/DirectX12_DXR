@@ -1,4 +1,4 @@
-#include "Common\pch.h"
+#include "pch.h"
 #include "RaytracingPipelineStateObject\RaytracingPipelineStateObject.h"
 
 #include "CompiledShaders\RadianceRayGeneration.hlsl.h"

@@ -1,4 +1,4 @@
-#include "Common\pch.h"
+#include "pch.h"
 #include "ShaderTable\RayGenerationShaderTable.h"
 namespace library
 {

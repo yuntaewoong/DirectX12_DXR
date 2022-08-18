@@ -1,5 +1,5 @@
 
-#include "pch.h"
+#include "pch_game.h"
 #include "Scene\Scene.h"
 #include "Game\Game.h"
 #include "Cube\BaseCube.h"

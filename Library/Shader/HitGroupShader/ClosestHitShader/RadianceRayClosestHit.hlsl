@@ -145,6 +145,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     
     float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr);//무게중심 좌표계로 UV값 보간하기
+    
     float3 ambientColor = float3(0.2f, 0.2f, 0.2f) * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
     float3 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal,triangleUV);
     float3 specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
