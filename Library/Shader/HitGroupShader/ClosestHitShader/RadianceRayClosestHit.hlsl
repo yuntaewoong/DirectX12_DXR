@@ -115,11 +115,11 @@ bool IsInShadow(in float3 hitPosition, in float3 lightPosition)
 void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
     float3 hitPosition = HitWorldPosition();
+    bool isInShadow = false;
     
     if (IsInShadow(hitPosition, g_lightCB.position[0].xyz))//shadow ray를 이용한 그림자 검사
     {
-        payload.color = float4(0.1f, 0.1f, 0.1f, 1.f); //어두운 그림자
-        return;
+        isInShadow = true;
     }
     
     uint indexSizeInBytes = 2; //index는 16비트
@@ -145,10 +145,18 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     
     float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr);//무게중심 좌표계로 UV값 보간하기
-    float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
+    float3 ambientColor = float3(0.2f, 0.2f, 0.2f) * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
     float3 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal,triangleUV);
     float3 specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
+    if(isInShadow)
+    {
+        diffuseColor = diffuseColor * float3(0.1f, 0.1f, 0.1f);
+        specullarColor = specullarColor * float3(0.1f, 0.1f, 0.1f);
+    }
+    
     float3 color = ambientColor + diffuseColor + specullarColor;
-    payload.color = float4(color,1);
+    payload.color = float4(color, 1);
+    
+    
 
 }
