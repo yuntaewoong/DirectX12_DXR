@@ -34,8 +34,9 @@ struct PointLightConstantBuffer
 {
     XMVECTOR position[NUM_LIGHT];
 };
-struct CubeConstantBuffer
+struct RenderableConstantBuffer
 {
+    XMMATRIX world;
     XMFLOAT4 albedo;
 };
 struct Vertex

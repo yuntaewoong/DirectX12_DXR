@@ -8,7 +8,8 @@ namespace library
 {
     Texture::Texture(_In_ const std::filesystem::path& filePath) :
         m_filePath(filePath),
-        m_textureResource(nullptr)
+        m_textureResource(nullptr),
+        m_descriptorHandle()
     {}
     HRESULT Texture::Initialize(
         _In_ const ComPtr<ID3D12Device>& pDevice,

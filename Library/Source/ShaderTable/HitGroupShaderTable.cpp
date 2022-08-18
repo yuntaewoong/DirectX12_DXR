@@ -32,9 +32,13 @@ namespace library
         record[3] == Renderable[1] shadow hit group
         record[4] == Renderable[2] radiance hit group
         record[5] == Renderable[2] shadow hit group
+        ...
+        .
+        ....
         ======================================*/
         LocalRootArgument rootArgument = {
             .cb = {
+                .world = XMMATRIX(),
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f)
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
@@ -43,14 +47,16 @@ namespace library
         };
         for (UINT i = 0; i < renderables.size(); i++)
         {
+            rootArgument.cb.world = XMMatrixTranspose(renderables[i]->GetWorldMatrix());
+            rootArgument.cb.albedo = renderables[i]->GetColor();
+            rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
+            rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
+            if (renderables[i]->GetMaterial()->HasDiffuseTexture())
+                rootArgument.diffuseTextureDescriptorHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
+
             for (UINT j = 0; j < RayType::Count; j++)
             {
                 void* hitGroupIdentifier = stateObjectProperties->GetShaderIdentifier(HIT_GROUP_NAMES[j]);
-                rootArgument.cb.albedo = renderables[i]->GetColor();
-                rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
-                rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
-                if(renderables[i]->GetMaterial()->HasDiffuseTexture())
-                    rootArgument.diffuseTextureDescriptorHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
                 Push_back(ShaderRecord(hitGroupIdentifier, shaderIdentifierSize, &rootArgument, sizeof(rootArgument)));
             }
         }

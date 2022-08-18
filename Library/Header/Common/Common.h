@@ -59,7 +59,7 @@ namespace library
     const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 4;
     struct LocalRootArgument
     {
-        CubeConstantBuffer cb;//Root Constant
+        RenderableConstantBuffer cb;//Root Constant
         D3D12_GPU_VIRTUAL_ADDRESS vbGPUAddress;//Inline Descriptor
         D3D12_GPU_VIRTUAL_ADDRESS ibGPUAddress;//Inline Descriptor
         D3D12_GPU_DESCRIPTOR_HANDLE diffuseTextureDescriptorHandle;//Descriptor Table

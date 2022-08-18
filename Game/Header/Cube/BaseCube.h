@@ -10,10 +10,10 @@ public:
 		_In_ XMVECTOR scale,
 		_In_ XMFLOAT4 color
 	);
-	BaseCube(const Renderable& other) = delete;
-	BaseCube(Renderable&& other) = delete;
-	BaseCube& operator=(const Renderable& other) = delete;
-	BaseCube& operator=(Renderable&& other) = delete;
+	BaseCube(const BaseCube& other) = delete;
+	BaseCube(BaseCube&& other) = delete;
+	BaseCube& operator=(const BaseCube& other) = delete;
+	BaseCube& operator=(BaseCube&& other) = delete;
 	~BaseCube() = default;
 
 	HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice) override;

@@ -1,45 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Source Files\Window">
-      <UniqueIdentifier>{89b4ecf1-821b-4992-b6e0-a91a6e5d42a2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game">
-      <UniqueIdentifier>{724b0101-5678-4606-ba64-396daacd8702}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Render">
-      <UniqueIdentifier>{60c56767-982b-455d-b5f9-6a5d897f26e6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader">
       <UniqueIdentifier>{0b809e7b-2e1a-4f3f-a48d-e506d61e0c97}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ShaderTable">
-      <UniqueIdentifier>{78193f6f-d303-4437-9de9-7dbe0daaaac9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\AccelerationStructure">
-      <UniqueIdentifier>{e746fb4d-fa83-4592-848d-a3144934f233}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Scene">
-      <UniqueIdentifier>{be817a22-37fb-4806-ae17-c658721b3f99}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Camera">
-      <UniqueIdentifier>{23753212-2368-4702-90c0-88461f50a747}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Light">
-      <UniqueIdentifier>{5322849c-de40-4973-a41c-728f896e4af0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\RootSignature">
-      <UniqueIdentifier>{56a52eab-4c1e-48ad-9ab4-b54d749cb5ca}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader\Include">
       <UniqueIdentifier>{c955895e-d541-4252-816d-d9bfd8965871}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\RaytracingPipelineStateObject">
-      <UniqueIdentifier>{e8060c37-ddaf-482d-bf29-92da75fb5825}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader\RayGenerationShader">
       <UniqueIdentifier>{72ab5eab-b683-4dcb-8bb7-b6c1e54a8f72}</UniqueIdentifier>
@@ -53,16 +19,50 @@
     <Filter Include="Shader\HitGroupShader\ClosestHitShader">
       <UniqueIdentifier>{dcf80f3d-f35b-40a4-b774-3fd073362c87}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Texture">
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source\Window">
+      <UniqueIdentifier>{89b4ecf1-821b-4992-b6e0-a91a6e5d42a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game">
+      <UniqueIdentifier>{724b0101-5678-4606-ba64-396daacd8702}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{60c56767-982b-455d-b5f9-6a5d897f26e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ShaderTable">
+      <UniqueIdentifier>{78193f6f-d303-4437-9de9-7dbe0daaaac9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\AccelerationStructure">
+      <UniqueIdentifier>{e746fb4d-fa83-4592-848d-a3144934f233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scene">
+      <UniqueIdentifier>{be817a22-37fb-4806-ae17-c658721b3f99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Camera">
+      <UniqueIdentifier>{23753212-2368-4702-90c0-88461f50a747}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Light">
+      <UniqueIdentifier>{5322849c-de40-4973-a41c-728f896e4af0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RootSignature">
+      <UniqueIdentifier>{56a52eab-4c1e-48ad-9ab4-b54d749cb5ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RaytracingPipelineStateObject">
+      <UniqueIdentifier>{e8060c37-ddaf-482d-bf29-92da75fb5825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Texture">
       <UniqueIdentifier>{c908750f-be0d-46c8-8ce8-f838bb97d79b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\DescriptorHeap">
+    <Filter Include="Source\DescriptorHeap">
       <UniqueIdentifier>{46883919-04a4-470b-90a3-90540355e85c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Common">
+    <Filter Include="Source\Common">
       <UniqueIdentifier>{4c315fb1-1529-4569-981a-afe600413910}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ThirdParty">
+    <Filter Include="Source\ThirdParty">
       <UniqueIdentifier>{3a615aa6-0fb9-419d-bb7b-4a60fe3d6be4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -71,183 +71,183 @@
       <Filter>Shader\Include</Filter>
     </ClInclude>
     <ClInclude Include="Header\AccelerationStructure\AccelerationStructure.h">
-      <Filter>Source Files\AccelerationStructure</Filter>
+      <Filter>Source\AccelerationStructure</Filter>
     </ClInclude>
     <ClInclude Include="Header\AccelerationStructure\BottomLevelAccelerationStructure.h">
-      <Filter>Source Files\AccelerationStructure</Filter>
+      <Filter>Source\AccelerationStructure</Filter>
     </ClInclude>
     <ClInclude Include="Header\AccelerationStructure\TopLevelAccelerationStructure.h">
-      <Filter>Source Files\AccelerationStructure</Filter>
+      <Filter>Source\AccelerationStructure</Filter>
     </ClInclude>
     <ClInclude Include="Header\Camera\Camera.h">
-      <Filter>Source Files\Camera</Filter>
+      <Filter>Source\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Header\DescriptorHeap\CBVSRVUAVDescriptorHeap.h">
-      <Filter>Source Files\DescriptorHeap</Filter>
+      <Filter>Source\DescriptorHeap</Filter>
     </ClInclude>
     <ClInclude Include="Header\DescriptorHeap\DescriptorHeap.h">
-      <Filter>Source Files\DescriptorHeap</Filter>
+      <Filter>Source\DescriptorHeap</Filter>
     </ClInclude>
     <ClInclude Include="Header\DescriptorHeap\RTVDescriptorHeap.h">
-      <Filter>Source Files\DescriptorHeap</Filter>
+      <Filter>Source\DescriptorHeap</Filter>
     </ClInclude>
     <ClInclude Include="Header\Game\Game.h">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source\Game</Filter>
     </ClInclude>
     <ClInclude Include="Header\Light\PointLight.h">
-      <Filter>Source Files\Light</Filter>
+      <Filter>Source\Light</Filter>
     </ClInclude>
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h">
-      <Filter>Source Files\RaytracingPipelineStateObject</Filter>
+      <Filter>Source\RaytracingPipelineStateObject</Filter>
     </ClInclude>
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h">
-      <Filter>Source Files\Render</Filter>
+      <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Header\Render\RaytracingRenderer.h">
-      <Filter>Source Files\Render</Filter>
+      <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Header\Render\Renderable.h">
-      <Filter>Source Files\Render</Filter>
+      <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Header\RootSignature\GlobalRootSignature.h">
-      <Filter>Source Files\RootSignature</Filter>
+      <Filter>Source\RootSignature</Filter>
     </ClInclude>
     <ClInclude Include="Header\RootSignature\LocalRootSignature.h">
-      <Filter>Source Files\RootSignature</Filter>
+      <Filter>Source\RootSignature</Filter>
     </ClInclude>
     <ClInclude Include="Header\RootSignature\RootSignature.h">
-      <Filter>Source Files\RootSignature</Filter>
+      <Filter>Source\RootSignature</Filter>
     </ClInclude>
     <ClInclude Include="Header\Scene\Scene.h">
-      <Filter>Source Files\Scene</Filter>
+      <Filter>Source\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Header\ShaderTable\HitGroupShaderTable.h">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClInclude>
     <ClInclude Include="Header\ShaderTable\MissShaderTable.h">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClInclude>
     <ClInclude Include="Header\ShaderTable\RayGenerationShaderTable.h">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClInclude>
     <ClInclude Include="Header\ShaderTable\ShaderRecord.h">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClInclude>
     <ClInclude Include="Header\ShaderTable\ShaderTable.h">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClInclude>
     <ClInclude Include="Header\Texture\Material.h">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>Source\Texture</Filter>
     </ClInclude>
     <ClInclude Include="Header\Texture\Texture.h">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>Source\Texture</Filter>
     </ClInclude>
     <ClInclude Include="Header\Window\BaseWindow.h">
-      <Filter>Source Files\Window</Filter>
+      <Filter>Source\Window</Filter>
     </ClInclude>
     <ClInclude Include="Header\Window\MainWindow.h">
-      <Filter>Source Files\Window</Filter>
+      <Filter>Source\Window</Filter>
     </ClInclude>
     <ClInclude Include="Header\Common\Common.h">
-      <Filter>Source Files\Common</Filter>
+      <Filter>Source\Common</Filter>
     </ClInclude>
     <ClInclude Include="Header\Common\d3dx12.h">
-      <Filter>Source Files\Common</Filter>
+      <Filter>Source\Common</Filter>
     </ClInclude>
     <ClInclude Include="Header\ThirdPartyHeader\DDSTextureLoader.h">
-      <Filter>Source Files\ThirdParty</Filter>
+      <Filter>Source\ThirdParty</Filter>
     </ClInclude>
     <ClInclude Include="Header\ThirdPartyHeader\GraphicsMemory.h">
-      <Filter>Source Files\ThirdParty</Filter>
+      <Filter>Source\ThirdParty</Filter>
     </ClInclude>
     <ClInclude Include="Header\ThirdPartyHeader\ResourceUploadBatch.h">
-      <Filter>Source Files\ThirdParty</Filter>
+      <Filter>Source\ThirdParty</Filter>
     </ClInclude>
     <ClInclude Include="Header\ThirdPartyHeader\WICTextureLoader.h">
-      <Filter>Source Files\ThirdParty</Filter>
+      <Filter>Source\ThirdParty</Filter>
     </ClInclude>
     <ClInclude Include="Header\pch.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
-      <Filter>Source Files\Window</Filter>
+      <Filter>Source\Window</Filter>
     </ClCompile>
     <ClCompile Include="Source\Game\Game.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source\Game</Filter>
     </ClCompile>
     <ClCompile Include="Source\Render\RaytracingRenderer.cpp">
-      <Filter>Source Files\Render</Filter>
+      <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\ShaderTable.cpp">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\ShaderRecord.cpp">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClCompile>
     <ClCompile Include="Source\AccelerationStructure\AccelerationStructure.cpp">
-      <Filter>Source Files\AccelerationStructure</Filter>
+      <Filter>Source\AccelerationStructure</Filter>
     </ClCompile>
     <ClCompile Include="Source\AccelerationStructure\BottomLevelAccelerationStructure.cpp">
-      <Filter>Source Files\AccelerationStructure</Filter>
+      <Filter>Source\AccelerationStructure</Filter>
     </ClCompile>
     <ClCompile Include="Source\AccelerationStructure\TopLevelAccelerationStructure.cpp">
-      <Filter>Source Files\AccelerationStructure</Filter>
+      <Filter>Source\AccelerationStructure</Filter>
     </ClCompile>
     <ClCompile Include="Source\Render\Renderable.cpp">
-      <Filter>Source Files\Render</Filter>
+      <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene\Scene.cpp">
-      <Filter>Source Files\Scene</Filter>
+      <Filter>Source\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\Camera\Camera.cpp">
-      <Filter>Source Files\Camera</Filter>
+      <Filter>Source\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Source\Light\PointLight.cpp">
-      <Filter>Source Files\Light</Filter>
+      <Filter>Source\Light</Filter>
     </ClCompile>
     <ClCompile Include="Source\RootSignature\RootSignature.cpp">
-      <Filter>Source Files\RootSignature</Filter>
+      <Filter>Source\RootSignature</Filter>
     </ClCompile>
     <ClCompile Include="Source\RootSignature\GlobalRootSignature.cpp">
-      <Filter>Source Files\RootSignature</Filter>
+      <Filter>Source\RootSignature</Filter>
     </ClCompile>
     <ClCompile Include="Source\RootSignature\LocalRootSignature.cpp">
-      <Filter>Source Files\RootSignature</Filter>
+      <Filter>Source\RootSignature</Filter>
     </ClCompile>
     <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp">
-      <Filter>Source Files\Render</Filter>
+      <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\RayGenerationShaderTable.cpp">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\HitGroupShaderTable.cpp">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderTable\MissShaderTable.cpp">
-      <Filter>Source Files\ShaderTable</Filter>
+      <Filter>Source\ShaderTable</Filter>
     </ClCompile>
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp">
-      <Filter>Source Files\RaytracingPipelineStateObject</Filter>
+      <Filter>Source\RaytracingPipelineStateObject</Filter>
     </ClCompile>
     <ClCompile Include="Source\Texture\Texture.cpp">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>Source\Texture</Filter>
     </ClCompile>
     <ClCompile Include="Source\Texture\Material.cpp">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>Source\Texture</Filter>
     </ClCompile>
     <ClCompile Include="Source\DescriptorHeap\DescriptorHeap.cpp">
-      <Filter>Source Files\DescriptorHeap</Filter>
+      <Filter>Source\DescriptorHeap</Filter>
     </ClCompile>
     <ClCompile Include="Source\DescriptorHeap\RTVDescriptorHeap.cpp">
-      <Filter>Source Files\DescriptorHeap</Filter>
+      <Filter>Source\DescriptorHeap</Filter>
     </ClCompile>
     <ClCompile Include="Source\DescriptorHeap\CBVSRVUAVDescriptorHeap.cpp">
-      <Filter>Source Files\DescriptorHeap</Filter>
+      <Filter>Source\DescriptorHeap</Filter>
     </ClCompile>
     <ClCompile Include="Source\pch.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

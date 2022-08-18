@@ -1,40 +1,49 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter Include="Source">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\Cube">
+    <Filter Include="Source\Cube">
       <UniqueIdentifier>{7a83dd63-ae73-4d1d-9d96-284890aaf236}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Light">
+    <Filter Include="Source\Light">
       <UniqueIdentifier>{a0925b43-caaf-419e-b08c-a93ffc12c416}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Plane">
+      <UniqueIdentifier>{a2312cfc-3f14-4b03-887e-c95c7793946d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Cube\BaseCube.cpp">
-      <Filter>Source Files\Cube</Filter>
+      <Filter>Source\Cube</Filter>
     </ClCompile>
     <ClCompile Include="Source\Light\RotatingLight.cpp">
-      <Filter>Source Files\Light</Filter>
+      <Filter>Source\Light</Filter>
     </ClCompile>
     <ClCompile Include="Source\pch_game.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plane\BasePlane.cpp">
+      <Filter>Source\Plane</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h">
-      <Filter>Source Files\Cube</Filter>
+      <Filter>Source\Cube</Filter>
     </ClInclude>
     <ClInclude Include="Header\Light\RotatingLight.h">
-      <Filter>Source Files\Light</Filter>
+      <Filter>Source\Light</Filter>
     </ClInclude>
     <ClInclude Include="Header\pch_game.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Plane\BasePlane.h">
+      <Filter>Source\Plane</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -3,9 +3,14 @@
 #include "Scene\Scene.h"
 #include "Game\Game.h"
 #include "Cube\BaseCube.h"
+#include "Plane\BasePlane.h"
 #include "Light\RotatingLight.h"
 #include "Texture\Texture.h"
 #include <DirectXColors.h>
+
+#define STRINGIFY(x) #x
+
+#define EXPAND(x) STRINGIFY(x)
 
 INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ INT nCmdShow)
 {
@@ -16,7 +21,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	
 	XMFLOAT4 color;
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(
+	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(//큐브1
 		XMVectorSet(0.5f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -24,7 +29,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(
+	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(//큐브2
 		XMVectorSet(-0.5f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -32,23 +37,33 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> plane = std::make_shared<BaseCube>(
+	std::shared_ptr<library::Renderable> plane = std::make_shared<BasePlane>(//바닥
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(5.f, 0.1f, 5.f, 1.f),
+		XMVectorSet(5.f, 1.f, 5.f, 1.f),
 		color
 	);
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
+	
+	std::filesystem::path projectDirPath;
+	{
+		std::string projectDirString = EXPAND(PROJECT_DIR);//project_dir의 문자열화
+		projectDirString.erase(0, 1);//Root제거
+		projectDirString.erase(projectDirString.size() - 2);// "\."제거
+		projectDirPath = projectDirString;
+	}
+	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
+	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
+	floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
+	
 
-	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();
-	floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/seafloor.dds"));
-
-	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();
-	woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(L"Assets/Texture/wood.jpg"));
-
+	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();//목재 텍스처
+	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
+	woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
+	std::filesystem::current_path();
 
 	
-	{//초기화해줄 Object들 Pass
+	{//Scene에서 초기화해줄 Object들 Pass
 		scene->AddRenderable(cube1);
 		scene->AddRenderable(cube2);
 		scene->AddRenderable(plane);
@@ -56,11 +71,11 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		scene->AddMaterial(floorMaterial);
 		scene->AddMaterial(woodMaterial);
 	}
-
-	cube1->SetMaterial(woodMaterial);
-	cube2->SetMaterial(woodMaterial);
-	plane->SetMaterial(floorMaterial);
-
+	{//Renderable=>Material 대응 세팅
+		cube1->SetMaterial(woodMaterial);
+		cube2->SetMaterial(woodMaterial);
+		plane->SetMaterial(floorMaterial);
+	}
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
 	{
