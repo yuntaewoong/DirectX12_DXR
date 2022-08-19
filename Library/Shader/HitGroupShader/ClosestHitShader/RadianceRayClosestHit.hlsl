@@ -171,6 +171,9 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);//반사용으로 Trace할 다음 Ray의 Direction
         float4 reflectionColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth);
         reflectedColor = mul(l_renderableCB.reflectivity, reflectionColor);
+        ambientColor = mul(1.f - l_renderableCB.reflectivity, ambientColor);
+        diffuseColor = mul(1.f - l_renderableCB.reflectivity, diffuseColor);
+        specullarColor = mul(1.f - l_renderableCB.reflectivity, specullarColor);
 
     }
     float3 color = ambientColor + diffuseColor + specullarColor + reflectedColor;
