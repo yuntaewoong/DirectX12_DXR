@@ -271,5 +271,8 @@
     <None Include="Shader\Include\HLSLCommon.hlsli">
       <Filter>Shader\Include</Filter>
     </None>
+    <None Include="Shader\Include\RadianceRayTrace.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
   </ItemGroup>
 </Project>

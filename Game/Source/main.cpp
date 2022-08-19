@@ -36,7 +36,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		color
 	);
 
-	XMStoreFloat4(&color, Colors::White);
+	XMStoreFloat4(&color, Colors::Coral);
 	std::shared_ptr<library::Renderable> plane = std::make_shared<BasePlane>(//바닥
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
@@ -62,17 +62,23 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		projectDirPath = projectDirString;
 	}
 	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
-	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
-	floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
+	//std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
 	
-
 	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();//목재 텍스처
 	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
-	woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
 	
-	std::shared_ptr<library::Material> emptyMaterial = std::make_shared<library::Material>();//Texture없는 Material
+	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>();//Texture없는 Material
 
-	
+	{//Material의 반사되는 정도 세팅(기본값은 0)
+		mirrorMaterial->SetReflectivity(0.9f);
+		floorMaterial->SetReflectivity(0.6f);
+		woodMaterial->SetReflectivity(0.1f);
+	}
+
+	{//Material=>Diffuse Texture대응 세팅
+		//floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
+		woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
+	}
 	{//Scene에서 초기화해줄 Object들 Pass
 		scene->AddRenderable(cube1);
 		scene->AddRenderable(cube2);
@@ -82,13 +88,13 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		scene->AddLight(light1);
 		scene->AddMaterial(floorMaterial);
 		scene->AddMaterial(woodMaterial);
-		scene->AddMaterial(emptyMaterial);
+		scene->AddMaterial(mirrorMaterial);
 	}
 	{//Renderable=>Material 대응 세팅
 		cube1->SetMaterial(woodMaterial);
 		cube2->SetMaterial(woodMaterial);
 		plane->SetMaterial(floorMaterial);
-		mirror->SetMaterial(emptyMaterial);
+		mirror->SetMaterial(mirrorMaterial);
 	}
 	game->GetRenderer()->SetMainScene(scene);//게임에서 사용할 Scene선택
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))

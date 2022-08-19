@@ -40,7 +40,8 @@ namespace library
             .cb = {
                 .world = XMMATRIX(),
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f),
-                .hasTexture = 0
+                .hasTexture = 0,
+                .reflectivity = 0.f
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
             .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
@@ -50,6 +51,7 @@ namespace library
         {
             rootArgument.cb.world = XMMatrixTranspose(renderables[i]->GetWorldMatrix());
             rootArgument.cb.albedo = renderables[i]->GetColor();
+            rootArgument.cb.reflectivity = renderables[i]->GetMaterial()->GetReflectivity();
             rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
             if (renderables[i]->GetMaterial()->HasDiffuseTexture())

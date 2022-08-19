@@ -1,4 +1,6 @@
+#pragma once
 #include "DataTypeSharedBothHLSLAndCPP.h"
+
 /*=================================================================
     g_(variable_name) ===> global root signature로 정의되는 Resource(매 프레임 1번씩 세팅)
 ==================================================================*/

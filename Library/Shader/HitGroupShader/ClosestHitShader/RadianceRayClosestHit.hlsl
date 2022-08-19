@@ -1,6 +1,6 @@
 #define HLSL
 #include "../../Include/HLSLCommon.hlsli"
-
+#include "../../Include/RadianceRayTrace.hlsli"
 
 
 /*================================================================================
@@ -91,8 +91,12 @@ float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal, float2 uv)
 
 
 // Shadow Ray를 이용해 그림자이면 true, 아니면 false리턴
-bool IsInShadow(in float3 hitPosition, in float3 lightPosition)
+bool IsInShadow(in float3 hitPosition, in float3 lightPosition,in UINT currentRayRecursionDepth)
 {
+    if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
+    {
+        return false;
+    }
     RayDesc rayDesc;
     rayDesc.Direction = normalize(lightPosition - hitPosition); //shadow ray 방향은 hit지점->light지점
     rayDesc.Origin = hitPosition;
@@ -119,13 +123,6 @@ bool IsInShadow(in float3 hitPosition, in float3 lightPosition)
 void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
     float3 hitPosition = HitWorldPosition();
-    bool isInShadow = false;
-    
-    if (IsInShadow(hitPosition, g_lightCB.position[0].xyz))//shadow ray를 이용한 그림자 검사
-    {
-        isInShadow = true;
-    }
-    
     uint indexSizeInBytes = 2; //index는 16비트
     uint indicesPerTriangle = 3; //삼각형은 Vertex가 3개
     uint triangleIndexStride = indicesPerTriangle * indexSizeInBytes; //primitive별로 끊어 읽어야하는 Index단위
@@ -146,23 +143,37 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         l_vertices[indices[2]].uv 
     };
     
-    
     float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
-    float2 triangleUV = HitAttributeFloat2(vertexUV, attr);//무게중심 좌표계로 UV값 보간하기
-    float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
-    if(l_renderableCB.hasTexture == 1)
-    {
-        ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
-    }
-    float3 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal,triangleUV);
-    float3 specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
-    if(isInShadow)
-    {
-        diffuseColor = diffuseColor * float3(0.1f, 0.1f, 0.1f);
-        specullarColor = specullarColor * float3(0.1f, 0.1f, 0.1f);
-    }
+    float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     
-    float3 color = ambientColor + diffuseColor+ specullarColor;
+    
+    float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
+    float3 diffuseColor = float3(0.f, 0.f, 0.f);
+    float3 specullarColor = float3(0.f, 0.f, 0.f);
+    
+    {//Phong Shading계산
+        if (l_renderableCB.hasTexture == 1)
+        {
+            ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+        }
+        diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal, triangleUV);
+        specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
+    }
+    {//Shadow Ray계산
+        if (IsInShadow(hitPosition, g_lightCB.position[0].xyz,payload.recursionDepth))
+        {
+            diffuseColor = diffuseColor * float3(0.1f, 0.1f, 0.1f);
+            specullarColor = specullarColor * float3(0.1f, 0.1f, 0.1f);
+        }
+    }
+    float3 reflectedColor = float3(0.f, 0.f, 0.f);
+    {//Reflection계산(추가 Radiance Ray이용)
+        float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);//반사용으로 Trace할 다음 Ray의 Direction
+        float4 reflectionColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth);
+        reflectedColor = mul(l_renderableCB.reflectivity, reflectionColor);
+
+    }
+    float3 color = ambientColor + diffuseColor + specullarColor + reflectedColor;
     payload.color = float4(color, 1);
     
     

@@ -23,9 +23,12 @@ namespace library
 			_In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap
 		);
 		void SetDiffuseTexture(_In_ const std::shared_ptr<Texture>& diffuse);
+		void SetReflectivity(_In_ FLOAT reflectivity);
 		const std::shared_ptr<Texture> GetDiffuseTexture() const;
+		FLOAT GetReflectivity() const;
 		BOOL HasDiffuseTexture() const;
 	private:
 		std::shared_ptr<Texture> m_diffuseTexture;
+		FLOAT m_reflectivity;//반사되는 정도 (1:거울, 0:완전 빛 흡수)
 	};
 }

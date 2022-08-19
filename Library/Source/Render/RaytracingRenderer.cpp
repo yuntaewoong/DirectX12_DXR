@@ -167,7 +167,8 @@ namespace library
         D3D12_RESOURCE_BARRIER preCopyBarriers[2] = {};
         preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
             currentRenderTarget.Get(),
-            D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_COPY_DEST
+            D3D12_RESOURCE_STATE_COMMON,
+            D3D12_RESOURCE_STATE_COPY_DEST
         );//Render Target을 Copy목적지로 전이
         preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
             m_raytracingOutput.Get(),
@@ -180,7 +181,8 @@ namespace library
         D3D12_RESOURCE_BARRIER postCopyBarriers[2] = {};
         postCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
             currentRenderTarget.Get(),
-            D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT
+            D3D12_RESOURCE_STATE_COPY_DEST, 
+            D3D12_RESOURCE_STATE_COMMON
         );//Render Target을 present단계로 만들기
         postCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
             m_raytracingOutput.Get(),

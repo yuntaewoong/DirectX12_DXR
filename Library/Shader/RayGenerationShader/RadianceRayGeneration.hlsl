@@ -1,6 +1,6 @@
 #define HLSL
 #include "../Include/HLSLCommon.hlsli"
-
+#include "../Include/RadianceRayTrace.hlsli"
 
 // Screen Space Ray를 World Space Ray로 변환
 // index: screen 좌표(해상도 별로 상이), origin: world좌표,  direction: world방향
@@ -26,24 +26,9 @@ void MyRaygenShader()
     float3 origin;
     GenerateCameraRay(DispatchRaysIndex().xy, origin, rayDir); //World Space Ray생성
     
-    
-    RayDesc ray;
-    ray.Origin = origin;
-    ray.Direction = rayDir;
-    ray.TMin = 0.001f;
-    ray.TMax = 10000.0;
-    RayPayload payload = { float4(0, 0, 0, 0) };
-    TraceRay(
-        g_scene, //acceleration structure
-        RAY_FLAG_NONE, //딱히 플래그를 주지 않음
-        TraceRayParameters::InstanceMask, //instance mask
-        TraceRayParameters::HitGroupOffset[RayType::Radiance], //hit group base index설정(공식:trace ray설정 index+ instance index + (geometry index * geometry stride)
-        TraceRayParameters::GeometryStride, //geometry stride
-        TraceRayParameters::MissShaderOffset[RayType::Radiance], //miss shader index
-        ray, //ray 정보
-        payload //payload
-    );
- 
-    g_renderTarget[DispatchRaysIndex().xy] = payload.color;
+    float4 color = float4(0.f, 0.f, 0.f, 1.f);
+    uint currentRecursionDepth = 0u;
+    color = TraceRadianceRay(origin, rayDir, currentRecursionDepth);
+    g_renderTarget[DispatchRaysIndex().xy] = color;
 
 }

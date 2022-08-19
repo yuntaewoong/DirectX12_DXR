@@ -4,7 +4,8 @@
 namespace library
 {
 	Material::Material() :
-		m_diffuseTexture(nullptr)
+		m_diffuseTexture(nullptr),
+		m_reflectivity(0.f)
 	{}
 
 	HRESULT Material::Initialize(
@@ -29,9 +30,17 @@ namespace library
 	{
 		m_diffuseTexture = diffuse;
 	}
+	void Material::SetReflectivity(_In_ FLOAT reflectivity)
+	{
+		m_reflectivity = reflectivity;
+	}
 	const std::shared_ptr<Texture> Material::GetDiffuseTexture() const
 	{
 		return m_diffuseTexture;
+	}
+	FLOAT Material::GetReflectivity() const
+	{
+		return m_reflectivity;
 	}
 	BOOL Material::HasDiffuseTexture() const
 	{
