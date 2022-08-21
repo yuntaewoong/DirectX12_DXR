@@ -22,7 +22,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	XMFLOAT4 color;
 	XMStoreFloat4(&color, Colors::White);
 	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(//큐브1
-		XMVectorSet(0.5f, 0.6f, 0.f, 1.0f),
+		XMVectorSet(0.6f, 0.0f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
 		color
@@ -30,11 +30,20 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 	XMStoreFloat4(&color, Colors::White);
 	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(//큐브2
-		XMVectorSet(-0.5f, 0.6f, 0.f, 1.0f),
+		XMVectorSet(-0.6f, 0.0f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
 		color
 	);
+
+	XMStoreFloat4(&color, Colors::White);
+	std::shared_ptr<library::Renderable> cube3 = std::make_shared<BaseCube>(//큐브3
+		XMVectorSet(0.0f, 0.6f, 0.f, 1.0f),
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
+		color
+	);
+
 
 	XMStoreFloat4(&color, Colors::Coral);
 	std::shared_ptr<library::Renderable> plane = std::make_shared<BasePlane>(//바닥
@@ -62,7 +71,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		projectDirPath = projectDirString;
 	}
 	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
-	//std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
+	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
 	
 	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();//목재 텍스처
 	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
@@ -71,17 +80,18 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 	{//Material의 반사되는 정도 세팅(기본값은 0)
 		mirrorMaterial->SetReflectivity(0.9f);
-		floorMaterial->SetReflectivity(0.6f);
-		woodMaterial->SetReflectivity(0.1f);
+		floorMaterial->SetReflectivity(0.0f);
+		woodMaterial->SetReflectivity(0.0f);
 	}
 
 	{//Material=>Diffuse Texture대응 세팅
-		//floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
+		floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
 		woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
 	}
 	{//Scene에서 초기화해줄 Object들 Pass
 		scene->AddRenderable(cube1);
 		scene->AddRenderable(cube2);
+		scene->AddRenderable(cube3);
 		scene->AddRenderable(plane);
 		scene->AddRenderable(mirror);
 
@@ -93,6 +103,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	{//Renderable=>Material 대응 세팅
 		cube1->SetMaterial(woodMaterial);
 		cube2->SetMaterial(woodMaterial);
+		cube3->SetMaterial(woodMaterial);
 		plane->SetMaterial(floorMaterial);
 		mirror->SetMaterial(mirrorMaterial);
 	}

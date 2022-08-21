@@ -76,7 +76,7 @@ float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
     {
         diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남       
     }
-    return l_renderableCB.albedo * nDotL * diffuseTexelColor;
+    return l_renderableCB.albedo.xyz * nDotL * diffuseTexelColor;
 }
 
 // Specullar계산

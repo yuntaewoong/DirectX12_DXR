@@ -86,7 +86,7 @@ namespace library
     void RaytracingPipelineStateObject::createPipelineConfigSubobject()
     {
         CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT* pipelineConfig = m_stateObjectDesc.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();// 파이프라인 config 서브오브젝트 생성 
-        UINT maxRecursionDepth = MAX_RECURSION_DEPTH;//2번만 recursion 하겠다(1: 기본 shading용, 2:shadow ray용)
+        UINT maxRecursionDepth = MAX_RECURSION_DEPTH;
         pipelineConfig->Config(maxRecursionDepth);//적용
     }
 }
