@@ -4,8 +4,11 @@
 #include "CompiledShaders\RadianceRayGeneration.hlsl.h"
 #include "CompiledShaders\RadianceRayClosestHit.hlsl.h"
 #include "CompiledShaders\ShadowRayClosestHit.hlsl.h"
+#include "CompiledShaders\RTAORayClosestHit.hlsl.h"
 #include "CompiledShaders\RadianceRayMiss.hlsl.h"
 #include "CompiledShaders\ShadowRayMiss.hlsl.h"
+#include "CompiledShaders\RTAORayMiss.hlsl.h"
+
 
 
 namespace library
@@ -43,8 +46,10 @@ namespace library
         createDXILSubobject(static_cast<const void*>(g_pRadianceRayGeneration), ARRAYSIZE(g_pRadianceRayGeneration), RAY_GEN_SHADER_NAME);
         createDXILSubobject(static_cast<const void*>(g_pRadianceRayClosestHit), ARRAYSIZE(g_pRadianceRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Radiance]);
         createDXILSubobject(static_cast<const void*>(g_pShadowRayClosestHit), ARRAYSIZE(g_pShadowRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Shadow]);
+        createDXILSubobject(static_cast<const void*>(g_pRTAORayClosestHit), ARRAYSIZE(g_pRTAORayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::RTAO]);
         createDXILSubobject(static_cast<const void*>(g_pRadianceRayMiss), ARRAYSIZE(g_pRadianceRayMiss), MISS_SHADER_NAMES[RayType::Radiance]);
         createDXILSubobject(static_cast<const void*>(g_pShadowRayMiss), ARRAYSIZE(g_pShadowRayMiss), MISS_SHADER_NAMES[RayType::Shadow]);
+        createDXILSubobject(static_cast<const void*>(g_pRTAORayMiss), ARRAYSIZE(g_pRTAORayMiss), MISS_SHADER_NAMES[RayType::RTAO]);
     }
     void RaytracingPipelineStateObject::createDXILSubobject(_In_ const void* pShaderByteCode, _In_ SIZE_T shaderByteCodeSize, _In_ LPCWSTR entryPointName)
     {

@@ -1,7 +1,8 @@
 #define HLSL
 #include "../../Include/HLSLCommon.hlsli"
 #include "../../Include/RadianceRayTrace.hlsli"
-
+#include "../../Include/ShadowRayTrace.hlsli"
+#include "../../Include/RTAORayTrace.hlsli"
 
 /*================================================================================
     l_(variable_name) ===> local root signature로 정의되는 Resource(매 프레임 Shader Table 각각 알맞게 세팅)
@@ -90,35 +91,6 @@ float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal, float2 uv)
 }
 
 
-// Shadow Ray를 이용해 그림자이면 true, 아니면 false리턴
-bool IsInShadow(in float3 hitPosition, in float3 lightPosition,in UINT currentRayRecursionDepth)
-{
-    if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
-    {
-        return false;
-    }
-    RayDesc rayDesc;
-    rayDesc.Direction = normalize(lightPosition - hitPosition); //shadow ray 방향은 hit지점->light지점
-    rayDesc.Origin = hitPosition;
-    rayDesc.TMin = 0.001f;
-    rayDesc.TMax = 10000.f;
-    
-    ShadowRayPayload shadowPayload;
-    shadowPayload.hit = 1.f; //closest hit시 값으로 초기화
-    
-    TraceRay(
-        g_scene, //acceleration structure
-        RAY_FLAG_SKIP_CLOSEST_HIT_SHADER, //closest hit shader무시(속도 향상)(나중에 필요해질때는 무시 안하게될듯)
-        TraceRayParameters::InstanceMask, //instance mask딱히 설정 x
-        TraceRayParameters::HitGroupOffset[RayType::Shadow], //hit group index
-        TraceRayParameters::GeometryStride, //shader table에서 geometry들 간의 간격
-        TraceRayParameters::MissShaderOffset[RayType::Shadow], //miss shader table에서 사용할 miss shader의 index
-        rayDesc, //ray 정보
-        shadowPayload //payload
-    );
-    return shadowPayload.hit > 0.5f; //0.5f보다 크다는 의미는 miss shader가 호출되지 않아서 그림자 영역에 존재한다는 의미
-}
-
 [shader("closesthit")]
 void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
@@ -150,23 +122,26 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
     float3 diffuseColor = float3(0.f, 0.f, 0.f);
     float3 specullarColor = float3(0.f, 0.f, 0.f);
-    
+    float3 reflectedColor = float3(0.f, 0.f, 0.f);
+    {//RTAO(Ray Tracing Ambient Occlusion 계산)
+        ambientColor = TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
+        ambientColor /= 3.f; //너무 밝지않게 조절
+    }
     {//Phong Shading계산
         if (l_renderableCB.hasTexture == 1)
         {
-            ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+            //ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
         }
         diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal, triangleUV);
         specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
     }
     {//Shadow Ray계산
-        if (IsInShadow(hitPosition, g_lightCB.position[0].xyz,payload.recursionDepth))
+        if (TraceShadowRay(hitPosition, g_lightCB.position[0].xyz,payload.recursionDepth))
         {
             diffuseColor = diffuseColor * float3(0.1f, 0.1f, 0.1f);
             specullarColor = specullarColor * float3(0.1f, 0.1f, 0.1f);
         }
     }
-    float3 reflectedColor = float3(0.f, 0.f, 0.f);
     {//Reflection계산(추가 Radiance Ray이용)
         float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);//반사용으로 Trace할 다음 Ray의 Direction
         float4 reflectionColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth);
@@ -174,11 +149,8 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         ambientColor = mul(1.f - l_renderableCB.reflectivity, ambientColor);
         diffuseColor = mul(1.f - l_renderableCB.reflectivity, diffuseColor);
         specullarColor = mul(1.f - l_renderableCB.reflectivity, specullarColor);
-
     }
-    float3 color = ambientColor + diffuseColor + specullarColor + reflectedColor;
+    float3 color = saturate(ambientColor + (reflectedColor + specullarColor + diffuseColor) * float3(0.0001f, 0.0001f, 0.0001f));
     payload.color = float4(color, 1);
-    
-    
 
 }

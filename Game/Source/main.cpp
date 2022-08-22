@@ -44,6 +44,21 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		color
 	);
 
+	XMStoreFloat4(&color, Colors::White);
+	std::shared_ptr<library::Renderable> cube4 = std::make_shared<BaseCube>(//큐브4
+		XMVectorSet(0.0f, 0.0f, 0.6f, 1.0f),
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
+		color
+	);
+
+	XMStoreFloat4(&color, Colors::White);
+	std::shared_ptr<library::Renderable> cube5 = std::make_shared<BaseCube>(//큐브5
+		XMVectorSet(0.0f, 0.0f, -0.6f, 1.0f),
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
+		color
+	);
 
 	XMStoreFloat4(&color, Colors::Coral);
 	std::shared_ptr<library::Renderable> plane = std::make_shared<BasePlane>(//바닥
@@ -85,13 +100,15 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	}
 
 	{//Material=>Diffuse Texture대응 세팅
-		floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
+		//floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
 		woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
 	}
 	{//Scene에서 초기화해줄 Object들 Pass
 		scene->AddRenderable(cube1);
 		scene->AddRenderable(cube2);
 		scene->AddRenderable(cube3);
+		scene->AddRenderable(cube4);
+		scene->AddRenderable(cube5);
 		scene->AddRenderable(plane);
 		scene->AddRenderable(mirror);
 
@@ -104,6 +121,8 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		cube1->SetMaterial(woodMaterial);
 		cube2->SetMaterial(woodMaterial);
 		cube3->SetMaterial(woodMaterial);
+		cube4->SetMaterial(woodMaterial);
+		cube5->SetMaterial(woodMaterial);
 		plane->SetMaterial(floorMaterial);
 		mirror->SetMaterial(mirrorMaterial);
 	}

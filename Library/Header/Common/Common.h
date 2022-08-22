@@ -25,16 +25,19 @@ namespace library
     {
         L"MyClosestHitShader",
         L"MyShadowRayClosestHitShader",
+        L"RTAORayClosestHitShader"
     };
     constexpr LPCWSTR MISS_SHADER_NAMES[RayType::Count] =
     {
         L"MyMissShader",
-        L"MyShadowRayMissShader"
+        L"MyShadowRayMissShader",
+        L"RTAORayMissShader"
     };
     constexpr LPCWSTR HIT_GROUP_NAMES[RayType::Count] =
     {
         L"MyHitGroup", 
-        L"MyShadowRayHitGroup"
+        L"MyShadowRayHitGroup",
+        L"RTAOHitGroup"
     };
 
     /*==========================================

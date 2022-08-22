@@ -28,10 +28,10 @@ namespace library
         구조는 아래와 같음
         record[0] == Renderable[0] radiance hit group
         record[1] == Renderable[0] shadow hit group
-        record[2] == Renderable[1] radiance hit group
-        record[3] == Renderable[1] shadow hit group
-        record[4] == Renderable[2] radiance hit group
-        record[5] == Renderable[2] shadow hit group
+        record[2] == Renderable[0] RTAO hit group
+        record[3] == Renderable[1] radiance hit group
+        record[4] == Renderable[1] shadow hit group
+        record[5] == Renderable[1] RTAO hit group
         ...
         .
         ....
@@ -54,14 +54,11 @@ namespace library
             rootArgument.cb.reflectivity = renderables[i]->GetMaterial()->GetReflectivity();
             rootArgument.vbGPUAddress = renderables[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = renderables[i]->GetIndexBuffer()->GetGPUVirtualAddress();
+            rootArgument.cb.hasTexture = 0u;
             if (renderables[i]->GetMaterial()->HasDiffuseTexture())
             {
                 rootArgument.cb.hasTexture = 1u;
                 rootArgument.diffuseTextureDescriptorHandle = renderables[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
-            }
-            else
-            {
-                rootArgument.cb.hasTexture = 0u;
             }
             for (UINT j = 0; j < RayType::Count; j++)
             {

@@ -266,12 +266,24 @@
     <FxCompile Include="Shader\MissShader\ShadowRayMiss.hlsl">
       <Filter>Shader\MissShader</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RTAORayClosestHit.hlsl">
+      <Filter>Shader\HitGroupShader\ClosestHitShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MissShader\RTAORayMiss.hlsl">
+      <Filter>Shader\MissShader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Include\HLSLCommon.hlsli">
       <Filter>Shader\Include</Filter>
     </None>
     <None Include="Shader\Include\RadianceRayTrace.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
+    <None Include="Shader\Include\ShadowRayTrace.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
+    <None Include="Shader\Include\RTAORayTrace.hlsli">
       <Filter>Shader\Include</Filter>
     </None>
   </ItemGroup>
