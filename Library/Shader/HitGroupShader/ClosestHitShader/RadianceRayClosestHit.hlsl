@@ -130,7 +130,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     {//Phong Shading°è»ê
         if (l_renderableCB.hasTexture == 1)
         {
-            //ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+            ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
         }
         diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal, triangleUV);
         specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
@@ -150,7 +150,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         diffuseColor = mul(1.f - l_renderableCB.reflectivity, diffuseColor);
         specullarColor = mul(1.f - l_renderableCB.reflectivity, specullarColor);
     }
-    float3 color = saturate(ambientColor + (reflectedColor + specullarColor + diffuseColor) * float3(0.0001f, 0.0001f, 0.0001f));
+    float3 color = saturate(ambientColor + reflectedColor + specullarColor + diffuseColor);
     payload.color = float4(color, 1);
 
 }

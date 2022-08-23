@@ -9,7 +9,7 @@ float3 TraceRTAORay(in float3 hitPosition, in float3 hitNormal, in UINT currentR
 {
     /*RTAO Ray샘플링 전략: 본래 Random Direction을 설정해서(1개정도) 그 후 이전 프레임 데이터로 Denoising을 하는것이 가장 성능 부하를 덜 먹고 좋은 퀄리티를 뽑을 수 있으나
         내 프로젝트에서는 특정 Direction을 잡아서 Denoising없이 가는것으로 결정(간단하니까)
-        특정 Direction에다가 Ray를 쏴주기 위해서는 hit position에 대응하는 TBN Matrix(World->tangent space)를 구해서(구하는법:Normal+ Normal에 직교하는 임의의 벡터+ 앞에 2놈 외적한 벡터를 축으로 삼음)
+        특정 Direction에다가 Ray를 쏴주기 위해서는 hit position에 대응하는 TBN Matrix(tangent->world space)를 구해서(구하는법:Normal+ Normal에 직교하는 임의의 벡터+ 앞에 2놈 외적한 벡터를 축으로 삼음)
         Tangent Space에 정의된 Ray방향 * TBN Matrix해서 ray direction을 결정하면 됨
     */
     if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)

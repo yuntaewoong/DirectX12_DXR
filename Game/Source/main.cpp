@@ -95,7 +95,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 	{//Material의 반사되는 정도 세팅(기본값은 0)
 		mirrorMaterial->SetReflectivity(0.9f);
-		floorMaterial->SetReflectivity(0.0f);
+		floorMaterial->SetReflectivity(0.6f);
 		woodMaterial->SetReflectivity(0.0f);
 	}
 
