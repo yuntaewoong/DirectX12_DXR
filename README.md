@@ -11,6 +11,14 @@ git clone repository
 2. Open ```DirectX12_DXR.sln```
 3. Build And Run(RTX Graphic Hardware Required)
 
+# Control
+`w` : front  
+`a` : left  
+`s` : back  
+`d` : right  
+`shift` : down  
+`space` : up  
+
 
 # Develop Schedule
 (22'07'23 ~ 22'08'22)  
