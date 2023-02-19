@@ -1,7 +1,8 @@
 <img src = "Image/Final.png" width = "600" height = "400">
 
 # DirectX12_DXR_Renderer
-This application is DirectX12 Toy Renderer Using basic DXR Ray tracing 
+This application is DirectX12 Toy Renderer Using basic DXR Ray tracing   
+[YouTubeLink](https://www.youtube.com/watch?v=3sq5kmFZCIY)
 
 # Project Build
 1. Clone This Repository
