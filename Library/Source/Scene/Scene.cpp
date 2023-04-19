@@ -25,6 +25,14 @@ namespace library
                 return hr;
             }
         }
+        for (UINT i = 0; i < m_models.size(); i++)
+        {
+            hr = m_models[i]->Initialize(pDevice);
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+        }
         for (UINT i = 0; i < m_lights.size(); i++)
         {
             hr = m_lights[i]->Initialize(pDevice);
@@ -51,6 +59,10 @@ namespace library
     void Scene::AddRenderable(_In_ const std::shared_ptr<Renderable>& pRenderable)
     {
         m_renderables.push_back(pRenderable);
+    }
+    void Scene::AddModel(const std::shared_ptr<Model>& pModel)
+    {
+        m_models.push_back(pModel);
     }
     void Scene::AddMaterial(_In_ const std::shared_ptr<Material>& pMaterial)
     {

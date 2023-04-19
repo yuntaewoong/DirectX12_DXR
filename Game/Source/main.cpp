@@ -6,6 +6,7 @@
 #include "Plane\BasePlane.h"
 #include "Light\RotatingLight.h"
 #include "Texture\Texture.h"
+#include "Model\Model.h"
 #include <DirectXColors.h>
 
 #define STRINGIFY(x) #x
@@ -16,7 +17,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
-	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Ambient Occlusion테스트",800,600);
+	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱",800,600);
 	std::shared_ptr<library::Scene> scene = std::make_shared<library::Scene>();
 	
 	XMFLOAT4 color;
@@ -76,6 +77,13 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		color
 	);
 
+	std::shared_ptr<library::Model> cyborg = std::make_shared<library::Model>(//사이보그 모델
+		L"Assets/Model/cyborg",
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(5.f, 5.f, 5.f, 1.f)
+	);
+
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
 	
 	std::filesystem::path projectDirPath;
@@ -111,6 +119,8 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		scene->AddRenderable(cube5);
 		scene->AddRenderable(plane);
 		scene->AddRenderable(mirror);
+
+		scene->AddModel(cyborg);
 
 		scene->AddLight(light1);
 		scene->AddMaterial(floorMaterial);

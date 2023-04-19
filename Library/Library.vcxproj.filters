@@ -65,6 +65,9 @@
     <Filter Include="Source\ThirdParty">
       <UniqueIdentifier>{3a615aa6-0fb9-419d-bb7b-4a60fe3d6be4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Model">
+      <UniqueIdentifier>{c27df9c7-e22b-4453-91f2-6f4feb6606b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
@@ -169,6 +172,9 @@
     <ClInclude Include="Header\pch.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Model\Model.h">
+      <Filter>Source\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -248,6 +254,9 @@
     </ClCompile>
     <ClCompile Include="Source\pch.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Model\Model.cpp">
+      <Filter>Source\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
