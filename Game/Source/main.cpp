@@ -16,7 +16,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
-	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Ambient Occlusion테스트",1920,1080);
+	std::unique_ptr<library::Game> game = std::make_unique<library::Game>(L"D3D12 레이트레이싱 Ambient Occlusion테스트",800,600);
 	std::shared_ptr<library::Scene> scene = std::make_shared<library::Scene>();
 	
 	XMFLOAT4 color;
