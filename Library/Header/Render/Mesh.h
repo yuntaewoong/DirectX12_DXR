@@ -4,20 +4,20 @@
 #include "Texture\Material.h"
 namespace library
 {
-	class Renderable
+	class Mesh
 	{
 	public:
-		Renderable(
+		Mesh(
 			_In_ XMVECTOR location,
 			_In_ XMVECTOR rotation,
 			_In_ XMVECTOR scale,
 			_In_ XMFLOAT4 color
 		);
-		Renderable(const Renderable& other) = delete;
-		Renderable(Renderable&& other) = delete;
-		Renderable& operator=(const Renderable& other) = delete;
-		Renderable& operator=(Renderable&& other) = delete;
-		~Renderable() = default;
+		Mesh(const Mesh& other) = delete;
+		Mesh(Mesh&& other) = delete;
+		Mesh& operator=(const Mesh& other) = delete;
+		Mesh& operator=(Mesh&& other) = delete;
+		~Mesh() = default;
 
 		virtual HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice) = 0;
 		virtual void Update(_In_ FLOAT deltaTime) = 0;
@@ -34,7 +34,6 @@ namespace library
 		const virtual Index* GetIndices() const = 0;
 		HRESULT initialize(_In_ const ComPtr<ID3D12Device>& pDevice);
 	private:
-		
 		HRESULT createVertexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
 		HRESULT createIndexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
 	private:

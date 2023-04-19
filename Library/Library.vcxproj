@@ -205,7 +205,7 @@
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h" />
     <ClInclude Include="Header\Render\RaytracingRenderer.h" />
-    <ClInclude Include="Header\Render\Renderable.h" />
+    <ClInclude Include="Header\Render\Mesh.h" />
     <ClInclude Include="Header\RootSignature\GlobalRootSignature.h" />
     <ClInclude Include="Header\RootSignature\LocalRootSignature.h" />
     <ClInclude Include="Header\RootSignature\RootSignature.h" />
@@ -241,7 +241,7 @@
     </ClCompile>
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp" />
     <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp" />
-    <ClCompile Include="Source\Render\Renderable.cpp" />
+    <ClCompile Include="Source\Render\Mesh.cpp" />
     <ClCompile Include="Source\Render\RaytracingRenderer.cpp" />
     <ClCompile Include="Source\RootSignature\GlobalRootSignature.cpp" />
     <ClCompile Include="Source\RootSignature\LocalRootSignature.cpp" />

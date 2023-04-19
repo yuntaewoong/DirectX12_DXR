@@ -50,7 +50,7 @@ namespace library
         for (INT i = 0; i < m_instanceDescs.size(); i++)
         {
             XMFLOAT4X4 transform;
-            XMStoreFloat4x4(&transform, XMMatrixTranspose(m_bottomLevelAccelerationStructures[i]->GetRenderable()->GetWorldMatrix()));
+            XMStoreFloat4x4(&transform, XMMatrixTranspose(m_bottomLevelAccelerationStructures[i]->GetMesh()->GetWorldMatrix()));
             m_instanceDescs[i] = {
                 .Transform = {
                     transform._11,transform._12,transform._13,transform._14,
@@ -60,7 +60,7 @@ namespace library
                 .InstanceID = static_cast<UINT>(i),
                 .InstanceMask = 1,
                 .InstanceContributionToHitGroupIndex = static_cast<UINT>(i) * RayType::Count,//일단 각 Renderable에는 Geometry가 1개만 있다고 생각(추후 모델 추가할때 변경)
-                .AccelerationStructure = m_bottomLevelAccelerationStructures[i]->GetAccelerationStructure   ()->GetGPUVirtualAddress()
+                .AccelerationStructure = m_bottomLevelAccelerationStructures[i]->GetAccelerationStructure()->GetGPUVirtualAddress()
             };
         }
         CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);

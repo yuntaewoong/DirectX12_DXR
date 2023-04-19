@@ -245,11 +245,11 @@ namespace library
         {
             return hr;
         }
-        {//AS를 이루게 되는 Renderable들 추출
-            const std::vector<std::shared_ptr<Renderable>>& renderables = m_scene->GetRenderables();
-            for (UINT i = 0; i < renderables.size(); i++)
+        {//BLAS를 이루게 되는 Mesh들 추출
+            const std::vector<std::shared_ptr<Mesh>>& meshes = m_scene->GetMeshes();
+            for (UINT i = 0; i < meshes.size(); i++)
             {
-                m_bottomLevelAccelerationStructures.push_back(std::make_unique<BottomLevelAccelerationStructure>(renderables[i]));
+                m_bottomLevelAccelerationStructures.push_back(std::make_unique<BottomLevelAccelerationStructure>(meshes[i]));
             }
         }
         {//TLAS,BLAS초기화(command List매핑)
@@ -294,7 +294,7 @@ namespace library
         hr = m_hitGroupShaderTable.Initialize(
             pDevice,
             m_raytracingPipelineStateObject.GetStateObject(),
-            m_scene->GetRenderables()
+            m_scene->GetMeshes()
         );//hit group table을 초기화 하기 위해서는 renderable들의 정보가 필요
         if (FAILED(hr))
         {

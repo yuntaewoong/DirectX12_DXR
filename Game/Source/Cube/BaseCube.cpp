@@ -7,12 +7,12 @@ BaseCube::BaseCube(
 	_In_ XMVECTOR scale,
 	_In_ XMFLOAT4 color
 ) :
-	Renderable::Renderable(location,rotation,scale,color)
+	Mesh::Mesh(location,rotation,scale,color)
 {}
 HRESULT BaseCube::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
 {
 	HRESULT hr = S_OK;
-	hr = Renderable::initialize(pDevice);
+	hr = Mesh::initialize(pDevice);
 	if (FAILED(hr))
 	{
 		return hr;

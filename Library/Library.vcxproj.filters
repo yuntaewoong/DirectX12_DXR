@@ -109,7 +109,7 @@
     <ClInclude Include="Header\Render\RaytracingRenderer.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Header\Render\Renderable.h">
+    <ClInclude Include="Header\Render\Mesh.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Header\RootSignature\GlobalRootSignature.h">
@@ -201,7 +201,7 @@
     <ClCompile Include="Source\AccelerationStructure\TopLevelAccelerationStructure.cpp">
       <Filter>Source\AccelerationStructure</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Render\Renderable.cpp">
+    <ClCompile Include="Source\Render\Mesh.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene\Scene.cpp">

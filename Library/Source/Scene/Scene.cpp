@@ -3,7 +3,7 @@
 namespace library
 {
     Scene::Scene() :
-        m_renderables(),
+        m_meshes(),
         m_lights(),
         m_materials(),
         m_pointLightsConstantBuffer(nullptr),
@@ -17,22 +17,22 @@ namespace library
     )
     {
         HRESULT hr = S_OK;
-        for (UINT i = 0; i < m_renderables.size(); i++)
+        for (UINT i = 0; i < m_meshes.size(); i++)
         {
-            hr = m_renderables[i]->Initialize(pDevice);
+            hr = m_meshes[i]->Initialize(pDevice);
             if (FAILED(hr))
             {
                 return hr;
             }
         }
-        for (UINT i = 0; i < m_models.size(); i++)
+        /*for (UINT i = 0; i < m_models.size(); i++)
         {
             hr = m_models[i]->Initialize(pDevice);
             if (FAILED(hr))
             {
                 return hr;
             }
-        }
+        }*/
         for (UINT i = 0; i < m_lights.size(); i++)
         {
             hr = m_lights[i]->Initialize(pDevice);
@@ -56,21 +56,21 @@ namespace library
         }
         return hr;
     }
-    void Scene::AddRenderable(_In_ const std::shared_ptr<Renderable>& pRenderable)
+    void Scene::AddMesh(_In_ const std::shared_ptr<Mesh>& pRenderable)
     {
-        m_renderables.push_back(pRenderable);
+        m_meshes.push_back(pRenderable);
     }
-    void Scene::AddModel(const std::shared_ptr<Model>& pModel)
+    /*void Scene::AddModel(const std::shared_ptr<Model>& pModel)
     {
         m_models.push_back(pModel);
-    }
+    }*/
     void Scene::AddMaterial(_In_ const std::shared_ptr<Material>& pMaterial)
     {
         m_materials.push_back(pMaterial);
     }
-    const std::vector<std::shared_ptr<Renderable>>& Scene::GetRenderables() const
+    const std::vector<std::shared_ptr<Mesh>>& Scene::GetMeshes() const
     {
-        return m_renderables;
+        return m_meshes;
     }
     void Scene::AddLight(_In_ const std::shared_ptr<PointLight>& pLight)
     {
@@ -78,9 +78,9 @@ namespace library
     }
     void Scene::Update(_In_ FLOAT deltaTime)
     {
-        for (UINT i = 0; i < m_renderables.size(); i++)
+        for (UINT i = 0; i < m_meshes.size(); i++)
         {
-            m_renderables[i]->Update(deltaTime);
+            m_meshes[i]->Update(deltaTime);
         }
         for (UINT i = 0; i < m_lights.size(); i++)
         {

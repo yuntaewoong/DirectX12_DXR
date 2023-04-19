@@ -6,7 +6,7 @@
 #include "Plane\BasePlane.h"
 #include "Light\RotatingLight.h"
 #include "Texture\Texture.h"
-#include "Model\Model.h"
+//#include "Model\Model.h"
 #include <DirectXColors.h>
 
 #define STRINGIFY(x) #x
@@ -22,7 +22,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	
 	XMFLOAT4 color;
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube1 = std::make_shared<BaseCube>(//큐브1
+	std::shared_ptr<library::Mesh> cube1 = std::make_shared<BaseCube>(//큐브1
 		XMVectorSet(0.6f, 0.0f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -30,7 +30,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube2 = std::make_shared<BaseCube>(//큐브2
+	std::shared_ptr<library::Mesh> cube2 = std::make_shared<BaseCube>(//큐브2
 		XMVectorSet(-0.6f, 0.0f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -38,7 +38,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube3 = std::make_shared<BaseCube>(//큐브3
+	std::shared_ptr<library::Mesh> cube3 = std::make_shared<BaseCube>(//큐브3
 		XMVectorSet(0.0f, 0.6f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -46,7 +46,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube4 = std::make_shared<BaseCube>(//큐브4
+	std::shared_ptr<library::Mesh> cube4 = std::make_shared<BaseCube>(//큐브4
 		XMVectorSet(0.0f, 0.0f, 0.6f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -54,7 +54,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> cube5 = std::make_shared<BaseCube>(//큐브5
+	std::shared_ptr<library::Mesh> cube5 = std::make_shared<BaseCube>(//큐브5
 		XMVectorSet(0.0f, 0.0f, -0.6f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f),
@@ -62,7 +62,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::Coral);
-	std::shared_ptr<library::Renderable> plane = std::make_shared<BasePlane>(//바닥
+	std::shared_ptr<library::Mesh> plane = std::make_shared<BasePlane>(//바닥
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(5.f, 1.f, 5.f, 1.f),
@@ -70,19 +70,19 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	);
 
 	XMStoreFloat4(&color, Colors::White);
-	std::shared_ptr<library::Renderable> mirror = std::make_shared<BasePlane>(//거울
+	std::shared_ptr<library::Mesh> mirror = std::make_shared<BasePlane>(//거울
 		XMVectorSet(0.f, 0.6f, 2.5f, 1.0f),
 		XMVectorSet(0.f, XM_PIDIV2, XM_PIDIV2, 1.0f),
 		XMVectorSet(5.f, 1.f, 5.f, 1.f),
 		color
 	);
 
-	std::shared_ptr<library::Model> cyborg = std::make_shared<library::Model>(//사이보그 모델
-		L"Assets/Model/cyborg",
-		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(5.f, 5.f, 5.f, 1.f)
-	);
+	//std::shared_ptr<library::Model> cyborg = std::make_shared<library::Model>(//사이보그 모델
+	//	L"Assets/Model/cyborg",
+	//	XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+	//	XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+	//	XMVectorSet(5.f, 5.f, 5.f, 1.f)
+	//);
 
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
 	
@@ -112,15 +112,15 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
 	}
 	{//Scene에서 초기화해줄 Object들 Pass
-		scene->AddRenderable(cube1);
-		scene->AddRenderable(cube2);
-		scene->AddRenderable(cube3);
-		scene->AddRenderable(cube4);
-		scene->AddRenderable(cube5);
-		scene->AddRenderable(plane);
-		scene->AddRenderable(mirror);
+		scene->AddMesh(cube1);
+		scene->AddMesh(cube2);
+		scene->AddMesh(cube3);
+		scene->AddMesh(cube4);
+		scene->AddMesh(cube5);
+		scene->AddMesh(plane);
+		scene->AddMesh(mirror);
 
-		scene->AddModel(cyborg);
+		//scene->AddModel(cyborg);
 
 		scene->AddLight(light1);
 		scene->AddMaterial(floorMaterial);

@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "Render\Renderable.h"
+#include "Render\Mesh.h"
 
 namespace library
 {
-	Renderable::Renderable(
+    Mesh::Mesh(
         _In_ XMVECTOR location,
         _In_ XMVECTOR rotation,
         _In_ XMVECTOR scale,
@@ -20,31 +20,31 @@ namespace library
             XMMatrixScalingFromVector(scale) *
             XMMatrixTranslationFromVector(location);
     }
-    ComPtr<ID3D12Resource>& Renderable::GetVertexBuffer()
+    ComPtr<ID3D12Resource>& Mesh::GetVertexBuffer()
     {
         return m_vertexBuffer;
     }
-    ComPtr<ID3D12Resource>& Renderable::GetIndexBuffer()
+    ComPtr<ID3D12Resource>& Mesh::GetIndexBuffer()
     {
         return m_indexBuffer;
     }
-    XMMATRIX Renderable::GetWorldMatrix() const
+    XMMATRIX Mesh::GetWorldMatrix() const
     {
         return m_world;
     }
-    XMFLOAT4 Renderable::GetColor() const
+    XMFLOAT4 Mesh::GetColor() const
     {
         return m_color;
     }
-    const std::shared_ptr<Material>& Renderable::GetMaterial() const
+    const std::shared_ptr<Material>& Mesh::GetMaterial() const
     {
         return m_material;
     }
-    void Renderable::SetMaterial(_In_ const std::shared_ptr<Material>& pMaterial)
+    void Mesh::SetMaterial(_In_ const std::shared_ptr<Material>& pMaterial)
     {
         m_material = pMaterial;
     }
-    HRESULT Renderable::initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
+    HRESULT Mesh::initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
 		HRESULT hr = S_OK;
         hr = createVertexBuffer(pDevice);
@@ -59,7 +59,7 @@ namespace library
         }
 		return hr;
 	}
-	HRESULT Renderable::createVertexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
+	HRESULT Mesh::createVertexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
         HRESULT hr = S_OK;
         const Vertex* triangleVertices = GetVertices();
@@ -89,7 +89,7 @@ namespace library
         m_vertexBuffer->Unmap(0, nullptr);//매핑 해제
         return hr;
 	}
-	HRESULT Renderable::createIndexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
+	HRESULT Mesh::createIndexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
         HRESULT hr = S_OK;
         const Index* indices = GetIndices();

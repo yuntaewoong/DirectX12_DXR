@@ -3,9 +3,9 @@
 
 namespace library
 {
-	BottomLevelAccelerationStructure::BottomLevelAccelerationStructure(_In_ const std::shared_ptr<Renderable>& pRenderable) :
+	BottomLevelAccelerationStructure::BottomLevelAccelerationStructure(_In_ const std::shared_ptr<Mesh>& pRenderable) :
 		AccelerationStructure::AccelerationStructure(),
-		m_pRenderable(pRenderable),
+		m_pMesh(pRenderable),
 		m_geometryDesc()
 	{}
 	HRESULT BottomLevelAccelerationStructure::Initialize(
@@ -24,9 +24,9 @@ namespace library
 		pCommandList->ResourceBarrier(1, &tempUAV);// Barrier
 		return hr;
 	}
-	const std::shared_ptr<Renderable>& BottomLevelAccelerationStructure::GetRenderable() const
+	const std::shared_ptr<Mesh>& BottomLevelAccelerationStructure::GetMesh() const
 	{
-		return m_pRenderable;
+		return m_pMesh;
 	}
 	void BottomLevelAccelerationStructure::Update(_In_ FLOAT deltaTime)
 	{}
@@ -50,11 +50,11 @@ namespace library
 				.Transform3x4 = 0,
 				.IndexFormat = DXGI_FORMAT_R16_UINT,
 				.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT,
-				.IndexCount = m_pRenderable->GetNumIndices(),
-				.VertexCount = m_pRenderable->GetNumVertices(),
-				.IndexBuffer = m_pRenderable->GetIndexBuffer()->GetGPUVirtualAddress(),
+				.IndexCount = m_pMesh->GetNumIndices(),
+				.VertexCount = m_pMesh->GetNumVertices(),
+				.IndexBuffer = m_pMesh->GetIndexBuffer()->GetGPUVirtualAddress(),
 				.VertexBuffer = {
-					.StartAddress = m_pRenderable->GetVertexBuffer()->GetGPUVirtualAddress(),
+					.StartAddress = m_pMesh->GetVertexBuffer()->GetGPUVirtualAddress(),
 					.StrideInBytes = sizeof(Vertex)
 				}
 			}

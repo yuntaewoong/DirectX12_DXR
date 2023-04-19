@@ -1,7 +1,7 @@
 #pragma once
-#include "Render\Renderable.h"
+#include "Render\Mesh.h"
 
-class BasePlane : public library::Renderable
+class BasePlane : public library::Mesh
 {
 public:
 	BasePlane(
