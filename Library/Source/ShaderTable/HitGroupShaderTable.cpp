@@ -22,7 +22,7 @@ namespace library
 
         /*=====================================
         현재 HitGroup SBT은
-        Renderable당 Radiance ray Hitgroup를 가리키는 Shader Record,
+        Mesh당 Radiance ray Hitgroup를 가리키는 Shader Record,
         Shadow Ray Hit Group을 가리키는 Shader Record가 존재함.
 
         구조는 아래와 같음

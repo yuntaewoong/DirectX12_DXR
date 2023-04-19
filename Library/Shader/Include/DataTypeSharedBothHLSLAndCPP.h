@@ -38,7 +38,7 @@ struct PointLightConstantBuffer
     XMVECTOR position[NUM_LIGHT];
 };
 
-struct RenderableConstantBuffer
+struct MeshConstantBuffer
 {
     XMMATRIX world;
     XMFLOAT4 albedo;

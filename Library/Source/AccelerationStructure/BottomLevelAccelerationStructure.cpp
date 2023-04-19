@@ -3,9 +3,9 @@
 
 namespace library
 {
-	BottomLevelAccelerationStructure::BottomLevelAccelerationStructure(_In_ const std::shared_ptr<Mesh>& pRenderable) :
+	BottomLevelAccelerationStructure::BottomLevelAccelerationStructure(_In_ const std::shared_ptr<Mesh>& pMesh) :
 		AccelerationStructure::AccelerationStructure(),
-		m_pMesh(pRenderable),
+		m_pMesh(pMesh),
 		m_geometryDesc()
 	{}
 	HRESULT BottomLevelAccelerationStructure::Initialize(

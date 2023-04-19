@@ -12,7 +12,7 @@ StructuredBuffer<Vertex> l_vertices : register(t2, space0);
 ByteAddressBuffer l_indices : register(t3, space0);
 Texture2D l_diffuseTexture : register(t4);
 //CBV
-ConstantBuffer<RenderableConstantBuffer> l_renderableCB : register(b1);
+ConstantBuffer<MeshConstantBuffer> l_renderableCB : register(b1);
 //Static Sampler
 SamplerState l_sampler : register(s0,space0);
 

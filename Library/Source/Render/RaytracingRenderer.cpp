@@ -33,7 +33,7 @@ namespace library
             m_renderingResources.GetDevice(),
             m_renderingResources.GetCommandQueue(),
             m_renderingResources.GetCBVSRVUAVDescriptorHeap()
-        );//Renderable들을 관리하는 Scene초기화
+        );//Mesh들을 관리하는 Scene초기화
         if (FAILED(hr))
         {
             return hr;
@@ -295,7 +295,7 @@ namespace library
             pDevice,
             m_raytracingPipelineStateObject.GetStateObject(),
             m_scene->GetMeshes()
-        );//hit group table을 초기화 하기 위해서는 renderable들의 정보가 필요
+        );//hit group table을 초기화 하기 위해서는 Mesh들의 정보가 필요
         if (FAILED(hr))
         {
             return hr;

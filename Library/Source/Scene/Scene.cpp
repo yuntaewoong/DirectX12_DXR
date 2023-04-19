@@ -56,9 +56,9 @@ namespace library
         }
         return hr;
     }
-    void Scene::AddMesh(_In_ const std::shared_ptr<Mesh>& pRenderable)
+    void Scene::AddMesh(_In_ const std::shared_ptr<Mesh>& pMesh)
     {
-        m_meshes.push_back(pRenderable);
+        m_meshes.push_back(pMesh);
     }
     /*void Scene::AddModel(const std::shared_ptr<Model>& pModel)
     {
