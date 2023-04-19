@@ -155,7 +155,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;PROJECT_DIR="$(ProjectDir).";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Header;$(ProjectDir)..\Library\Shader\Include;$(ProjectDir)..\Library\Header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Header;$(ProjectDir)..\Library\Shader\Include;$(ProjectDir)..\Library\Header;$(ProjectDir)..\ThirdPartyHeader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch_game.h</PrecompiledHeaderFile>
     </ClCompile>
