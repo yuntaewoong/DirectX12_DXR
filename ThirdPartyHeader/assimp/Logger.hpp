@@ -263,7 +263,9 @@ inline Logger::Logger() AI_NO_EXCEPT :
 }
 
 // ----------------------------------------------------------------------------------
-inline Logger::~Logger() = default;
+inline Logger::~Logger() {
+    // empty
+}
 
 // ----------------------------------------------------------------------------------
 inline Logger::Logger(LogSeverity severity) :

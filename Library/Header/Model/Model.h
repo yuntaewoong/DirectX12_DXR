@@ -1,6 +1,7 @@
 #pragma once
 #include "Common/Common.h"
-#include "Render\Mesh.h"
+#include "Model\ModelMesh.h"
+#include "Texture\Material.h"
 
 struct aiScene;
 struct aiMesh;
@@ -33,30 +34,40 @@ namespace library
         Model& operator=(Model&& other) = delete;
         ~Model() = default;
 
-        HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice);
+        HRESULT Initialize(
+            _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap
+        );
         void Update(_In_ FLOAT deltaTime);
-        const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const;
+        const std::vector<std::shared_ptr<ModelMesh>>& GetMeshes() const;
     private:
-        void countVerticesAndIndices(_Inout_ UINT& uOutNumVertices, _Inout_ UINT& uOutNumIndices, _In_ const aiScene* pScene);
+        void setMeshes2Materials(_In_ const aiScene* pScene);
         void initAllMeshes(_In_ const aiScene* pScene);
         HRESULT initFromScene(
             _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
             _In_ const aiScene* pScene,
             _In_ const std::filesystem::path& filePath
         );
         HRESULT initMaterials(
             _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
             _In_ const aiScene* pScene,
             _In_ const std::filesystem::path& filePath
         );
         virtual void initSingleMesh(_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh);
         HRESULT loadDiffuseTexture(
             _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
             _In_ const std::filesystem::path& parentDirectory,
             _In_ const aiMaterial* pMaterial,
             _In_ UINT uIndex
         );
-        HRESULT loadSpecularTexture(
+        /*HRESULT loadSpecularTexture(
             _In_ const ComPtr<ID3D12Device>& pDevice,
             _In_ const std::filesystem::path& parentDirectory,
             _In_ const aiMaterial* pMaterial,
@@ -67,21 +78,21 @@ namespace library
             _In_ const std::filesystem::path& parentDirectory,
             _In_ const aiMaterial* pMaterial,
             _In_ UINT uIndex
-        );
+        );*/
         HRESULT loadTextures(
             _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
             _In_ const std::filesystem::path& parentDirectory,
             _In_ const aiMaterial* pMaterial,
             _In_ UINT uIndex
         );
-        void reserveSpace(_In_ UINT uNumVertices, _In_ UINT uNumIndices);
     private:
         static std::unique_ptr<Assimp::Importer> sm_pImporter;
     private:
         std::filesystem::path m_filePath;
-        std::vector<std::shared_ptr<Renderable>> m_aMeshes;
-        std::vector<XMMATRIX> m_aTransforms;
+        std::vector<std::shared_ptr<ModelMesh>> m_meshes;
+        std::vector<std::shared_ptr<Material>> m_materials;
         const aiScene* m_pScene;
-        float m_timeSinceLoaded;
     };
 }

@@ -237,10 +237,15 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::IOSystem() AI_NO_EXCEPT = default;
+AI_FORCE_INLINE IOSystem::IOSystem() AI_NO_EXCEPT :
+        m_pathStack() {
+    // empty
+}
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::~IOSystem() = default;
+AI_FORCE_INLINE IOSystem::~IOSystem() {
+    // empty
+}
 
 // ----------------------------------------------------------------------------
 // For compatibility, the interface of some functions taking a std::string was

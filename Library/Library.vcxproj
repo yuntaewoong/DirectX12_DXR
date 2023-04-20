@@ -148,7 +148,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTK12.lib;assimp-vc143-mtd.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTK12.lib;assimp-vc142-mtd.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\ThirdParty\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
@@ -162,6 +162,9 @@
       <DisableOptimizations>true</DisableOptimizations>
       <ObjectFileOutput>$(OutDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.dll" "$(SolutionDir)Build\Game\Debug" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -201,6 +204,7 @@
     <ClInclude Include="Header\Game\Game.h" />
     <ClInclude Include="Header\Light\PointLight.h" />
     <ClInclude Include="Header\Model\Model.h" />
+    <ClInclude Include="Header\Model\ModelMesh.h" />
     <ClInclude Include="Header\pch.h" />
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h" />
@@ -236,6 +240,7 @@
     <ClCompile Include="Source\Game\Game.cpp" />
     <ClCompile Include="Source\Light\PointLight.cpp" />
     <ClCompile Include="Source\Model\Model.cpp" />
+    <ClCompile Include="Source\Model\ModelMesh.cpp" />
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>

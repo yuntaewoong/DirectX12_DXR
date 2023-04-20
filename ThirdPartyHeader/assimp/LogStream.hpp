@@ -99,9 +99,13 @@ public:
 
 }; // !class LogStream
 
-inline LogStream::LogStream() AI_NO_EXCEPT = default;
+inline LogStream::LogStream() AI_NO_EXCEPT {
+    // empty
+}
 
-inline LogStream::~LogStream() = default;
+inline LogStream::~LogStream() {
+    // empty
+}
 
 } // Namespace Assimp
 

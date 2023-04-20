@@ -28,7 +28,7 @@ namespace library
             _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap
         );
         void AddMesh(_In_ const std::shared_ptr<Mesh>& pMesh);
-        //void AddModel(_In_ const std::shared_ptr<Model>& pModel);
+        void AddModel(_In_ const std::shared_ptr<Model>& pModel);
         const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const;
         void AddLight(_In_ const std::shared_ptr<PointLight>& pLight);
         void AddMaterial(_In_ const std::shared_ptr<Material>& pMaterial);
@@ -39,7 +39,7 @@ namespace library
         void updateLightConstantBuffer();
     private:
         std::vector<std::shared_ptr<Mesh>> m_meshes;
-        //std::vector<std::shared_ptr<Model>> m_models;
+        std::vector<std::shared_ptr<Model>> m_models;
         std::vector<std::shared_ptr<PointLight>> m_lights;  
         std::vector<std::shared_ptr<Material>> m_materials;
         ComPtr<ID3D12Resource> m_pointLightsConstantBuffer;

@@ -12,7 +12,7 @@ StructuredBuffer<Vertex> l_vertices : register(t2, space0);
 ByteAddressBuffer l_indices : register(t3, space0);
 Texture2D l_diffuseTexture : register(t4);
 //CBV
-ConstantBuffer<MeshConstantBuffer> l_renderableCB : register(b1);
+ConstantBuffer<MeshConstantBuffer> l_meshCB : register(b1);
 //Static Sampler
 SamplerState l_sampler : register(s0,space0);
 
@@ -73,11 +73,11 @@ float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
     float3 pixelToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
     float3 nDotL = max(0.0f, dot(pixelToLight, normal));
     float3 diffuseTexelColor = float3(1.f, 1.f, 1.f);
-    if(l_renderableCB.hasTexture == 1)
+    if(l_meshCB.hasTexture == 1)
     {
         diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남       
     }
-    return l_renderableCB.albedo.xyz * nDotL * diffuseTexelColor;
+    return l_meshCB.albedo.xyz * nDotL * diffuseTexelColor;
 }
 
 // Specullar계산
@@ -87,7 +87,7 @@ float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal, float2 uv)
     float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition);
     float3 reflectDirection = normalize(reflect(lightToHit, normal));
     
-    return pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_renderableCB.albedo;
+    return pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_meshCB.albedo;
 }
 
 
@@ -104,9 +104,9 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
 
     float3 vertexNormals[3] =
     { //index값으로 world space vertex normal값 가져오기
-        normalize(mul(float4(l_vertices[indices[0]].normal, 0), l_renderableCB.world).xyz),
-        normalize(mul(float4(l_vertices[indices[1]].normal, 0), l_renderableCB.world).xyz),
-        normalize(mul(float4(l_vertices[indices[2]].normal, 0), l_renderableCB.world).xyz)
+        normalize(mul(float4(l_vertices[indices[0]].normal, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[1]].normal, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[2]].normal, 0), l_meshCB.world).xyz)
     };
     float2 vertexUV[3] =
     { //index값으로 vertex uv값 가져오기
@@ -128,7 +128,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         ambientColor /= 3.f; //너무 밝지않게 조절
     }
     {//Phong Shading계산
-        if (l_renderableCB.hasTexture == 1)
+        if (l_meshCB.hasTexture == 1)
         {
             ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
         }
@@ -145,10 +145,10 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     {//Reflection계산(추가 Radiance Ray이용)
         float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);//반사용으로 Trace할 다음 Ray의 Direction
         float4 reflectionColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth);
-        reflectedColor = mul(l_renderableCB.reflectivity, reflectionColor);
-        ambientColor = mul(1.f - l_renderableCB.reflectivity, ambientColor);
-        diffuseColor = mul(1.f - l_renderableCB.reflectivity, diffuseColor);
-        specullarColor = mul(1.f - l_renderableCB.reflectivity, specullarColor);
+        reflectedColor = mul(l_meshCB.reflectivity, reflectionColor);
+        ambientColor = mul(1.f - l_meshCB.reflectivity, ambientColor);
+        diffuseColor = mul(1.f - l_meshCB.reflectivity, diffuseColor);
+        specullarColor = mul(1.f - l_meshCB.reflectivity, specullarColor);
     }
     float3 color = saturate(ambientColor + reflectedColor + specullarColor + diffuseColor);
     payload.color = float4(color, 1);

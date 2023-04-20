@@ -128,11 +128,15 @@ public:
 
 // ----------------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOStream::IOStream() AI_NO_EXCEPT = default;
+IOStream::IOStream() AI_NO_EXCEPT {
+    // empty
+}
 
 // ----------------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOStream::~IOStream() = default;
+IOStream::~IOStream() {
+    // empty
+}
 // ----------------------------------------------------------------------------------
 
 } //!namespace Assimp

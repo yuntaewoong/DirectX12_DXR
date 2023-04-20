@@ -47,12 +47,15 @@ namespace library
         _In_ XMVECTOR scale
     )   :
         m_filePath(filePath),
-        m_aMeshes(std::vector<std::shared_ptr<Renderable>>()),
-        m_aTransforms(std::vector<XMMATRIX>()),
-        m_pScene(nullptr),
-        m_timeSinceLoaded(0.0f)
+        m_meshes(std::vector<std::shared_ptr<ModelMesh>>()),
+        m_materials(std::vector<std::shared_ptr<Material>>()),
+        m_pScene(nullptr)
     {}
-    HRESULT Model::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
+    HRESULT Model::Initialize(
+        _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap
+    )
     {
         HRESULT hr = S_OK;
         m_pScene = sm_pImporter->ReadFile(//ASSIMP로 모델 읽기
@@ -62,7 +65,7 @@ namespace library
         );
         if (m_pScene)
         {
-            hr = initFromScene(pDevice, m_pScene, m_filePath);
+            hr = initFromScene(pDevice,pCommandQueue,cbvSrvUavDescriptorHeap, m_pScene, m_filePath);
         }
         else
         {
@@ -83,26 +86,20 @@ namespace library
     void Model::Update(_In_ FLOAT deltaTime)
     {
     }
-    const std::vector<Renderable>& Model::GetMeshes() const
+    const std::vector<std::shared_ptr<ModelMesh>>& Model::GetMeshes() const
     {
-        return m_aMeshes;
+        return m_meshes;
     }
-    void Model::countVerticesAndIndices(_Inout_ UINT& uOutNumVertices, _Inout_ UINT& uOutNumIndices, _In_ const aiScene* pScene)
+    void Model::setMeshes2Materials(_In_ const aiScene* pScene)
     {
         for (UINT i = 0u; i < pScene->mNumMeshes; i++)
         {
-            m_aMeshes[i].uMaterialIndex = pScene->mMeshes[i]->mMaterialIndex;
-            m_aMeshes[i].uBaseIndex = uOutNumIndices;
-            m_aMeshes[i].uBaseVertex = uOutNumVertices;
-            m_aMeshes[i].uNumIndices = pScene->mMeshes[i]->mNumFaces * 3u;
-
-            uOutNumIndices += pScene->mMeshes[i]->mNumFaces * 3u;
-            uOutNumVertices += pScene->mMeshes[i]->mNumVertices;
+            m_meshes[i]->SetMaterial(m_materials[pScene->mMeshes[i]->mMaterialIndex]);
         }
     }
     void Model::initAllMeshes(_In_ const aiScene* pScene)
     {
-        for (UINT i = 0u; i < m_aMeshes.size(); ++i)
+        for (UINT i = 0u; i < m_meshes.size(); ++i)
         {
             const aiMesh* pMesh = pScene->mMeshes[i];
             initSingleMesh(i, pMesh);
@@ -110,18 +107,16 @@ namespace library
     }
     HRESULT Model::initFromScene(
         _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
         _In_ const aiScene* pScene,
         _In_ const std::filesystem::path& filePath
     )
     {
         HRESULT hr = S_OK;
-        m_aMeshes.resize(pScene->mNumMeshes);
-        //UINT uNumVertices = 0u;
-        //UINT uNumIndices = 0u;
-        //countVerticesAndIndices(uNumVertices, uNumIndices, pScene);
-        //reserveSpace(uNumVertices, uNumIndices);
         initAllMeshes(pScene);
-        hr = initMaterials(pDevice, pScene, filePath);
+        hr = initMaterials(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap,pScene, filePath);
+        setMeshes2Materials(pScene);//모든 modelmesh들을 맞는 material에 매핑
         if (FAILED(hr))
         {
             return hr;
@@ -130,6 +125,8 @@ namespace library
     }
     HRESULT Model::initMaterials(
         _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
         _In_ const aiScene* pScene,
         _In_ const std::filesystem::path& filePath
     )
@@ -147,15 +144,16 @@ namespace library
             std::string szName = filePath.string() + std::to_string(i);
             std::wstring pwszName(szName.length(), L' ');
             std::copy(szName.begin(), szName.end(), pwszName.begin());
-            m_aMaterials.push_back(std::make_shared<Material>(pwszName));
-
-            loadTextures(pDevice, pImmediateContext, parentDirectory, pMaterial, i);
+            //m_materials.push_back(std::make_shared<Material>(pwszName));
+            m_materials.push_back(std::make_shared<Material>());
+            loadTextures(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, i);
         }
 
         return hr;
     }
     void Model::initSingleMesh(_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh)
     {
+        m_meshes.push_back(std::make_shared<ModelMesh>());
         const aiVector3D zero3d(0.0f, 0.0f, 0.0f);
         for (UINT i = 0u; i < pMesh->mNumVertices; i++)
         {
@@ -163,49 +161,51 @@ namespace library
             const aiVector3D& normal = pMesh->mNormals[i];
             const aiVector3D& texCoord = pMesh->HasTextureCoords(0u) ?
                 pMesh->mTextureCoords[0][i] : zero3d;
-            const aiVector3D& tangent = pMesh->HasTangentsAndBitangents() ?
+            /*const aiVector3D& tangent = pMesh->HasTangentsAndBitangents() ?
                 pMesh->mTangents[i] : zero3d;
             const aiVector3D& bitangent = pMesh->HasTangentsAndBitangents() ?
-                pMesh->mBitangents[i] : zero3d;
+                pMesh->mBitangents[i] : zero3d;*/
             Vertex vertex =
             {
-                .Position = XMFLOAT3(position.x, position.y, position.z),
-                .TexCoord = XMFLOAT2(texCoord.x, texCoord.y),
-                .Normal = XMFLOAT3(normal.x, normal.y, normal.z)
+                .position = XMFLOAT3(position.x, position.y, position.z),
+                .uv = XMFLOAT2(texCoord.x, texCoord.y),
+                .normal = XMFLOAT3(normal.x, normal.y, normal.z)
             };
-            NormalData normalData =
+            /*NormalData normalData =
             {
                 .Tangent = XMFLOAT3(tangent.x,tangent.y,tangent.z),
                 .Bitangent = XMFLOAT3(bitangent.x,bitangent.y,bitangent.z)
-            };
-            m_aVertices.push_back(vertex);
-            m_aNormalData.push_back(normalData);
+            };*/
+            m_meshes[i]->AddVertex(vertex);
+            //m_aNormalData.push_back(normalData);
         }
         for (UINT i = 0u; i < pMesh->mNumFaces; i++)
         {
             const aiFace& face = pMesh->mFaces[i];
             assert(face.mNumIndices == 3u);
-            WORD aIndices[3] =
+            Index aIndices[3] =
             {
-                static_cast<WORD>(face.mIndices[0]),
-                static_cast<WORD>(face.mIndices[1]),
-                static_cast<WORD>(face.mIndices[2]),
+                static_cast<Index>(face.mIndices[0]),
+                static_cast<Index>(face.mIndices[1]),
+                static_cast<Index>(face.mIndices[2]),
             };
-            m_aIndices.push_back(aIndices[0]);
-            m_aIndices.push_back(aIndices[1]);
-            m_aIndices.push_back(aIndices[2]);
+            m_meshes[i]->AddIndex(aIndices[0]);
+            m_meshes[i]->AddIndex(aIndices[1]);
+            m_meshes[i]->AddIndex(aIndices[2]);
         }
     }
 
     HRESULT Model::loadDiffuseTexture(
         _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
         _In_ const std::filesystem::path& parentDirectory,
         _In_ const aiMaterial* pMaterial,
         _In_ UINT uIndex
     )
     {
         HRESULT hr = S_OK;
-        m_aMaterials[uIndex]->pDiffuse = nullptr;
+        m_materials[uIndex]->SetDiffuseTexture(nullptr);
 
         if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
         {
@@ -222,9 +222,9 @@ namespace library
 
                 std::filesystem::path fullPath = parentDirectory / szPath;
 
-                m_aMaterials[uIndex]->pDiffuse = std::make_shared<Texture>(fullPath);
+                m_materials[uIndex]->SetDiffuseTexture(std::make_shared<Texture>(fullPath));
 
-                hr = m_aMaterials[uIndex]->pDiffuse->Initialize(pDevice, pImmediateContext);
+                hr = m_materials[uIndex]->GetDiffuseTexture()->Initialize(pDevice,pCommandQueue,cbvSrvUavDescriptorHeap);
                 if (FAILED(hr))
                 {
                     OutputDebugString(L"Error loading diffuse texture \"");
@@ -242,123 +242,119 @@ namespace library
 
         return hr;
     }
-    HRESULT Model::loadSpecularTexture(
-        _In_ const ComPtr<ID3D12Device>& pDevice,
-        _In_ const std::filesystem::path& parentDirectory,
-        _In_ const aiMaterial* pMaterial,
-        _In_ UINT uIndex
-    )
-    {
-        HRESULT hr = S_OK;
-        m_aMaterials[uIndex]->pSpecularExponent = nullptr;
+    //HRESULT Model::loadSpecularTexture(
+    //    _In_ const ComPtr<ID3D12Device>& pDevice,
+    //    _In_ const std::filesystem::path& parentDirectory,
+    //    _In_ const aiMaterial* pMaterial,
+    //    _In_ UINT uIndex
+    //)
+    //{
+    //    HRESULT hr = S_OK;
+    //    m_materials[uIndex]->pSpecularExponent = nullptr;
 
-        if (pMaterial->GetTextureCount(aiTextureType_SHININESS) > 0)
-        {
-            aiString aiPath;
+    //    if (pMaterial->GetTextureCount(aiTextureType_SHININESS) > 0)
+    //    {
+    //        aiString aiPath;
 
-            if (pMaterial->GetTexture(aiTextureType_SHININESS, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
-            {
-                std::string szPath(aiPath.data);
+    //        if (pMaterial->GetTexture(aiTextureType_SHININESS, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
+    //        {
+    //            std::string szPath(aiPath.data);
 
-                if (szPath.substr(0ull, 2ull) == ".\\")
-                {
-                    szPath = szPath.substr(2ull, szPath.size() - 2ull);
-                }
+    //            if (szPath.substr(0ull, 2ull) == ".\\")
+    //            {
+    //                szPath = szPath.substr(2ull, szPath.size() - 2ull);
+    //            }
 
-                std::filesystem::path fullPath = parentDirectory / szPath;
+    //            std::filesystem::path fullPath = parentDirectory / szPath;
 
-                m_aMaterials[uIndex]->pSpecularExponent = std::make_shared<Texture>(fullPath);
+    //            m_aMaterials[uIndex]->pSpecularExponent = std::make_shared<Texture>(fullPath);
 
-                hr = m_aMaterials[uIndex]->pSpecularExponent->Initialize(pDevice, pImmediateContext);
-                if (FAILED(hr))
-                {
-                    OutputDebugString(L"Error loading specular texture \"");
-                    OutputDebugString(fullPath.c_str());
-                    OutputDebugString(L"\"\n");
+    //            hr = m_aMaterials[uIndex]->pSpecularExponent->Initialize(pDevice, pImmediateContext);
+    //            if (FAILED(hr))
+    //            {
+    //                OutputDebugString(L"Error loading specular texture \"");
+    //                OutputDebugString(fullPath.c_str());
+    //                OutputDebugString(L"\"\n");
 
-                    return hr;
-                }
+    //                return hr;
+    //            }
 
-                OutputDebugString(L"Loaded specular texture \"");
-                OutputDebugString(fullPath.c_str());
-                OutputDebugString(L"\"\n");
-            }
-        }
+    //            OutputDebugString(L"Loaded specular texture \"");
+    //            OutputDebugString(fullPath.c_str());
+    //            OutputDebugString(L"\"\n");
+    //        }
+    //    }
 
-        return hr;
-    }
-    HRESULT Model::loadNormalTexture(
-        _In_ const ComPtr<ID3D12Device>& pDevice,
-        _In_ const std::filesystem::path& parentDirectory,
-        _In_ const aiMaterial* pMaterial, _In_ UINT uIndex
-    )
-    {
-        HRESULT hr = S_OK;
-        m_aMaterials[uIndex]->pNormal = nullptr;
+    //    return hr;
+    //}
+    //HRESULT Model::loadNormalTexture(
+    //    _In_ const ComPtr<ID3D12Device>& pDevice,
+    //    _In_ const std::filesystem::path& parentDirectory,
+    //    _In_ const aiMaterial* pMaterial, _In_ UINT uIndex
+    //)
+    //{
+    //    HRESULT hr = S_OK;
+    //    m_aMaterials[uIndex]->pNormal = nullptr;
 
-        if (pMaterial->GetTextureCount(aiTextureType_HEIGHT) > 0)
-        {
-            aiString aiPath;
+    //    if (pMaterial->GetTextureCount(aiTextureType_HEIGHT) > 0)
+    //    {
+    //        aiString aiPath;
 
-            if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
-            {
-                std::string szPath(aiPath.data);
+    //        if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
+    //        {
+    //            std::string szPath(aiPath.data);
 
-                if (szPath.substr(0ull, 2ull) == ".\\")
-                {
-                    szPath = szPath.substr(2ull, szPath.size() - 2ull);
-                }
+    //            if (szPath.substr(0ull, 2ull) == ".\\")
+    //            {
+    //                szPath = szPath.substr(2ull, szPath.size() - 2ull);
+    //            }
 
-                std::filesystem::path fullPath = parentDirectory / szPath;
+    //            std::filesystem::path fullPath = parentDirectory / szPath;
 
-                m_aMaterials[uIndex]->pNormal = std::make_shared<Texture>(fullPath);
-                m_bHasNormalMap = true;
+    //            m_aMaterials[uIndex]->pNormal = std::make_shared<Texture>(fullPath);
+    //            m_bHasNormalMap = true;
 
-                if (FAILED(hr))
-                {
-                    OutputDebugString(L"Error loading normal texture \"");
-                    OutputDebugString(fullPath.c_str());
-                    OutputDebugString(L"\"\n");
+    //            if (FAILED(hr))
+    //            {
+    //                OutputDebugString(L"Error loading normal texture \"");
+    //                OutputDebugString(fullPath.c_str());
+    //                OutputDebugString(L"\"\n");
 
-                    return hr;
-                }
+    //                return hr;
+    //            }
 
-                OutputDebugString(L"Loaded normal texture \"");
-                OutputDebugString(fullPath.c_str());
-                OutputDebugString(L"\"\n");
-            }
-        }
+    //            OutputDebugString(L"Loaded normal texture \"");
+    //            OutputDebugString(fullPath.c_str());
+    //            OutputDebugString(L"\"\n");
+    //        }
+    //    }
 
-        return hr;
-    }
+    //    return hr;
+    //}
     HRESULT Model::loadTextures(
         _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
         _In_ const std::filesystem::path& parentDirectory,
         _In_ const aiMaterial* pMaterial,
         _In_ UINT uIndex
     )
     {
-        HRESULT hr = loadDiffuseTexture(pDevice, parentDirectory, pMaterial, uIndex);
+        HRESULT hr = loadDiffuseTexture(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, uIndex);
         if (FAILED(hr))
         {
             return hr;
         }
-        hr = loadSpecularTexture(pDevice,  parentDirectory, pMaterial, uIndex);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = loadNormalTexture(pDevice, parentDirectory, pMaterial, uIndex);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        //hr = loadSpecularTexture(pDevice,  parentDirectory, pMaterial, uIndex);
+        //if (FAILED(hr))
+        //{
+        //    return hr;
+        //}
+        //hr = loadNormalTexture(pDevice, parentDirectory, pMaterial, uIndex);
+        //if (FAILED(hr))
+        //{
+        //    return hr;
+        //}
         return hr;
-    }
-    void Model::reserveSpace(_In_ UINT uNumVertices, _In_ UINT uNumIndices)
-    {
-        m_aVertices.reserve(uNumVertices);
-        m_aIndices.reserve(uNumIndices);
-        m_aBoneData.resize(uNumVertices);
     }
 }

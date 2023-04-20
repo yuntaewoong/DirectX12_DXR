@@ -25,14 +25,14 @@ namespace library
                 return hr;
             }
         }
-        /*for (UINT i = 0; i < m_models.size(); i++)
+        for (UINT i = 0; i < m_models.size(); i++)
         {
-            hr = m_models[i]->Initialize(pDevice);
+            hr = m_models[i]->Initialize(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap);
             if (FAILED(hr))
             {
                 return hr;
             }
-        }*/
+        }
         for (UINT i = 0; i < m_lights.size(); i++)
         {
             hr = m_lights[i]->Initialize(pDevice);
@@ -60,10 +60,10 @@ namespace library
     {
         m_meshes.push_back(pMesh);
     }
-    /*void Scene::AddModel(const std::shared_ptr<Model>& pModel)
+    void Scene::AddModel(const std::shared_ptr<Model>& pModel)
     {
         m_models.push_back(pModel);
-    }*/
+    }
     void Scene::AddMaterial(_In_ const std::shared_ptr<Material>& pMaterial)
     {
         m_materials.push_back(pMaterial);
