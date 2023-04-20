@@ -43,7 +43,10 @@ namespace library
         const std::vector<std::shared_ptr<ModelMesh>>& GetMeshes() const;
     private:
         void setMeshes2Materials(_In_ const aiScene* pScene);
-        void initAllMeshes(_In_ const aiScene* pScene);
+        HRESULT initAllMeshes(
+            _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const aiScene* pScene
+        );
         HRESULT initFromScene(
             _In_ const ComPtr<ID3D12Device>& pDevice,
             _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,

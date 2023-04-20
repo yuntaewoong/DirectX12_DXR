@@ -97,12 +97,21 @@ namespace library
             m_meshes[i]->SetMaterial(m_materials[pScene->mMeshes[i]->mMaterialIndex]);
         }
     }
-    void Model::initAllMeshes(_In_ const aiScene* pScene)
+    HRESULT Model::initAllMeshes(
+        _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const aiScene* pScene
+    )
     {
+        HRESULT hr = S_OK;
         for (UINT i = 0u; i < pScene->mNumMeshes; ++i)
         {
             const aiMesh* pMesh = pScene->mMeshes[i];
             initSingleMesh(i, pMesh);
+            hr = m_meshes[i]->Initialize(pDevice);
+            if (FAILED(hr))
+            {
+                return hr;
+            }
         }
     }
     HRESULT Model::initFromScene(
@@ -114,13 +123,18 @@ namespace library
     )
     {
         HRESULT hr = S_OK;
-        initAllMeshes(pScene);
-        hr = initMaterials(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap,pScene, filePath);
-        setMeshes2Materials(pScene);//모든 modelmesh들을 맞는 material에 매핑
+        hr = initAllMeshes(pDevice,pScene);
         if (FAILED(hr))
         {
             return hr;
         }
+        hr = initMaterials(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap,pScene, filePath);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        setMeshes2Materials(pScene);//모든 modelmesh들을 맞는 material에 매핑
+        
         return hr;
     }
     HRESULT Model::initMaterials(

@@ -32,6 +32,11 @@ namespace library
             {
                 return hr;
             }
+            const std::vector<std::shared_ptr<ModelMesh>>& modelMeshes = m_models[i]->GetMeshes();
+            for (UINT i = 0u; i < modelMeshes.size(); i++)
+            {//임시구현: ModelMesh들을 Mesh배열에 추가
+                m_meshes.push_back(modelMeshes[i]);
+            }
         }
         for (UINT i = 0; i < m_lights.size(); i++)
         {
