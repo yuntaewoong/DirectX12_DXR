@@ -99,7 +99,7 @@ namespace library
     }
     void Model::initAllMeshes(_In_ const aiScene* pScene)
     {
-        for (UINT i = 0u; i < m_meshes.size(); ++i)
+        for (UINT i = 0u; i < pScene->mNumMeshes; ++i)
         {
             const aiMesh* pMesh = pScene->mMeshes[i];
             initSingleMesh(i, pMesh);
@@ -176,7 +176,7 @@ namespace library
                 .Tangent = XMFLOAT3(tangent.x,tangent.y,tangent.z),
                 .Bitangent = XMFLOAT3(bitangent.x,bitangent.y,bitangent.z)
             };*/
-            m_meshes[i]->AddVertex(vertex);
+            m_meshes[uMeshIndex]->AddVertex(vertex);
             //m_aNormalData.push_back(normalData);
         }
         for (UINT i = 0u; i < pMesh->mNumFaces; i++)
@@ -189,9 +189,9 @@ namespace library
                 static_cast<Index>(face.mIndices[1]),
                 static_cast<Index>(face.mIndices[2]),
             };
-            m_meshes[i]->AddIndex(aIndices[0]);
-            m_meshes[i]->AddIndex(aIndices[1]);
-            m_meshes[i]->AddIndex(aIndices[2]);
+            m_meshes[uMeshIndex]->AddIndex(aIndices[0]);
+            m_meshes[uMeshIndex]->AddIndex(aIndices[1]);
+            m_meshes[uMeshIndex]->AddIndex(aIndices[2]);
         }
     }
 

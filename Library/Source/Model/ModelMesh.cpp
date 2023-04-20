@@ -8,7 +8,9 @@ namespace library
 			XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 			XMVectorSet(1.f, 1.f, 1.f, 1.f),
 			XMFLOAT4()
-		)
+		),
+		m_vertices(std::vector<Vertex>()),
+		m_indices(std::vector<Index>())
 	{}
 	void ModelMesh::AddVertex(Vertex vertex)
 	{
