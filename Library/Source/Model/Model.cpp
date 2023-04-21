@@ -129,11 +129,6 @@ namespace library
         for (UINT i = 0u; i < pScene->mNumMaterials; ++i)
         {
             const aiMaterial* pMaterial = pScene->mMaterials[i];
-
-            std::string szName = filePath.string() + std::to_string(i);
-            std::wstring pwszName(szName.length(), L' ');
-            std::copy(szName.begin(), szName.end(), pwszName.begin());
-            //m_materials.push_back(std::make_shared<Material>(pwszName));
             m_materials.push_back(std::make_shared<Material>());
             loadTextures(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, i);
         }
@@ -233,95 +228,99 @@ namespace library
 
         return hr;
     }
-    //HRESULT Model::loadSpecularTexture(
-    //    _In_ const ComPtr<ID3D12Device>& pDevice,
-    //    _In_ const std::filesystem::path& parentDirectory,
-    //    _In_ const aiMaterial* pMaterial,
-    //    _In_ UINT uIndex
-    //)
-    //{
-    //    HRESULT hr = S_OK;
-    //    m_materials[uIndex]->pSpecularExponent = nullptr;
+    HRESULT Model::loadSpecularTexture(
+        _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
+        _In_ const std::filesystem::path& parentDirectory,
+        _In_ const aiMaterial* pMaterial,
+        _In_ UINT uIndex
+    )
+    {
+        HRESULT hr = S_OK;
+        m_materials[uIndex]->SetSpecularTexture(nullptr);
 
-    //    if (pMaterial->GetTextureCount(aiTextureType_SHININESS) > 0)
-    //    {
-    //        aiString aiPath;
+        if (pMaterial->GetTextureCount(aiTextureType_SHININESS) > 0)
+        {
+            aiString aiPath;
 
-    //        if (pMaterial->GetTexture(aiTextureType_SHININESS, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
-    //        {
-    //            std::string szPath(aiPath.data);
+            if (pMaterial->GetTexture(aiTextureType_SHININESS, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
+            {
+                std::string szPath(aiPath.data);
 
-    //            if (szPath.substr(0ull, 2ull) == ".\\")
-    //            {
-    //                szPath = szPath.substr(2ull, szPath.size() - 2ull);
-    //            }
+                if (szPath.substr(0ull, 2ull) == ".\\")
+                {
+                    szPath = szPath.substr(2ull, szPath.size() - 2ull);
+                }
 
-    //            std::filesystem::path fullPath = parentDirectory / szPath;
+                std::filesystem::path fullPath = parentDirectory / szPath;
 
-    //            m_aMaterials[uIndex]->pSpecularExponent = std::make_shared<Texture>(fullPath);
+                m_materials[uIndex]->SetSpecularTexture(std::make_shared<Texture>(fullPath));
 
-    //            hr = m_aMaterials[uIndex]->pSpecularExponent->Initialize(pDevice, pImmediateContext);
-    //            if (FAILED(hr))
-    //            {
-    //                OutputDebugString(L"Error loading specular texture \"");
-    //                OutputDebugString(fullPath.c_str());
-    //                OutputDebugString(L"\"\n");
+                hr = m_materials[uIndex]->GetSpecularTexture()->Initialize(pDevice,pCommandQueue, cbvSrvUavDescriptorHeap);
+                if (FAILED(hr))
+                {
+                    OutputDebugString(L"Error loading specular texture \"");
+                    OutputDebugString(fullPath.c_str());
+                    OutputDebugString(L"\"\n");
 
-    //                return hr;
-    //            }
+                    return hr;
+                }
 
-    //            OutputDebugString(L"Loaded specular texture \"");
-    //            OutputDebugString(fullPath.c_str());
-    //            OutputDebugString(L"\"\n");
-    //        }
-    //    }
+                OutputDebugString(L"Loaded specular texture \"");
+                OutputDebugString(fullPath.c_str());
+                OutputDebugString(L"\"\n");
+            }
+        }
 
-    //    return hr;
-    //}
-    //HRESULT Model::loadNormalTexture(
-    //    _In_ const ComPtr<ID3D12Device>& pDevice,
-    //    _In_ const std::filesystem::path& parentDirectory,
-    //    _In_ const aiMaterial* pMaterial, _In_ UINT uIndex
-    //)
-    //{
-    //    HRESULT hr = S_OK;
-    //    m_aMaterials[uIndex]->pNormal = nullptr;
+        return hr;
+    }
+    HRESULT Model::loadNormalTexture(
+        _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+        _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
+        _In_ const std::filesystem::path& parentDirectory,
+        _In_ const aiMaterial* pMaterial, _In_ UINT uIndex
+    )
+    {
+        HRESULT hr = S_OK;
+        m_materials[uIndex]->SetNormalTexture(nullptr);
 
-    //    if (pMaterial->GetTextureCount(aiTextureType_HEIGHT) > 0)
-    //    {
-    //        aiString aiPath;
+        if (pMaterial->GetTextureCount(aiTextureType_HEIGHT) > 0)
+        {
+            aiString aiPath;
 
-    //        if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
-    //        {
-    //            std::string szPath(aiPath.data);
+            if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
+            {
+                std::string szPath(aiPath.data);
 
-    //            if (szPath.substr(0ull, 2ull) == ".\\")
-    //            {
-    //                szPath = szPath.substr(2ull, szPath.size() - 2ull);
-    //            }
+                if (szPath.substr(0ull, 2ull) == ".\\")
+                {
+                    szPath = szPath.substr(2ull, szPath.size() - 2ull);
+                }
 
-    //            std::filesystem::path fullPath = parentDirectory / szPath;
+                std::filesystem::path fullPath = parentDirectory / szPath;
 
-    //            m_aMaterials[uIndex]->pNormal = std::make_shared<Texture>(fullPath);
-    //            m_bHasNormalMap = true;
+                m_materials[uIndex]->SetNormalTexture(std::make_shared<Texture>(fullPath));
+                //m_bHasNormalMap = true;
 
-    //            if (FAILED(hr))
-    //            {
-    //                OutputDebugString(L"Error loading normal texture \"");
-    //                OutputDebugString(fullPath.c_str());
-    //                OutputDebugString(L"\"\n");
+                if (FAILED(hr))
+                {
+                    OutputDebugString(L"Error loading normal texture \"");
+                    OutputDebugString(fullPath.c_str());
+                    OutputDebugString(L"\"\n");
 
-    //                return hr;
-    //            }
+                    return hr;
+                }
 
-    //            OutputDebugString(L"Loaded normal texture \"");
-    //            OutputDebugString(fullPath.c_str());
-    //            OutputDebugString(L"\"\n");
-    //        }
-    //    }
+                OutputDebugString(L"Loaded normal texture \"");
+                OutputDebugString(fullPath.c_str());
+                OutputDebugString(L"\"\n");
+            }
+        }
 
-    //    return hr;
-    //}
+        return hr;
+    }
     HRESULT Model::loadTextures(
         _In_ const ComPtr<ID3D12Device>& pDevice,
         _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
@@ -336,16 +335,16 @@ namespace library
         {
             return hr;
         }
-        //hr = loadSpecularTexture(pDevice,  parentDirectory, pMaterial, uIndex);
-        //if (FAILED(hr))
-        //{
-        //    return hr;
-        //}
-        //hr = loadNormalTexture(pDevice, parentDirectory, pMaterial, uIndex);
-        //if (FAILED(hr))
-        //{
-        //    return hr;
-        //}
+        hr = loadSpecularTexture(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap,parentDirectory, pMaterial, uIndex);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = loadNormalTexture(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, uIndex);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         return hr;
     }
 }

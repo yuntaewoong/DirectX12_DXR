@@ -71,18 +71,22 @@ namespace library
             _In_ const aiMaterial* pMaterial,
             _In_ UINT uIndex
         );
-        /*HRESULT loadSpecularTexture(
+        HRESULT loadSpecularTexture(
             _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
             _In_ const std::filesystem::path& parentDirectory,
             _In_ const aiMaterial* pMaterial,
             _In_ UINT uIndex
         );
         HRESULT loadNormalTexture(
             _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
+            _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap,
             _In_ const std::filesystem::path& parentDirectory,
             _In_ const aiMaterial* pMaterial,
             _In_ UINT uIndex
-        );*/
+        );
         HRESULT loadTextures(
             _In_ const ComPtr<ID3D12Device>& pDevice,
             _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
