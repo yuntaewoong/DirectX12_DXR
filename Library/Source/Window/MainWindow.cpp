@@ -178,8 +178,8 @@ namespace library
                     RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawdata.get());
                     if (raw->header.dwType == RIM_TYPEMOUSE)
                     {
-                        m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
-                        m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
+                        //m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
+                        //m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
                     }
                 }
             }

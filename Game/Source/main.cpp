@@ -79,9 +79,9 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 	std::shared_ptr<library::Model> cyborg = std::make_shared<library::Model>(//사이보그 모델
 		L"Assets/Model/cyborg/cyborg.obj",
+		XMVectorSet(0.f, -1.f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(5.f, 5.f, 5.f, 1.f)
+		XMVectorSet(1.f, 1.f, 1.f, 1.f)
 	);
 
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));

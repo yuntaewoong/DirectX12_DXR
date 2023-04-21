@@ -6,7 +6,11 @@ namespace library
 	class ModelMesh : public Mesh
 	{
 	public:
-		ModelMesh();
+		ModelMesh(
+			_In_ XMVECTOR location,
+			_In_ XMVECTOR rotation,
+			_In_ XMVECTOR scale
+		);
 		ModelMesh(const ModelMesh& other) = delete;
 		ModelMesh(ModelMesh&& other) = delete;
 		ModelMesh& operator=(const ModelMesh& other) = delete;

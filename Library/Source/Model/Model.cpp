@@ -8,36 +8,6 @@
 
 namespace library
 {
-    XMMATRIX ConvertMatrix(_In_ const aiMatrix4x4& matrix)
-    {
-        return XMMATRIX(
-            matrix.a1,
-            matrix.b1,
-            matrix.c1,
-            matrix.d1,
-            matrix.a2,
-            matrix.b2,
-            matrix.c2,
-            matrix.d2,
-            matrix.a3,
-            matrix.b3,
-            matrix.c3,
-            matrix.d3,
-            matrix.a4,
-            matrix.b4,
-            matrix.c4,
-            matrix.d4
-        );
-    }
-    XMFLOAT3 ConvertVector3dToFloat3(_In_ const aiVector3D& vector)
-    {
-        return XMFLOAT3(vector.x, vector.y, vector.z);
-    }
-    XMVECTOR ConvertQuaternionToVector(_In_ const aiQuaternion& quaternion)
-    {
-        XMFLOAT4 float4 = XMFLOAT4(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-        return XMLoadFloat4(&float4);
-    }
     std::unique_ptr<Assimp::Importer> Model::sm_pImporter = std::make_unique<Assimp::Importer>();
 
     Model::Model(
@@ -49,7 +19,10 @@ namespace library
         m_filePath(filePath),
         m_meshes(std::vector<std::shared_ptr<ModelMesh>>()),
         m_materials(std::vector<std::shared_ptr<Material>>()),
-        m_pScene(nullptr)
+        m_pScene(nullptr),
+        m_location(location),
+        m_rotation(rotation),
+        m_scale(scale)
     {}
     HRESULT Model::Initialize(
         _In_ const ComPtr<ID3D12Device>& pDevice,
@@ -167,7 +140,9 @@ namespace library
     }
     void Model::initSingleMesh(_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh)
     {
-        m_meshes.push_back(std::make_shared<ModelMesh>());
+        m_meshes.push_back(
+            std::make_shared<ModelMesh>(m_location,m_rotation,m_scale)
+        );
         const aiVector3D zero3d(0.0f, 0.0f, 0.0f);
         for (UINT i = 0u; i < pMesh->mNumVertices; i++)
         {

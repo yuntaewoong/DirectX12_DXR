@@ -2,11 +2,16 @@
 #include "Model/ModelMesh.h"
 namespace library
 {
-	ModelMesh::ModelMesh() :
+	ModelMesh::ModelMesh(
+		_In_ XMVECTOR location,
+		_In_ XMVECTOR rotation,
+		_In_ XMVECTOR scale
+	) 
+		:
 		Mesh::Mesh(
-			XMVectorSet(0.0f, 0.0f, 0.f, 1.0f),
-			XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-			XMVectorSet(1.f, 1.f, 1.f, 1.f),
+			location,
+			rotation,
+			scale,
 			XMFLOAT4()
 		),
 		m_vertices(std::vector<Vertex>()),

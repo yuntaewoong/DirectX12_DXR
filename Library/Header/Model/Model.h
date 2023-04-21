@@ -97,5 +97,8 @@ namespace library
         std::vector<std::shared_ptr<ModelMesh>> m_meshes;
         std::vector<std::shared_ptr<Material>> m_materials;
         const aiScene* m_pScene;
+        XMVECTOR m_location;
+        XMVECTOR m_rotation;
+        XMVECTOR m_scale;
     };
 }
