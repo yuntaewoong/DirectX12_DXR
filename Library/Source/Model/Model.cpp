@@ -14,7 +14,8 @@ namespace library
         _In_ const std::filesystem::path& filePath,
         _In_ XMVECTOR location,
         _In_ XMVECTOR rotation,
-        _In_ XMVECTOR scale
+        _In_ XMVECTOR scale,
+        _In_ XMFLOAT4 color
     )   :
         m_filePath(filePath),
         m_meshes(std::vector<std::shared_ptr<ModelMesh>>()),
@@ -22,7 +23,8 @@ namespace library
         m_pScene(nullptr),
         m_location(location),
         m_rotation(rotation),
-        m_scale(scale)
+        m_scale(scale),
+        m_color(color)
     {}
     HRESULT Model::Initialize(
         _In_ const ComPtr<ID3D12Device>& pDevice,
@@ -141,7 +143,7 @@ namespace library
     void Model::initSingleMesh(_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh)
     {
         m_meshes.push_back(
-            std::make_shared<ModelMesh>(m_location,m_rotation,m_scale)
+            std::make_shared<ModelMesh>(m_location,m_rotation,m_scale,m_color)
         );
         const aiVector3D zero3d(0.0f, 0.0f, 0.0f);
         for (UINT i = 0u; i < pMesh->mNumVertices; i++)

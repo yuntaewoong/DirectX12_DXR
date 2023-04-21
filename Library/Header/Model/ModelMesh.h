@@ -9,7 +9,8 @@ namespace library
 		ModelMesh(
 			_In_ XMVECTOR location,
 			_In_ XMVECTOR rotation,
-			_In_ XMVECTOR scale
+			_In_ XMVECTOR scale,
+			_In_ XMFLOAT4 color
 		);
 		ModelMesh(const ModelMesh& other) = delete;
 		ModelMesh(ModelMesh&& other) = delete;

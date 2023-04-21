@@ -5,14 +5,15 @@ namespace library
 	ModelMesh::ModelMesh(
 		_In_ XMVECTOR location,
 		_In_ XMVECTOR rotation,
-		_In_ XMVECTOR scale
+		_In_ XMVECTOR scale,
+		_In_ XMFLOAT4 color
 	) 
 		:
 		Mesh::Mesh(
 			location,
 			rotation,
 			scale,
-			XMFLOAT4()
+			color
 		),
 		m_vertices(std::vector<Vertex>()),
 		m_indices(std::vector<Index>())
