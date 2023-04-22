@@ -97,11 +97,16 @@ float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
 // Specullar계산
 float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal,float2 uv)
 {
+    float3 specularSample = float3(1.f, 1.f, 1.f);
+    if(l_meshCB.hasSpecularTexture)
+    {//스페큘러 맵이 존재한다면 계산
+        specularSample = l_specularTexture.SampleLevel(l_sampler, uv, 0).xyz;
+    }
     float3 lightToHit = normalize(hitPosition - g_lightCB.position[0].xyz);
     float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition);
     float3 reflectDirection = normalize(reflect(lightToHit, normal));
     
-    return pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_meshCB.albedo;
+    return specularSample * pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_meshCB.albedo;
 }
 
 
@@ -178,7 +183,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         diffuseColor = mul(1.f - l_meshCB.reflectivity, diffuseColor);
         specullarColor = mul(1.f - l_meshCB.reflectivity, specullarColor);
     }
-    float3 color = saturate(ambientColor + reflectedColor + specullarColor + diffuseColor);
+    float3 color = saturate(/*ambientColor + reflectedColor + */specullarColor/* + diffuseColor*/);
     
     payload.color = float4(color, 1);
     
