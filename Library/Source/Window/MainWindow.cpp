@@ -111,19 +111,16 @@ namespace library
                 case 'D':
                     m_directions.bRight = true;
                     break;
-                }
-            }
-            else
-            {
-                switch (wParam)
-                {
-                case VK_SHIFT:
+                case 'q':
+                case 'Q':
                     m_directions.bDown = true;
                     break;
-                case VK_SPACE:
+                case 'e':
+                case 'E':
                     m_directions.bUp = true;
                     break;
                 }
+
             }
             break;
         }
@@ -150,16 +147,12 @@ namespace library
                 case 'D':
                     m_directions.bRight = false;
                     break;
-                }
-            }
-            else
-            {
-                switch (wParam)
-                {
-                case VK_SHIFT:
+                case 'q':
+                case 'Q':
                     m_directions.bDown = false;
                     break;
-                case VK_SPACE:
+                case 'e':
+                case 'E':
                     m_directions.bUp = false;
                     break;
                 }
@@ -178,8 +171,8 @@ namespace library
                     RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawdata.get());
                     if (raw->header.dwType == RIM_TYPEMOUSE)
                     {
-                        //m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
-                        //m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
+                        m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
+                        m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
                     }
                 }
             }
