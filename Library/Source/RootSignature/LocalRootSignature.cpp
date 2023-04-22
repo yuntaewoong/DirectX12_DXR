@@ -8,13 +8,18 @@ namespace library
     {}
     HRESULT LocalRootSignature::Initialize(_In_ ID3D12Device* pDevice)
     {
-        m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::CubeConstantSlot)].InitAsConstants(24u, 1u);//1번 레지스터에 32비트(4바이트) 값 21개를 쓰겠다(16개-XMMATRIX,4개->XMFLAOT4,1개->UINT)
+        CD3DX12_DESCRIPTOR_RANGE ranges[NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT] = {};
+        ranges[static_cast<UINT>(ELocalRootSignatureSlot::DiffuseTextureSlot)].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4);  // 4번 레지스터는 SRV Texture2D
+        ranges[static_cast<UINT>(ELocalRootSignatureSlot::NormalTextureSlot)].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5);  // 5번 레지스터는 SRV Texture2D
+        ranges[static_cast<UINT>(ELocalRootSignatureSlot::SpecularTextureSlot)].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6);  // 6번 레지스터는 SRV Texture2D
+
+
+        m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::CubeConstantSlot)].InitAsConstants(24u, 1u);//1번 레지스터에 32비트(4바이트) 값 24개를 쓰겠다(16개-XMMATRIX,4개->XMFLAOT4,3개->UINT,1개->FLOAT)
         m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::VertexBufferSlot)].InitAsShaderResourceView(2);//2번 레지스터는 VB
         m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::IndexBufferSlot)].InitAsShaderResourceView(3);//3번 레지스터는 IB
-
-        CD3DX12_DESCRIPTOR_RANGE ranges[1] = {};
-        ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4);  // 4번 레지스터는 SRV Texture2D
-        m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::DiffuseTextureSlot)].InitAsDescriptorTable(1, &ranges[0]); 
+        m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::DiffuseTextureSlot)].InitAsDescriptorTable(1, &ranges[static_cast<UINT>(ELocalRootSignatureSlot::DiffuseTextureSlot)]);
+        m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::NormalTextureSlot)].InitAsDescriptorTable(1, &ranges[static_cast<UINT>(ELocalRootSignatureSlot::NormalTextureSlot)]);
+        m_rootParameter[static_cast<UINT>(ELocalRootSignatureSlot::SpecularTextureSlot)].InitAsDescriptorTable(1, &ranges[static_cast<UINT>(ELocalRootSignatureSlot::SpecularTextureSlot)]);
 
         D3D12_STATIC_SAMPLER_DESC staticSamplerDesc =
         {//local root signature의 sampler에 대한 정보(Root Signature안에 Sampler정보가 내장되므로 HitGroup Table에서 데이터 입력해줄 필요없음

@@ -51,21 +51,25 @@ namespace library
         CameraConstantSlot,
         LightConstantSlot
     };
-    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 4;
+    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 6;
     enum class ELocalRootSignatureSlot
     {
         CubeConstantSlot = 0,
         VertexBufferSlot = 1,
         IndexBufferSlot = 2,
         DiffuseTextureSlot = 3,
+        NormalTextureSlot = 4,
+        SpecularTextureSlot = 5
     };
-    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 4;
+    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 6;
     struct LocalRootArgument
     {
         MeshConstantBuffer cb;//Root Constant
         D3D12_GPU_VIRTUAL_ADDRESS vbGPUAddress;//Inline Descriptor
         D3D12_GPU_VIRTUAL_ADDRESS ibGPUAddress;//Inline Descriptor
         D3D12_GPU_DESCRIPTOR_HANDLE diffuseTextureDescriptorHandle;//Descriptor Table
+        D3D12_GPU_DESCRIPTOR_HANDLE normalTextureDescriptorHandle;//Descriptor Table
+        D3D12_GPU_DESCRIPTOR_HANDLE specularTextureDescriptorHandle;//Descriptor Table
     };
 
 

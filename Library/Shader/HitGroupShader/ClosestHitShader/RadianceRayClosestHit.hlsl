@@ -11,6 +11,8 @@
 StructuredBuffer<Vertex> l_vertices : register(t2, space0);
 ByteAddressBuffer l_indices : register(t3, space0);
 Texture2D l_diffuseTexture : register(t4);
+Texture2D l_normalTexture : register(t5);
+Texture2D l_specularTexture : register(t6);
 //CBV
 ConstantBuffer<MeshConstantBuffer> l_meshCB : register(b1);
 //Static Sampler
@@ -67,13 +69,24 @@ float2 HitAttributeFloat2(float2 vertexAttribute[3], BuiltInTriangleIntersection
         attr.barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
 }
 
+//노말맵이 적용된 새로운 노말값 리턴
+float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTangent,float2 uv)
+{
+    if(!l_meshCB.hasNormalTexture)
+        return originNormal;
+    float3 newNormal = l_normalTexture.SampleLevel(l_sampler, uv, 0).xyz;
+    newNormal = (newNormal * 2.0f) - 1.0f;
+    newNormal = (newNormal.x * tangent) + (newNormal.y * biTangent) + (newNormal.z * originNormal);//TBN변환
+    return normalize(newNormal);
+}
+
 // Diffuse계산
 float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
 {
     float3 pixelToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
     float3 nDotL = max(0.0f, dot(pixelToLight, normal));
     float3 diffuseTexelColor = float3(1.f, 1.f, 1.f);
-    if(l_meshCB.hasTexture == 1)
+    if(l_meshCB.hasDiffuseTexture == 1)
     {
         diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남       
     }
@@ -82,7 +95,7 @@ float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
 }
 
 // Specullar계산
-float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal, float2 uv)
+float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal,float2 uv)
 {
     float3 lightToHit = normalize(hitPosition - g_lightCB.position[0].xyz);
     float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition);
@@ -109,6 +122,18 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         normalize(mul(float4(l_vertices[indices[1]].normal, 0), l_meshCB.world).xyz),
         normalize(mul(float4(l_vertices[indices[2]].normal, 0), l_meshCB.world).xyz)
     };
+    float3 vertexTangent[3] =
+    { //index값으로 world space vertex tangent값 가져오기
+        normalize(mul(float4(l_vertices[indices[0]].tangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[1]].tangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[2]].tangent, 0), l_meshCB.world).xyz)
+    };
+    float3 vertexBiTangent[3] =
+    { //index값으로 world space vertex biTangent값 가져오기
+        normalize(mul(float4(l_vertices[indices[0]].biTangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[1]].biTangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[2]].biTangent, 0), l_meshCB.world).xyz)
+    };
     float2 vertexUV[3] =
     { //index값으로 vertex uv값 가져오기
         l_vertices[indices[0]].uv,
@@ -117,8 +142,10 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     };
     
     float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
+    float3 triangleTangent = HitAttributeFloat3(vertexTangent, attr); //무게중심 좌표계로 tangent값 보간하기
+    float3 triangleBitangent = HitAttributeFloat3(vertexBiTangent, attr); //무게중심 좌표계로 biTangent값 보간하기
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
-    
+    triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
     float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
     float3 diffuseColor = float3(0.f, 0.f, 0.f);
@@ -129,7 +156,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         ambientColor /= 3.f; //너무 밝지않게 조절
     }
     {//Phong Shading계산
-        if (l_meshCB.hasTexture == 1)
+        if (l_meshCB.hasDiffuseTexture == 1)
         {
             ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
         }
@@ -152,6 +179,9 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         specullarColor = mul(1.f - l_meshCB.reflectivity, specullarColor);
     }
     float3 color = saturate(ambientColor + reflectedColor + specullarColor + diffuseColor);
+    
     payload.color = float4(color, 1);
+    
+    
 
 }

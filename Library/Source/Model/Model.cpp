@@ -233,11 +233,11 @@ namespace library
         HRESULT hr = S_OK;
         m_materials[uIndex]->SetSpecularTexture(nullptr);
 
-        if (pMaterial->GetTextureCount(aiTextureType_SHININESS) > 0)
+        if (pMaterial->GetTextureCount(aiTextureType_SPECULAR) > 0)
         {
             aiString aiPath;
 
-            if (pMaterial->GetTexture(aiTextureType_SHININESS, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
+            if (pMaterial->GetTexture(aiTextureType_SPECULAR, 0u, &aiPath, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
             {
                 std::string szPath(aiPath.data);
 
@@ -295,6 +295,7 @@ namespace library
                 std::filesystem::path fullPath = parentDirectory / szPath;
 
                 m_materials[uIndex]->SetNormalTexture(std::make_shared<Texture>(fullPath));
+                hr = m_materials[uIndex]->GetNormalTexture()->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
                 //m_bHasNormalMap = true;
 
                 if (FAILED(hr))

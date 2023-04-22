@@ -40,12 +40,16 @@ namespace library
             .cb = {
                 .world = XMMATRIX(),
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f),
-                .hasTexture = 0,
+                .hasDiffuseTexture = 0,
+                .hasNormalTexture = 0,
+                .hasSpecularTexture = 0,
                 .reflectivity = 0.f
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
             .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
-            .diffuseTextureDescriptorHandle = D3D12_GPU_DESCRIPTOR_HANDLE()
+            .diffuseTextureDescriptorHandle = D3D12_GPU_DESCRIPTOR_HANDLE(),
+            .normalTextureDescriptorHandle = D3D12_GPU_DESCRIPTOR_HANDLE(),
+            .specularTextureDescriptorHandle = D3D12_GPU_DESCRIPTOR_HANDLE()
         };
         for (UINT i = 0; i < meshes.size(); i++)
         {
@@ -54,11 +58,23 @@ namespace library
             rootArgument.cb.reflectivity = meshes[i]->GetMaterial()->GetReflectivity();
             rootArgument.vbGPUAddress = meshes[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = meshes[i]->GetIndexBuffer()->GetGPUVirtualAddress();
-            rootArgument.cb.hasTexture = 0u;
+            rootArgument.cb.hasDiffuseTexture = 0u;
+            rootArgument.cb.hasNormalTexture = 0u;
+            rootArgument.cb.hasSpecularTexture = 0u;
             if (meshes[i]->GetMaterial()->HasDiffuseTexture())
             {
-                rootArgument.cb.hasTexture = 1u;
+                rootArgument.cb.hasDiffuseTexture = 1u;
                 rootArgument.diffuseTextureDescriptorHandle = meshes[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
+            }
+            if (meshes[i]->GetMaterial()->HasNormalTexture())
+            {
+                rootArgument.cb.hasNormalTexture = 1u;
+                rootArgument.normalTextureDescriptorHandle = meshes[i]->GetMaterial()->GetNormalTexture()->GetDescriptorHandle();
+            }
+            if (meshes[i]->GetMaterial()->HasSpecularTexture())
+            {
+                rootArgument.cb.hasSpecularTexture = 1u;
+                rootArgument.specularTextureDescriptorHandle = meshes[i]->GetMaterial()->GetSpecularTexture()->GetDescriptorHandle();
             }
             for (UINT j = 0; j < RayType::Count; j++)
             {

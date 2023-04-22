@@ -40,11 +40,12 @@ struct PointLightConstantBuffer
 
 struct MeshConstantBuffer
 {
-    XMMATRIX world;
-    XMFLOAT4 albedo;
-    UINT hasTexture;//1이면 texture있음, 0이면 없음
-    FLOAT reflectivity;//1이면 거울,0이면 무반사
-    FLOAT padding[2];//32비트 4단위를 맞추기 위한 padding
+    XMMATRIX world;//float(32bit)가 16개 -> DWORD 16개필요
+    XMFLOAT4 albedo;//float(32bit)가 4개 -> DWORD 4개 필요
+    UINT hasDiffuseTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
+    UINT hasNormalTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
+    UINT hasSpecularTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
+    FLOAT reflectivity;//1이면 거울,0이면 무반사, 32bit가 1개 -> DWORD 1개 필요
 };
 
 struct Vertex
