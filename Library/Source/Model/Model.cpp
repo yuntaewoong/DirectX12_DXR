@@ -145,25 +145,18 @@ namespace library
         {
             const aiVector3D& position = pMesh->mVertices[i];
             const aiVector3D& normal = pMesh->mNormals[i];
-            const aiVector3D& texCoord = pMesh->HasTextureCoords(0u) ?
-                pMesh->mTextureCoords[0][i] : zero3d;
-            /*const aiVector3D& tangent = pMesh->HasTangentsAndBitangents() ?
-                pMesh->mTangents[i] : zero3d;
-            const aiVector3D& bitangent = pMesh->HasTangentsAndBitangents() ?
-                pMesh->mBitangents[i] : zero3d;*/
+            const aiVector3D& texCoord = pMesh->HasTextureCoords(0u) ? pMesh->mTextureCoords[0][i] : zero3d;
+            const aiVector3D& tangent = pMesh->HasTangentsAndBitangents() ? pMesh->mTangents[i] : zero3d;
+            const aiVector3D& biTangent = pMesh->HasTangentsAndBitangents() ? pMesh->mBitangents[i] : zero3d;
             Vertex vertex =
             {
                 .position = XMFLOAT3(position.x, position.y, position.z),
                 .uv = XMFLOAT2(texCoord.x, texCoord.y),
-                .normal = XMFLOAT3(normal.x, normal.y, normal.z)
+                .normal = XMFLOAT3(normal.x, normal.y, normal.z),
+                .tangent = XMFLOAT3(tangent.x,tangent.y,tangent.z),
+                .biTangent = XMFLOAT3(biTangent.x,biTangent.y,biTangent.z)
             };
-            /*NormalData normalData =
-            {
-                .Tangent = XMFLOAT3(tangent.x,tangent.y,tangent.z),
-                .Bitangent = XMFLOAT3(bitangent.x,bitangent.y,bitangent.z)
-            };*/
             m_meshes[uMeshIndex]->AddVertex(vertex);
-            //m_aNormalData.push_back(normalData);
         }
         for (UINT i = 0u; i < pMesh->mNumFaces; i++)
         {
