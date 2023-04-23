@@ -183,9 +183,11 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         diffuseColor = mul(1.f - l_meshCB.reflectivity, diffuseColor);
         specullarColor = mul(1.f - l_meshCB.reflectivity, specullarColor);
     }
-    float3 color = saturate(/*ambientColor + reflectedColor + */specullarColor/* + diffuseColor*/);
+    float3 color = saturate(ambientColor + reflectedColor + specullarColor + diffuseColor);
     
     payload.color = float4(color, 1);
+    
+        
     
     
 
