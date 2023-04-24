@@ -115,7 +115,7 @@ namespace library
     XMMATRIX Camera::getInverseViewProjectionMatrix() const
     {
         XMMATRIX view = XMMatrixLookAtLH(m_eye, m_at, m_up);
-        XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 16.f/9.f, 1.0f, 125.0f);
+        XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 4.f/3.f, 1.0f, 125.0f);
         XMMATRIX viewProj = view * proj;
         return XMMatrixInverse(nullptr, viewProj);
     }

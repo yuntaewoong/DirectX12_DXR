@@ -86,6 +86,16 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		color
 	);
 
+	XMStoreFloat4(&color, Colors::White);
+	std::shared_ptr<library::Model> sphere = std::make_shared<library::Model>(//±¸ ¸ðµ¨
+		L"Assets/Model/sphere/source/sphere.fbx",
+		XMVectorSet(3.f, 3.f, 0.f, 1.0f),
+		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
+		XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f),
+		color
+	);
+
+
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
 	
 	std::filesystem::path projectDirPath;
@@ -135,6 +145,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		scene->AddMesh(mirror);
 
 		scene->AddModel(cyborg);
+		scene->AddModel(sphere);
 
 		scene->AddLight(light1);
 		scene->AddMaterial(floorMaterial);
