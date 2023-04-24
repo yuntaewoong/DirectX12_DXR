@@ -28,10 +28,14 @@ namespace library
 		void SetRoughnessTexture(_In_ const std::shared_ptr<Texture>& roughness);
 		void SetMetallicTexture(_In_ const std::shared_ptr<Texture>& metallic);
 		void SetReflectivity(_In_ FLOAT reflectivity);
+		void SetRoughness(_In_ FLOAT roughness);
+		void SetMetallic(_In_ FLOAT metallic);
 		const std::shared_ptr<Texture> GetDiffuseTexture() const;
 		const std::shared_ptr<Texture> GetNormalTexture() const;
 		const std::shared_ptr<Texture> GetSpecularTexture() const;
 		FLOAT GetReflectivity() const;
+		FLOAT GetRoughness() const;
+		FLOAT GetMetallic() const;
 		BOOL HasDiffuseTexture() const;
 		BOOL HasNormalTexture() const;
 		BOOL HasSpecularTexture() const;
@@ -44,5 +48,7 @@ namespace library
 		std::shared_ptr<Texture> m_roughnessTexture;
 		std::shared_ptr<Texture> m_metallicTexture;
 		FLOAT m_reflectivity;//반사되는 정도 (1:거울, 0:완전 빛 흡수)
+		FLOAT m_roughness;//거친정도
+		FLOAT m_metallic;//금속인 정도
 	};
 }

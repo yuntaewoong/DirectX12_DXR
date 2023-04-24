@@ -9,7 +9,9 @@ namespace library
 		m_specularTexture(nullptr),
 		m_roughnessTexture(nullptr),
 		m_metallicTexture(nullptr),
-		m_reflectivity(0.f)
+		m_reflectivity(0.f),
+		m_roughness(0.5f),
+		m_metallic(0.f)
 	{}
 
 	HRESULT Material::Initialize(
@@ -74,17 +76,25 @@ namespace library
 	{
 		m_specularTexture = specular;
 	}
-	void Material::SetRoughnessTexture(const std::shared_ptr<Texture>& roughness)
+	void Material::SetRoughnessTexture(_In_ const std::shared_ptr<Texture>& roughness)
 	{
 		m_roughnessTexture = roughness;
 	}
-	void Material::SetMetallicTexture(const std::shared_ptr<Texture>& metallic)
+	void Material::SetMetallicTexture(_In_ const std::shared_ptr<Texture>& metallic)
 	{
 		m_metallicTexture = metallic;
 	}
 	void Material::SetReflectivity(_In_ FLOAT reflectivity)
 	{
 		m_reflectivity = reflectivity;
+	}
+	void Material::SetRoughness(_In_ FLOAT roughness)
+	{
+		m_roughness = roughness;
+	}
+	void Material::SetMetallic(_In_ FLOAT metallic)
+	{
+		m_metallic = metallic;
 	}
 	const std::shared_ptr<Texture> Material::GetDiffuseTexture() const
 	{
@@ -101,6 +111,14 @@ namespace library
 	FLOAT Material::GetReflectivity() const
 	{
 		return m_reflectivity;
+	}
+	FLOAT Material::GetRoughness() const
+	{
+		return m_roughness;
+	}
+	FLOAT Material::GetMetallic() const
+	{
+		return m_metallic;
 	}
 	BOOL Material::HasDiffuseTexture() const
 	{
