@@ -13,6 +13,9 @@ ByteAddressBuffer l_indices : register(t3, space0);
 Texture2D l_diffuseTexture : register(t4);
 Texture2D l_normalTexture : register(t5);
 Texture2D l_specularTexture : register(t6);
+Texture2D l_roughnessTexture : register(t7);
+Texture2D l_metallicTexture : register(t8);
+
 //CBV
 ConstantBuffer<MeshConstantBuffer> l_meshCB : register(b1);
 //Static Sampler

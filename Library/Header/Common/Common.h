@@ -51,7 +51,7 @@ namespace library
         CameraConstantSlot,
         LightConstantSlot
     };
-    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 6;
+    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 4;
     enum class ELocalRootSignatureSlot
     {
         CubeConstantSlot = 0,
@@ -59,9 +59,11 @@ namespace library
         IndexBufferSlot = 2,
         DiffuseTextureSlot = 3,
         NormalTextureSlot = 4,
-        SpecularTextureSlot = 5
+        SpecularTextureSlot = 5,
+        RoughnessTextureSlot = 6,
+        MetallicTextureSlot = 7,
     };
-    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 6;
+    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 8;
     struct LocalRootArgument
     {
         MeshConstantBuffer cb;//Root Constant
@@ -70,6 +72,8 @@ namespace library
         D3D12_GPU_DESCRIPTOR_HANDLE diffuseTextureDescriptorHandle;//Descriptor Table
         D3D12_GPU_DESCRIPTOR_HANDLE normalTextureDescriptorHandle;//Descriptor Table
         D3D12_GPU_DESCRIPTOR_HANDLE specularTextureDescriptorHandle;//Descriptor Table
+        D3D12_GPU_DESCRIPTOR_HANDLE roughnessTextureDescriptorHandle;//Descriptor Table
+        D3D12_GPU_DESCRIPTOR_HANDLE metallicTextureDescriptorHandle;//Descriptor Table
     };
 
 

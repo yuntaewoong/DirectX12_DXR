@@ -108,6 +108,14 @@ namespace library
 	{
 		return m_specularTexture;
 	}
+	const std::shared_ptr<Texture> Material::GetRoughnessTexture() const
+	{
+		return m_roughnessTexture;
+	}
+	const std::shared_ptr<Texture> Material::GetMetallicTexture() const
+	{
+		return m_metallicTexture;
+	}
 	FLOAT Material::GetReflectivity() const
 	{
 		return m_reflectivity;

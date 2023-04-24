@@ -43,7 +43,9 @@ namespace library
                 .hasDiffuseTexture = 0,
                 .hasNormalTexture = 0,
                 .hasSpecularTexture = 0,
-                .reflectivity = 0.f
+                .reflectivity = 0.f,
+                .roughness = 0.5f,
+                .metallic = 0.f
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
             .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
@@ -56,11 +58,15 @@ namespace library
             rootArgument.cb.world = XMMatrixTranspose(meshes[i]->GetWorldMatrix());
             rootArgument.cb.albedo = meshes[i]->GetColor();
             rootArgument.cb.reflectivity = meshes[i]->GetMaterial()->GetReflectivity();
+            rootArgument.cb.roughness = meshes[i]->GetMaterial()->GetRoughness();
+            rootArgument.cb.metallic = meshes[i]->GetMaterial()->GetMetallic();
             rootArgument.vbGPUAddress = meshes[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = meshes[i]->GetIndexBuffer()->GetGPUVirtualAddress();
             rootArgument.cb.hasDiffuseTexture = 0u;
             rootArgument.cb.hasNormalTexture = 0u;
             rootArgument.cb.hasSpecularTexture = 0u;
+            rootArgument.cb.hasRoughnessTexture = 0u;
+            rootArgument.cb.hasMetallicTexture = 0u;
             if (meshes[i]->GetMaterial()->HasDiffuseTexture())
             {
                 rootArgument.cb.hasDiffuseTexture = 1u;
@@ -75,6 +81,16 @@ namespace library
             {
                 rootArgument.cb.hasSpecularTexture = 1u;
                 rootArgument.specularTextureDescriptorHandle = meshes[i]->GetMaterial()->GetSpecularTexture()->GetDescriptorHandle();
+            }
+            if (meshes[i]->GetMaterial()->HasRoughnessTexture())
+            {
+                rootArgument.cb.hasRoughnessTexture = 1u;
+                rootArgument.roughnessTextureDescriptorHandle = meshes[i]->GetMaterial()->GetRoughnessTexture()->GetDescriptorHandle();
+            }
+            if (meshes[i]->GetMaterial()->HasMetallicTexture())
+            {
+                rootArgument.cb.hasMetallicTexture = 1u;
+                rootArgument.metallicTextureDescriptorHandle = meshes[i]->GetMaterial()->GetMetallicTexture()->GetDescriptorHandle();
             }
             for (UINT j = 0; j < RayType::Count; j++)
             {

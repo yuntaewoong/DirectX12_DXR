@@ -103,16 +103,28 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	
 	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>();//Texture없는 Material
 
+	std::shared_ptr<library::Material> ironPBRMaterial = std::make_shared<library::Material>();//PBR 철
+	std::filesystem::path ironBaseColorTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_basecolor.png");//project dir상에서의 상대Path
+	std::filesystem::path ironNormalTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_normal.png");//project dir상에서의 상대Path
+	std::filesystem::path ironRoughnessTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_roughness.png");//project dir상에서의 상대Path
+	std::filesystem::path ironMetallicTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_metallic.png");//project dir상에서의 상대Path
+
+	
+
+	{//Material=>Texture대응 세팅
+		woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
+		ironPBRMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / ironBaseColorTexturePath));
+		ironPBRMaterial->SetNormalTexture(std::make_shared<library::Texture>(projectDirPath / ironNormalTexturePath));
+		ironPBRMaterial->SetRoughnessTexture(std::make_shared<library::Texture>(projectDirPath / ironRoughnessTexturePath));
+		ironPBRMaterial->SetMetallicTexture(std::make_shared<library::Texture>(projectDirPath / ironMetallicTexturePath));
+	}
+
 	{//Material의 반사되는 정도 세팅(기본값은 0)
 		mirrorMaterial->SetReflectivity(0.9f);
 		floorMaterial->SetReflectivity(0.6f);
 		woodMaterial->SetReflectivity(0.0f);
 	}
 
-	{//Material=>Diffuse Texture대응 세팅
-		//floorMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
-		woodMaterial->SetDiffuseTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
-	}
 	{//Scene에서 초기화해줄 Object들 Pass
 		scene->AddMesh(cube1);
 		scene->AddMesh(cube2);
@@ -128,13 +140,14 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		scene->AddMaterial(floorMaterial);
 		scene->AddMaterial(woodMaterial);
 		scene->AddMaterial(mirrorMaterial);
+		scene->AddMaterial(ironPBRMaterial);
 	}
 	{//Mesh=>Material 대응 세팅
 		cube1->SetMaterial(woodMaterial);
 		cube2->SetMaterial(woodMaterial);
 		cube3->SetMaterial(woodMaterial);
 		cube4->SetMaterial(woodMaterial);
-		cube5->SetMaterial(woodMaterial);
+		cube5->SetMaterial(ironPBRMaterial);
 		plane->SetMaterial(floorMaterial);
 		mirror->SetMaterial(mirrorMaterial);
 	}
