@@ -25,6 +25,8 @@ namespace library
 		void SetDiffuseTexture(_In_ const std::shared_ptr<Texture>& diffuse);
 		void SetNormalTexture(_In_ const std::shared_ptr<Texture>& normal);
 		void SetSpecularTexture(_In_ const std::shared_ptr<Texture>& specular);
+		void SetRoughnessTexture(_In_ const std::shared_ptr<Texture>& roughness);
+		void SetMetallicTexture(_In_ const std::shared_ptr<Texture>& metallic);
 		void SetReflectivity(_In_ FLOAT reflectivity);
 		const std::shared_ptr<Texture> GetDiffuseTexture() const;
 		const std::shared_ptr<Texture> GetNormalTexture() const;
@@ -33,10 +35,14 @@ namespace library
 		BOOL HasDiffuseTexture() const;
 		BOOL HasNormalTexture() const;
 		BOOL HasSpecularTexture() const;
+		BOOL HasRoughnessTexture() const;
+		BOOL HasMetallicTexture() const;
 	private:
 		std::shared_ptr<Texture> m_diffuseTexture;
 		std::shared_ptr<Texture> m_normalTexture;
 		std::shared_ptr<Texture> m_specularTexture;
+		std::shared_ptr<Texture> m_roughnessTexture;
+		std::shared_ptr<Texture> m_metallicTexture;
 		FLOAT m_reflectivity;//반사되는 정도 (1:거울, 0:완전 빛 흡수)
 	};
 }

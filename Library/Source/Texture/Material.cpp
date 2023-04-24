@@ -7,6 +7,8 @@ namespace library
 		m_diffuseTexture(nullptr),
 		m_normalTexture(nullptr),
 		m_specularTexture(nullptr),
+		m_roughnessTexture(nullptr),
+		m_metallicTexture(nullptr),
 		m_reflectivity(0.f)
 	{}
 
@@ -41,6 +43,22 @@ namespace library
 				return hr;
 			}
 		}
+		if (m_roughnessTexture)
+		{
+			hr = m_roughnessTexture->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
+			if (FAILED(hr))
+			{
+				return hr;
+			}
+		}
+		if (m_metallicTexture)
+		{
+			hr = m_metallicTexture->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
+			if (FAILED(hr))
+			{
+				return hr;
+			}
+		}
 		return hr;
 	}
 
@@ -55,6 +73,14 @@ namespace library
 	void Material::SetSpecularTexture(_In_ const std::shared_ptr<Texture>& specular)
 	{
 		m_specularTexture = specular;
+	}
+	void Material::SetRoughnessTexture(const std::shared_ptr<Texture>& roughness)
+	{
+		m_roughnessTexture = roughness;
+	}
+	void Material::SetMetallicTexture(const std::shared_ptr<Texture>& metallic)
+	{
+		m_metallicTexture = metallic;
 	}
 	void Material::SetReflectivity(_In_ FLOAT reflectivity)
 	{
@@ -87,5 +113,13 @@ namespace library
 	BOOL Material::HasSpecularTexture() const
 	{
 		return m_specularTexture ? TRUE : FALSE;
+	}
+	BOOL Material::HasRoughnessTexture() const
+	{
+		return m_roughnessTexture ? TRUE : FALSE;
+	}
+	BOOL Material::HasMetallicTexture() const
+	{
+		return m_metallicTexture ? TRUE : FALSE;
 	}
 }
