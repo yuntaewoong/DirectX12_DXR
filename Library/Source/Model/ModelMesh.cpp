@@ -42,11 +42,11 @@ namespace library
 	}
 	UINT ModelMesh::GetNumVertices() const
 	{
-		return m_vertices.size();
+		return static_cast<UINT>(m_vertices.size());
 	}
 	UINT ModelMesh::GetNumIndices() const
 	{
-		return m_indices.size();
+		return static_cast<UINT>(m_indices.size());
 	}
 	const Vertex* ModelMesh::GetVertices() const
 	{

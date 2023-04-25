@@ -106,10 +106,10 @@ float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal,float2 uv)
         specularSample = l_specularTexture.SampleLevel(l_sampler, uv, 0).xyz;
     }
     float3 lightToHit = normalize(hitPosition - g_lightCB.position[0].xyz);
-    float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition);
+    float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition.xyz);
     float3 reflectDirection = normalize(reflect(lightToHit, normal));
     
-    return specularSample * pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_meshCB.albedo;
+    return specularSample * pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_meshCB.albedo.xyz;
 }
 
 
@@ -181,7 +181,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     {//Reflection계산(추가 Radiance Ray이용)
         float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);//반사용으로 Trace할 다음 Ray의 Direction
         float4 reflectionColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth);
-        reflectedColor = mul(l_meshCB.reflectivity, reflectionColor);
+        reflectedColor = mul(l_meshCB.reflectivity, reflectionColor.rgb);
         ambientColor = mul(1.f - l_meshCB.reflectivity, ambientColor);
         diffuseColor = mul(1.f - l_meshCB.reflectivity, diffuseColor);
         specullarColor = mul(1.f - l_meshCB.reflectivity, specullarColor);

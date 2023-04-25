@@ -50,7 +50,6 @@ namespace library
             OutputDebugString(L": ");
             OutputDebugStringA(sm_pImporter->GetErrorString());
             OutputDebugString(L"\n");
-            return hr;
         }
         if (FAILED(hr))
         {
@@ -88,6 +87,7 @@ namespace library
                 return hr;
             }
         }
+        return hr;
     }
     HRESULT Model::initFromScene(
         _In_ const ComPtr<ID3D12Device>& pDevice,
