@@ -148,7 +148,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTK12.lib;assimp-vc142-mtd.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;DirectXTK12.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\ThirdParty\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
