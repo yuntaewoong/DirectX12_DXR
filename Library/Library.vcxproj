@@ -157,13 +157,16 @@
       <HeaderFileOutput>$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
       <EntryPointName />
       <VariableName>g_p%(Filename)</VariableName>
-      <AssemblerOutput>AssemblyCode</AssemblerOutput>
+      <AssemblerOutput>AssemblyCodeAndHex</AssemblerOutput>
       <AssemblerOutputFile>$(OutDir)%(Filename)d.pdb</AssemblerOutputFile>
       <DisableOptimizations>true</DisableOptimizations>
       <ObjectFileOutput>$(OutDir)%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions>-Qembed_debug %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.dll" "$(SolutionDir)Build\Game\Debug" </Command>
+      <Command>xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.dll" "$(SolutionDir)Build\Game\Debug" 
+xcopy /y /d "$(SolutionDir)ThirdParty\Debug\DirectXTK12.pdb" "$(SolutionDir)Build\Game\Debug" 
+xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir)Build\Game\Debug" </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
