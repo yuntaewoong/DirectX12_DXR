@@ -75,7 +75,7 @@ float2 HitAttributeFloat2(float2 vertexAttribute[3], BuiltInTriangleIntersection
 //노말맵이 적용된 새로운 노말값 리턴
 float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTangent,float2 uv)
 {
-    if(!l_meshCB.hasNormalTexture)
+    if(l_meshCB.hasNormalTexture == 1)
         return originNormal;
     float3 newNormal = l_normalTexture.SampleLevel(l_sampler, uv, 0).xyz;
     newNormal = (newNormal * 2.0f) - 1.0f;

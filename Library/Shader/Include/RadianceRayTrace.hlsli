@@ -5,7 +5,7 @@
  Radiance Ray의 Trace호출의 Wrapper(closest hit shader,ray generation shader에서 사용됨
 */
 
-float4 TraceRadianceRay(in float3 rayOrigin,in float3 rayDirection, in UINT currentRayRecursionDepth)
+float4 TraceRadianceRay(in float3 rayOrigin,in float3 rayDirection, in uint currentRayRecursionDepth)
 {
     if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
     {
