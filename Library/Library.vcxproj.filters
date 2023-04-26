@@ -68,6 +68,12 @@
     <Filter Include="Source\Model">
       <UniqueIdentifier>{c27df9c7-e22b-4453-91f2-6f4feb6606b2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Include\BxDF">
+      <UniqueIdentifier>{bfff8e46-750b-46ac-8e7c-f771635b17e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Include\BxDF\BRDF">
+      <UniqueIdentifier>{8b978e68-bcb9-4ede-b34a-8259a713cd28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
@@ -300,6 +306,9 @@
     </None>
     <None Include="Shader\Include\RTAORayTrace.hlsli">
       <Filter>Shader\Include</Filter>
+    </None>
+    <None Include="Shader\Include\BxDF\BRDF\PhongModel.hlsli">
+      <Filter>Shader\Include\BxDF\BRDF</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -303,6 +303,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\Include\BxDF\BRDF\PhongModel.hlsli" />
     <None Include="Shader\Include\HLSLCommon.hlsli" />
     <None Include="Shader\Include\RadianceRayTrace.hlsli" />
     <None Include="Shader\Include\RTAORayTrace.hlsli" />

@@ -83,36 +83,6 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
     newNormal = (newNormal.x * tangent) + (newNormal.y * biTangent) + (newNormal.z * originNormal);//TBN변환
     return normalize(newNormal);
 }
-
-// Diffuse계산
-float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
-{
-    float3 pixelToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
-    float3 nDotL = max(0.0f, dot(pixelToLight, normal));
-    float3 diffuseTexelColor = float3(1.f, 1.f, 1.f);
-    if(l_meshCB.hasDiffuseTexture == 1)
-    {
-        diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남       
-    }
-    return l_meshCB.albedo.xyz * nDotL * diffuseTexelColor;
-}
-
-// Specullar계산
-float3 CalculateSpecullarLighting(float3 hitPosition, float3 normal,float2 uv)
-{
-    float3 specularSample = float3(1.f, 1.f, 1.f);
-    if(l_meshCB.hasSpecularTexture)
-    {//스페큘러 맵이 존재한다면 계산
-        specularSample = l_specularTexture.SampleLevel(l_sampler, uv, 0).xyz;
-    }
-    float3 lightToHit = normalize(hitPosition - g_lightCB.position[0].xyz);
-    float3 cameraToHit = normalize(hitPosition - g_cameraCB.cameraPosition.xyz);
-    float3 reflectDirection = normalize(reflect(lightToHit, normal));
-    
-    return specularSample * pow(max(dot(-cameraToHit, reflectDirection), 0.0f), 15.0f) * l_meshCB.albedo.xyz;
-}
-
-
 [shader("closesthit")]
 void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
@@ -155,43 +125,45 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
-    float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
-    float3 diffuseColor = float3(0.f, 0.f, 0.f);
-    float3 specullarColor = float3(0.f, 0.f, 0.f);
-    float3 reflectedColor = float3(0.f, 0.f, 0.f);
-    {//RTAO(Ray Tracing Ambient Occlusion 계산)
-        ambientColor = TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
-        ambientColor /= 3.f; //너무 밝지않게 조절
-    }
-    {//Phong Shading계산
-        if (l_meshCB.hasDiffuseTexture == 1)
-        {
-            ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+    {//PhongShading모델
+        float3 ambientColor = l_meshCB.albedo.rgb * float3(0.2f, 0.2f, 0.2f);
+        {//RTAO(Ray Tracing Ambient Occlusion 계산)
+            ambientColor = TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
+            ambientColor /= 3.f; //너무 밝지않게 조절
         }
-        diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal, triangleUV);
-        specullarColor = CalculateSpecullarLighting(hitPosition, triangleNormal, triangleUV);
-    }
-    {//Shadow Ray계산
-        if (TraceShadowRay(hitPosition, g_lightCB.position[0].xyz,payload.recursionDepth))
-        {
-            diffuseColor = diffuseColor * float3(0.1f, 0.1f, 0.1f);
-            specullarColor = specullarColor * float3(0.1f, 0.1f, 0.1f);
+        float3 diffuseColor = l_meshCB.albedo.rgb;
+        float3 specularColor = float3(0.f, 0.f, 0.f);
+        if (l_meshCB.hasDiffuseTexture)
+        {// 디퓨즈맵이 존재한다면 계산
+            ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+            diffuseColor = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
         }
+        if (l_meshCB.hasSpecularTexture)
+        { //스페큘러 맵이 존재한다면 계산
+            specularColor = l_specularTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+        }
+        float3 pointToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
+        float3 pointToCamera = normalize(g_cameraCB.cameraPosition.xyz - hitPosition);
+        float3 lightColor = float3(1.f, 1.f, 1.f);
+        float lightAttenuation = 1.f;
+        bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position[0].xyz, payload.recursionDepth);
+        float3 color = BxDF::PhongShade(
+            ambientColor,
+            diffuseColor,
+            specularColor,
+            triangleNormal,
+            pointToLight,
+            pointToCamera,
+            lightColor,
+            lightAttenuation,
+            isInShadow
+        );
+        float3 reflectedColor = float3(0.f, 0.f, 0.f);
+        if(l_meshCB.reflectivity > 0.0f)
+        {
+            float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal); //반사용으로 Trace할 다음 Ray의 Direction
+            reflectedColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
+        }
+        payload.color = float4(color * (1.0f - l_meshCB.reflectivity) + reflectedColor * l_meshCB.reflectivity, 1);
     }
-    {//Reflection계산(추가 Radiance Ray이용)
-        float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);//반사용으로 Trace할 다음 Ray의 Direction
-        float4 reflectionColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth);
-        reflectedColor = mul(l_meshCB.reflectivity, reflectionColor.rgb);
-        ambientColor = mul(1.f - l_meshCB.reflectivity, ambientColor);
-        diffuseColor = mul(1.f - l_meshCB.reflectivity, diffuseColor);
-        specullarColor = mul(1.f - l_meshCB.reflectivity, specullarColor);
-    }
-    float3 color = saturate(ambientColor + reflectedColor + specullarColor + diffuseColor);
-    
-    payload.color = float4(color, 1);
-    
-        
-    
-    
-
 }

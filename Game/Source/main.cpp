@@ -6,7 +6,7 @@
 #include "Plane\BasePlane.h"
 #include "Light\RotatingLight.h"
 #include "Texture\Texture.h"
-//#include "Model\Model.h"
+#include "Model\Model.h"
 #include <DirectXColors.h>
 
 #define STRINGIFY(x) #x
