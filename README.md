@@ -17,8 +17,8 @@ git clone repository
 `a` : left  
 `s` : back  
 `d` : right  
-`shift` : down  
-`space` : up  
+`q` : down  
+`e` : up  
 
 
 # Develop Schedule
@@ -32,6 +32,10 @@ git clone repository
 * 22'08'15 : Texturing
 * 22'08'18 : Raytracing Reflection(Mirror)
 * 22'08'22 : Raytracing Ambient Occlusion
+
+(23'04'19 ~ present)
+* 23'04'20 : Assimp Model Loading
+* 23'04'22 : Normal Map
 
 # Main Features
 ## Shadow Ray
