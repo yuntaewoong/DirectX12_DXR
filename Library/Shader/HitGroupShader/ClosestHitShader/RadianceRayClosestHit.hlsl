@@ -3,6 +3,7 @@
 #include "../../Include/RadianceRayTrace.hlsli"
 #include "../../Include/ShadowRayTrace.hlsli"
 #include "../../Include/RTAORayTrace.hlsli"
+#include "../../Include/BxDF/BRDF/PhongModel.hlsli"
 
 /*================================================================================
     l_(variable_name) ===> local root signature로 정의되는 Resource(매 프레임 Shader Table 각각 알맞게 세팅)
@@ -75,7 +76,7 @@ float2 HitAttributeFloat2(float2 vertexAttribute[3], BuiltInTriangleIntersection
 //노말맵이 적용된 새로운 노말값 리턴
 float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTangent,float2 uv)
 {
-    if(l_meshCB.hasNormalTexture == 1)
+    if(!l_meshCB.hasNormalTexture)
         return originNormal;
     float3 newNormal = l_normalTexture.SampleLevel(l_sampler, uv, 0).xyz;
     newNormal = (newNormal * 2.0f) - 1.0f;
@@ -94,7 +95,6 @@ float3 CalculateDiffuseLighting(float3 hitPosition, float3 normal,float2 uv)
         diffuseTexelColor = l_diffuseTexture.SampleLevel(l_sampler, uv, 0).xyz; //Shadel Model lib 6_3에서는 Sample함수 컴파일에러남       
     }
     return l_meshCB.albedo.xyz * nDotL * diffuseTexelColor;
-
 }
 
 // Specullar계산
