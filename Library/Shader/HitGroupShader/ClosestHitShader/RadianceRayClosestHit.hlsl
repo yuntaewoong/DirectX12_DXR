@@ -145,7 +145,8 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
         float3 pointToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
         float3 pointToCamera = normalize(g_cameraCB.cameraPosition.xyz - hitPosition);
         float3 lightColor = float3(1.f, 1.f, 1.f);
-        float lightAttenuation = 1.f;
+        float3 lightDistance = g_lightCB.position[0].xyz - hitPosition;
+        float lightAttenuation = 1.0 / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position[0].xyz, payload.recursionDepth);
         float3 color = BxDF::PhongShade(
             ambientColor,
