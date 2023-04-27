@@ -76,6 +76,15 @@ struct RTAORayPayload
     FLOAT tHit; // at + b직선 방정식의 t값
 };
 
+namespace MaterialType
+{
+    enum Enum {
+        Phong = 0,
+        PBR
+    };
+}
+
+
 namespace RayType 
 {
     enum Enum {

@@ -3,7 +3,8 @@
 
 namespace library
 {
-	Material::Material() :
+	Material::Material(_In_ MaterialType::Enum materialType) :
+		m_materialType(materialType),
 		m_diffuseTexture(nullptr),
 		m_normalTexture(nullptr),
 		m_specularTexture(nullptr),

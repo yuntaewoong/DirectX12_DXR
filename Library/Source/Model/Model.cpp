@@ -129,7 +129,7 @@ namespace library
         for (UINT i = 0u; i < pScene->mNumMaterials; ++i)
         {
             const aiMaterial* pMaterial = pScene->mMaterials[i];
-            m_materials.push_back(std::make_shared<Material>());
+            m_materials.push_back(std::make_shared<Material>(MaterialType::Phong));
             loadTextures(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, i);
         }
 

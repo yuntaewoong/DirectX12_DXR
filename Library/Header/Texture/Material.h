@@ -10,7 +10,7 @@ namespace library
 	class Material
 	{
 	public:
-		Material();
+		Material(_In_ MaterialType::Enum materialType);
 		Material(const Material& other) = default;
 		Material(Material&& other) = default;
 		Material& operator=(const Material& other) = default;
@@ -44,6 +44,7 @@ namespace library
 		BOOL HasRoughnessTexture() const;
 		BOOL HasMetallicTexture() const;
 	private:
+		MaterialType::Enum m_materialType;
 		std::shared_ptr<Texture> m_diffuseTexture;
 		std::shared_ptr<Texture> m_normalTexture;
 		std::shared_ptr<Texture> m_specularTexture;

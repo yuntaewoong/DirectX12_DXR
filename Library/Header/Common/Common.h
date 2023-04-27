@@ -44,6 +44,7 @@ namespace library
     Global Root Signature Slot
     Local Root Signature Slot상수 정의
     ======================================*/
+    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 4;
     enum class EGlobalRootSignatureSlot
     {
         OutputViewSlot = 0,
@@ -51,7 +52,7 @@ namespace library
         CameraConstantSlot,
         LightConstantSlot
     };
-    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 4;
+    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 8;
     enum class ELocalRootSignatureSlot
     {
         CubeConstantSlot = 0,
@@ -63,7 +64,6 @@ namespace library
         RoughnessTextureSlot = 6,
         MetallicTextureSlot = 7,
     };
-    const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 8;
     struct LocalRootArgument
     {
         MeshConstantBuffer cb;//Root Constant

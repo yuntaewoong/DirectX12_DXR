@@ -105,15 +105,12 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		projectDirString.erase(projectDirString.size() - 2);// "\."제거
 		projectDirPath = projectDirString;
 	}
-	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
+	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>(MaterialType::Phong);//바닥 텍스처
 	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
-	
-	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();//목재 텍스처
+	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>(MaterialType::Phong);//목재 텍스처
 	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
-	
-	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>();//Texture없는 Material
-
-	std::shared_ptr<library::Material> ironPBRMaterial = std::make_shared<library::Material>();//PBR 철
+	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>(MaterialType::Phong);//Texture없는 Material
+	std::shared_ptr<library::Material> ironPBRMaterial = std::make_shared<library::Material>(MaterialType::PBR);//PBR 철
 	std::filesystem::path ironBaseColorTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_basecolor.png");//project dir상에서의 상대Path
 	std::filesystem::path ironNormalTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_normal.png");//project dir상에서의 상대Path
 	std::filesystem::path ironRoughnessTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_roughness.png");//project dir상에서의 상대Path
