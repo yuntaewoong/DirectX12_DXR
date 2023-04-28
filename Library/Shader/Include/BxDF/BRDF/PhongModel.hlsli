@@ -14,7 +14,7 @@ namespace BxDF
         }
         namespace Specular
         {
-            float3 CalculateSpecullar(in float3 specularMap, in float3 normal, in float3 pointToLight, in float3 pointToCamera)
+            float3 CalculateSpecular(in float3 specularMap, in float3 normal, in float3 pointToLight, in float3 pointToCamera)
             {//Specular BRDF°è»ê
                 float3 reflectDirection = normalize(reflect(-pointToLight, normal));
                 float cosFactor = 15.0f;
@@ -36,7 +36,7 @@ namespace BxDF
     {
         float3 ambient = ambientMap;
         float3 diffuse = BxDF::BRDF::Diffuse::CalculatePhongDiffuse(albedoMap, normal, pointToLight);
-        float3 specular = BxDF::BRDF::Specular::CalculateSpecullar(specularMap, normal, pointToLight, pointToCamera);
+        float3 specular = BxDF::BRDF::Specular::CalculateSpecular(specularMap, normal, pointToLight, pointToCamera);
         if(isInShadow)
         {
             diffuse = diffuse * 0.1f;

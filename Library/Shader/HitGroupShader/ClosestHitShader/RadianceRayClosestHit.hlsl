@@ -4,7 +4,7 @@
 #include "../../Include/ShadowRayTrace.hlsli"
 #include "../../Include/RTAORayTrace.hlsli"
 #include "../../Include/BxDF/BRDF/PhongModel.hlsli"
-
+#include "../../Include/BxDF/BRDF/PBRModel.hlsli"
 /*================================================================================
     l_(variable_name) ===> local root signature로 정의되는 Resource(매 프레임 Shader Table 각각 알맞게 세팅)
 ================================================================================*/
@@ -126,30 +126,32 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
+        
+    float3 ambientColor = l_meshCB.albedo.rgb * float3(0.2f, 0.2f, 0.2f);
+    {//RTAO(Ray Tracing Ambient Occlusion 계산)
+        ambientColor = TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
+        ambientColor /= 3.f; //너무 밝지않게 조절
+    }
+    float3 diffuseColor = l_meshCB.albedo.rgb;
+    float3 specularColor = float3(1.f, 1.f, 1.f);
+    if (l_meshCB.hasDiffuseTexture)
+    { // 디퓨즈맵이 존재한다면 계산
+        ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+        diffuseColor = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+    }
+    if (l_meshCB.hasSpecularTexture)
+    { //스페큘러 맵이 존재한다면 계산
+        specularColor = l_specularTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+    }
+    float3 pointToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
+    float3 pointToCamera = normalize(g_cameraCB.cameraPosition.xyz - hitPosition);
+    float3 lightColor = float3(1.f, 1.f, 1.f);
+    float lightDistance = sqrt(dot(g_lightCB.position[0].xyz - hitPosition, g_lightCB.position[0].xyz - hitPosition));
+    float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
+    bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position[0].xyz, payload.recursionDepth);
+        
     if(l_meshCB.materialType == MaterialType::Phong)
     {//PhongShading모델
-        float3 ambientColor = l_meshCB.albedo.rgb * float3(0.2f, 0.2f, 0.2f);
-        {//RTAO(Ray Tracing Ambient Occlusion 계산)
-            ambientColor = TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
-            ambientColor /= 3.f; //너무 밝지않게 조절
-        }
-        float3 diffuseColor = l_meshCB.albedo.rgb;
-        float3 specularColor = float3(0.f, 0.f, 0.f);
-        if (l_meshCB.hasDiffuseTexture)
-        {// 디퓨즈맵이 존재한다면 계산
-            ambientColor = ambientColor * l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
-            diffuseColor = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
-        }
-        if (l_meshCB.hasSpecularTexture)
-        { //스페큘러 맵이 존재한다면 계산
-            specularColor = l_specularTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
-        }
-        float3 pointToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
-        float3 pointToCamera = normalize(g_cameraCB.cameraPosition.xyz - hitPosition);
-        float3 lightColor = float3(1.f, 1.f, 1.f);
-        float lightDistance = sqrt(dot(g_lightCB.position[0].xyz - hitPosition, g_lightCB.position[0].xyz - hitPosition));
-        float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
-        bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position[0].xyz, payload.recursionDepth);
         float3 color = BxDF::PhongShade(
             ambientColor,
             diffuseColor,
@@ -171,6 +173,35 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     }
     else if(l_meshCB.materialType == MaterialType::PBR)
     {//PBR Shading Model
-        payload.color = float4(0.5f, 0.5f, 0.5f, 1.f);
+        float3 roughness = l_meshCB.roughness;
+        if(l_meshCB.hasRoughnessTexture)
+        {
+            roughness = l_roughnessTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+        }
+        float3 metallic = l_meshCB.metallic;
+        if (l_meshCB.hasMetallicTexture)
+        {
+            metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+        }
+            
+        float3 color = BxDF::PBRShade(
+            ambientColor,
+            diffuseColor,
+            roughness,
+            metallic,
+            triangleNormal,
+            pointToLight,
+            pointToCamera,
+            lightColor,
+            lightAttenuation,
+            isInShadow
+        );
+        float3 reflectedColor = float3(0.f, 0.f, 0.f);
+        if (l_meshCB.reflectivity > 0.0f)
+        {
+            float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal); //반사용으로 Trace할 다음 Ray의 Direction
+            reflectedColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
+        }
+        payload.color = float4(color * (1.0f - l_meshCB.reflectivity) + reflectedColor * l_meshCB.reflectivity, 1);
     }
 }

@@ -5,7 +5,7 @@
 #define MAX_RECURSION_DEPTH 20 //TraceRay재귀 호출 depth
 #define NUM_RTAO_RAY 4 // RTAO에 사용할 Ray수
 #define RTAO_RADIUS 0.2  // RTAO에 적용할 반구의 반지름
-
+#define PI 3.14159265359f // 원주율정의
 
 #ifdef HLSL//HLSL에서 include시
 //전처리기를 이용해 HLSL에서도 c++에서도 같은 파일을 Include시켜주는 트릭

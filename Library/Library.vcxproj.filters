@@ -310,5 +310,8 @@
     <None Include="Shader\Include\BxDF\BRDF\PhongModel.hlsli">
       <Filter>Shader\Include\BxDF\BRDF</Filter>
     </None>
+    <None Include="Shader\Include\BxDF\BRDF\PBRModel.hlsli">
+      <Filter>Shader\Include\BxDF\BRDF</Filter>
+    </None>
   </ItemGroup>
 </Project>
