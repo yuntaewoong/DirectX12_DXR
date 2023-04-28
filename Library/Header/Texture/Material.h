@@ -35,6 +35,7 @@ namespace library
 		const std::shared_ptr<Texture> GetSpecularTexture() const;
 		const std::shared_ptr<Texture> GetRoughnessTexture() const;
 		const std::shared_ptr<Texture> GetMetallicTexture() const;
+		MaterialType::Enum GetMaterialType() const;
 		FLOAT GetReflectivity() const;
 		FLOAT GetRoughness() const;
 		FLOAT GetMetallic() const;

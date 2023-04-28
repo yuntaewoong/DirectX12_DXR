@@ -43,6 +43,7 @@ namespace library
                 .hasDiffuseTexture = 0,
                 .hasNormalTexture = 0,
                 .hasSpecularTexture = 0,
+                .materialType = static_cast<UINT>(MaterialType::Phong),
                 .reflectivity = 0.f,
                 .roughness = 0.5f,
                 .metallic = 0.f
@@ -67,6 +68,7 @@ namespace library
             rootArgument.cb.hasSpecularTexture = 0u;
             rootArgument.cb.hasRoughnessTexture = 0u;
             rootArgument.cb.hasMetallicTexture = 0u;
+            rootArgument.cb.materialType = static_cast<UINT>(meshes[i]->GetMaterial()->GetMaterialType());
             if (meshes[i]->GetMaterial()->HasDiffuseTexture())
             {
                 rootArgument.cb.hasDiffuseTexture = 1u;

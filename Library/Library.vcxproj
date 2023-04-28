@@ -111,6 +111,9 @@
     <Lib>
       <AdditionalDependencies>d3d12.lib;dxgi.lib</AdditionalDependencies>
     </Lib>
+    <FxCompile>
+      <ShaderModel>6.3</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

@@ -47,6 +47,7 @@ struct MeshConstantBuffer
     UINT hasSpecularTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     UINT hasRoughnessTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     UINT hasMetallicTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
+    UINT materialType;//MaterialType::Enum자료형을 UINT로 표현, 32bit가 1개 -> DWORD 1개 필요
     FLOAT reflectivity;//1이면 거울,0이면 무반사, 32bit가 1개 -> DWORD 1개 필요
     FLOAT roughness;//거친정도, 32bit가 1개 -> DWORD 1개 필요
     FLOAT metallic;//금속인 정도, 32bit가 1개 -> DWORD 1개 필요

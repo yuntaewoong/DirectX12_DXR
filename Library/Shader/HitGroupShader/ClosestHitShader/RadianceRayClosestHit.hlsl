@@ -83,6 +83,7 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
     newNormal = (newNormal.x * tangent) + (newNormal.y * biTangent) + (newNormal.z * originNormal);//TBN변환
     return normalize(newNormal);
 }
+    
 [shader("closesthit")]
 void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
@@ -125,6 +126,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
+    if(l_meshCB.materialType == MaterialType::Phong)
     {//PhongShading모델
         float3 ambientColor = l_meshCB.albedo.rgb * float3(0.2f, 0.2f, 0.2f);
         {//RTAO(Ray Tracing Ambient Occlusion 계산)
@@ -166,5 +168,9 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
             reflectedColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
         }
         payload.color = float4(color * (1.0f - l_meshCB.reflectivity) + reflectedColor * l_meshCB.reflectivity, 1);
+    }
+    else if(l_meshCB.materialType == MaterialType::PBR)
+    {//PBR Shading Model
+        payload.color = float4(0.5f, 0.5f, 0.5f, 1.f);
     }
 }

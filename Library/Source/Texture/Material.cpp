@@ -117,6 +117,10 @@ namespace library
 	{
 		return m_metallicTexture;
 	}
+	MaterialType::Enum Material::GetMaterialType() const
+	{
+		return m_materialType;
+	}
 	FLOAT Material::GetReflectivity() const
 	{
 		return m_reflectivity;
