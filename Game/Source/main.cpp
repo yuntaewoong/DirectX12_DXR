@@ -186,7 +186,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		cube2->SetMaterial(woodMaterial);
 		cube3->SetMaterial(woodMaterial);
 		cube4->SetMaterial(woodMaterial);
-		cube5->SetMaterial(ironPBRMaterial);
+		cube5->SetMaterial(woodMaterial);
 		plane->SetMaterial(floorMaterial);
 		mirror->SetMaterial(mirrorMaterial);
 

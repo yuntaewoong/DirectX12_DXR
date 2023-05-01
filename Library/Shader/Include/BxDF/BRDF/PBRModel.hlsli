@@ -89,7 +89,7 @@ namespace BxDF
     {
         float3 halfVector = normalize(pointToLight+ pointToCamera);
         
-        float3 ambient = ambientMap;
+        float3 ambient = ambientMap * albedoMap * 0.2f;
         float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(albedoMap);
         
         float3 F0 = float3(0.04f,0.04f,0.04f);//일반적인 프레넬 상수수치를 0.04로 정의
@@ -107,11 +107,11 @@ namespace BxDF
             specular = float3(0.f, 0.f, 0.f);
         }
         float NdotL = max(dot(normal, pointToLight), 0.0);
-        float3 color = ambient + (/*kD * */diffuse + specular) * lightColor * lightAttenuation* NdotL;
-                
-        //color = color / (color + float3(1.0f,1.0f,1.0f));
-        //color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
-   
+        float3 color = ambient + (kD * diffuse + specular) * lightColor * lightAttenuation* NdotL;
+        {//감마변환    
+            color = color / (color + float3(1.0f, 1.0f, 1.0f));
+            color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+        }
         return color;
         
     }
