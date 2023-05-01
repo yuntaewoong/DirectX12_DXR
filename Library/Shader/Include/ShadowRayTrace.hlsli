@@ -6,7 +6,7 @@ Shadow Ray의 Trace호출의 Wrapper
 */
 
 // Shadow Ray를 이용해 그림자이면 true, 아니면 false리턴
-bool TraceShadowRay(in float3 hitPosition, in float4 lightPositions[NUM_LIGHT], in UINT currentRayRecursionDepth)
+float TraceShadowRay(in float3 hitPosition, in float4 lightPositions[NUM_LIGHT], in UINT currentRayRecursionDepth)
 {
     if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
     {
@@ -37,5 +37,5 @@ bool TraceShadowRay(in float3 hitPosition, in float4 lightPositions[NUM_LIGHT], 
         );
     }
     
-    return (shadowPayloads[0].hit > 0.5f) && (shadowPayloads[1].hit > 0.5f); //0.5f보다 크다는 의미는 miss shader가 호출되지 않아서 그림자 영역에 존재한다는 의미
+    return shadowPayloads[0].hit + shadowPayloads[1].hit; 
 }

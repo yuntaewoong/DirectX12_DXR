@@ -84,7 +84,7 @@ namespace BxDF
         in float3 pointToCamera,
         in float3 lightColor,
         in float lightAttenuation,
-        in bool isInShadow
+        in float shadowAmount
     )
     {
         float3 ambient = ambientMap * albedoMap * 0.2f;
@@ -105,10 +105,10 @@ namespace BxDF
             kD = kD * float3(1.f - metallicMap, 1.f - metallicMap, 1.f - metallicMap); //Diffuse에 metallic반영
         
             float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(normal, pointToCamera, halfVector, pointToLights[i], roughnessMap, F);
-            if (isInShadow)
+            if (shadowAmount > 0.2f)
             { //그림자 효과 반영
-                diffuse = diffuse * 0.1f;
-                specular = float3(0.f, 0.f, 0.f);
+                diffuse = saturate(diffuse * (1.f - shadowAmount + 0.1f));
+                specular = saturate(specular * (1.f - shadowAmount + 0.1f));
             }
             float NdotL = max(dot(normal, pointToLights[i]), 0.0);
             color += (kD * diffuse + specular) * lightColor * lightAttenuation * NdotL;

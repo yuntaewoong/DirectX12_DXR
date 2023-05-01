@@ -150,7 +150,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     float3 lightColor = float3(1.f, 1.f, 1.f);
     float lightDistance = sqrt(dot(g_lightCB.position[0].xyz - hitPosition, g_lightCB.position[0].xyz - hitPosition));
     float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
-    bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position, payload.recursionDepth);
+    float shadowAmount = TraceShadowRay(hitPosition, g_lightCB.position, payload.recursionDepth);
         
     if(l_meshCB.materialType == MaterialType::Phong)
     {//PhongShading¸ðµ¨
@@ -163,7 +163,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
             pointToCamera,
             lightColor,
             lightAttenuation,
-            isInShadow
+            shadowAmount
         );
         float3 reflectedColor = float3(0.f, 0.f, 0.f);
         if(l_meshCB.reflectivity > 0.0f)
@@ -196,7 +196,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
             pointToCamera,
             lightColor,
             lightAttenuation,
-            isInShadow
+            shadowAmount
         );
         payload.color = float4(color, 1);
            // payload.color = float4(isInShadow, isInShadow, isInShadow, 1);
