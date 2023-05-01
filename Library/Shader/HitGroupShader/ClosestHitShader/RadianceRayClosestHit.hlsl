@@ -143,12 +143,14 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     { //Ω∫∆‰≈ß∑Ø ∏ ¿Ã ¡∏¿Á«—¥Ÿ∏È ∞ËªÍ
         specularColor = l_specularTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
     }
-    float3 pointToLight = normalize(g_lightCB.position[0].xyz - hitPosition);
+    float3 pointToLights[NUM_LIGHT];
+    pointToLights[0] = normalize(g_lightCB.position[0].xyz - hitPosition);
+    pointToLights[1] = normalize(g_lightCB.position[1].xyz - hitPosition);
     float3 pointToCamera = normalize(g_cameraCB.cameraPosition.xyz - hitPosition);
     float3 lightColor = float3(1.f, 1.f, 1.f);
     float lightDistance = sqrt(dot(g_lightCB.position[0].xyz - hitPosition, g_lightCB.position[0].xyz - hitPosition));
     float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
-    bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position[0].xyz, payload.recursionDepth);
+    bool isInShadow = TraceShadowRay(hitPosition, g_lightCB.position, payload.recursionDepth);
         
     if(l_meshCB.materialType == MaterialType::Phong)
     {//PhongShading∏µ®
@@ -157,7 +159,7 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
             diffuseColor,
             specularColor,
             triangleNormal,
-            pointToLight,
+            pointToLights,
             pointToCamera,
             lightColor,
             lightAttenuation,
@@ -190,14 +192,14 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
             roughness,
             metallic,
             triangleNormal,
-            pointToLight,
+            pointToLights,
             pointToCamera,
             lightColor,
             lightAttenuation,
             isInShadow
         );
         payload.color = float4(color, 1);
-        
+           // payload.color = float4(isInShadow, isInShadow, isInShadow, 1);
 
     }
 }

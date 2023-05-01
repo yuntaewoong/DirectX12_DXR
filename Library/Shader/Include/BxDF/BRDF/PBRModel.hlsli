@@ -80,34 +80,40 @@ namespace BxDF
         in float roughnessMap,
         in float metallicMap,
         in float3 normal,
-        in float3 pointToLight,
+        in float3 pointToLights[NUM_LIGHT],
         in float3 pointToCamera,
         in float3 lightColor,
         in float lightAttenuation,
         in bool isInShadow
     )
     {
-        float3 halfVector = normalize(pointToLight+ pointToCamera);
-        
         float3 ambient = ambientMap * albedoMap * 0.2f;
-        float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(albedoMap);
+        float3 color = float3(0.f, 0.f, 0.f);
+        [unroll(NUM_LIGHT)]
+        for (uint i = 0; i < NUM_LIGHT; i++)
+        {
+            float3 halfVector = normalize(pointToLights[i] + pointToCamera);
         
-        float3 F0 = float3(0.04f,0.04f,0.04f);//일반적인 프레넬 상수수치를 0.04로 정의
-        F0 = lerp(F0,albedoMap, metallicMap);
-        float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
+            float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(albedoMap);
         
-        float3 kS = F;//Specular상수
-        float3 kD = float3(1.f, 1.f, 1.f) - kS;//Diffuse 상수
-        kD = kD * float3(1.f - metallicMap, 1.f - metallicMap, 1.f - metallicMap); //Diffuse에 metallic반영
+            float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
+            F0 = lerp(F0, albedoMap, metallicMap);
+            float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
         
-        float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(normal, pointToCamera, halfVector, pointToLight, roughnessMap,F);
-        if (isInShadow)
-        {//그림자 효과 반영
-            diffuse = diffuse * 0.1f;
-            specular = float3(0.f, 0.f, 0.f);
+            float3 kS = F; //Specular상수
+            float3 kD = float3(1.f, 1.f, 1.f) - kS; //Diffuse 상수
+            kD = kD * float3(1.f - metallicMap, 1.f - metallicMap, 1.f - metallicMap); //Diffuse에 metallic반영
+        
+            float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(normal, pointToCamera, halfVector, pointToLights[i], roughnessMap, F);
+            if (isInShadow)
+            { //그림자 효과 반영
+                diffuse = diffuse * 0.1f;
+                specular = float3(0.f, 0.f, 0.f);
+            }
+            float NdotL = max(dot(normal, pointToLights[i]), 0.0);
+            color += (kD * diffuse + specular) * lightColor * lightAttenuation * NdotL;
         }
-        float NdotL = max(dot(normal, pointToLight), 0.0);
-        float3 color = ambient + (kD * diffuse + specular) * lightColor * lightAttenuation* NdotL;
+        color += ambient;
         {//감마변환    
             color = color / (color + float3(1.0f, 1.0f, 1.0f));
             color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));

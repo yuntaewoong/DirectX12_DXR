@@ -1,3 +1,4 @@
+#include"../../DataTypeSharedBothHLSLAndCPP.h"
 #ifndef PHONGMODEL
 #define PHONGMODEL
 namespace BxDF
@@ -27,22 +28,29 @@ namespace BxDF
         in float3 albedoMap,
         in float3 specularMap,
         in float3 normal, 
-        in float3 pointToLight,
+        in float3 pointToLights[NUM_LIGHT],
         in float3 pointToCamera,
         in float3 lightColor,
         in float  lightAttenuation,
         in bool isInShadow
     )
     {
-        float3 ambient = ambientMap;
-        float3 diffuse = BxDF::BRDF::Diffuse::CalculatePhongDiffuse(albedoMap, normal, pointToLight);
-        float3 specular = BxDF::BRDF::Specular::CalculateSpecular(specularMap, normal, pointToLight, pointToCamera);
-        if(isInShadow)
+        float3 color = float3(0.f, 0.f, 0.f);
+        [unroll(NUM_LIGHT)]
+        for (uint i = 0; i < NUM_LIGHT; i++)
         {
-            diffuse = diffuse * 0.1f;
-            specular = float3(0.f, 0.f, 0.f);
+            float3 ambient = ambientMap;
+            float3 diffuse = BxDF::BRDF::Diffuse::CalculatePhongDiffuse(albedoMap, normal, pointToLights[i]);
+            float3 specular = BxDF::BRDF::Specular::CalculateSpecular(specularMap, normal, pointToLights[i], pointToCamera);
+            if (isInShadow)
+            {
+                diffuse = diffuse * 0.1f;
+                specular = float3(0.f, 0.f, 0.f);
+            }
+            color += ambient + diffuse + specular;
         }
-        return saturate((ambient + diffuse + specular) * lightColor * lightAttenuation);
+        
+        return saturate(color * lightColor * lightAttenuation);
     }
 }
 

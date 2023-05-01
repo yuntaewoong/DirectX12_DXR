@@ -5,6 +5,7 @@
 #include "Cube\BaseCube.h"
 #include "Plane\BasePlane.h"
 #include "Light\RotatingLight.h"
+#include "Light\FixedLight.h"
 #include "Texture\Texture.h"
 #include "Model\Model.h"
 #include <DirectXColors.h>
@@ -65,7 +66,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Mesh> plane = std::make_shared<BasePlane>(//바닥
 		XMVectorSet(0.f, -0.3f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
-		XMVectorSet(5.f, 1.f, 5.f, 1.f),
+		XMVectorSet(15.f, 1.f, 15.f, 1.f),
 		color
 	);
 
@@ -73,14 +74,14 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Mesh> mirror = std::make_shared<BasePlane>(//거울
 		XMVectorSet(0.f, 0.6f, 2.5f, 1.0f),
 		XMVectorSet(0.f, XM_PIDIV2, XM_PIDIV2, 1.0f),
-		XMVectorSet(5.f, 1.f, 5.f, 1.f),
+		XMVectorSet(15.f, 1.f, 15.f, 1.f),
 		color
 	);
 
 	XMStoreFloat4(&color, Colors::White);
 	std::shared_ptr<library::Model> cyborg = std::make_shared<library::Model>(//사이보그 모델
 		L"Assets/Model/cyborg/cyborg.obj",
-		XMVectorSet(0.f, -1.f, 0.f, 1.0f),
+		XMVectorSet(-3.f, 1.f, 0.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(1.f, 1.f, 1.f, 1.f),
 		color
@@ -106,7 +107,9 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 
 	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
-	
+	std::shared_ptr<library::PointLight> light2 = std::make_shared<FixedLight>(XMVectorSet(3.f, 3.f, -5.f, 1.f));
+
+
 	std::filesystem::path projectDirPath;
 	{
 		std::string projectDirString = EXPAND(PROJECT_DIR);//project_dir의 문자열화
@@ -176,6 +179,8 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		
 
 		scene->AddLight(light1);
+		scene->AddLight(light2);
+
 		scene->AddMaterial(floorMaterial);
 		scene->AddMaterial(woodMaterial);
 		scene->AddMaterial(mirrorMaterial);

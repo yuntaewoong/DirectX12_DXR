@@ -31,6 +31,9 @@
     <ClCompile Include="Source\Plane\BasePlane.cpp">
       <Filter>Source\Plane</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Light\FixedLight.cpp">
+      <Filter>Source\Light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h">
@@ -44,6 +47,9 @@
     </ClInclude>
     <ClInclude Include="Header\Plane\BasePlane.h">
       <Filter>Source\Plane</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Light\FixedLight.h">
+      <Filter>Source\Light</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
