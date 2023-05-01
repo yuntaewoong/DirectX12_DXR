@@ -173,15 +173,15 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     }
     else if(l_meshCB.materialType == MaterialType::PBR)
     {//PBR Shading Model
-        float3 roughness = l_meshCB.roughness;
+        float roughness = l_meshCB.roughness;
         if(l_meshCB.hasRoughnessTexture)
         {
-            roughness = l_roughnessTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+            roughness = l_roughnessTexture.SampleLevel(l_sampler, triangleUV, 0).x;
         }
-        float3 metallic = l_meshCB.metallic;
+        float metallic = l_meshCB.metallic;
         if (l_meshCB.hasMetallicTexture)
         {
-            metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+            metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).x;
         }
             
         float3 color = BxDF::PBRShade(
@@ -196,12 +196,8 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
             lightAttenuation,
             isInShadow
         );
-        float3 reflectedColor = float3(0.f, 0.f, 0.f);
-        if (l_meshCB.reflectivity > 0.0f)
-        {
-            float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal); //반사용으로 Trace할 다음 Ray의 Direction
-            reflectedColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
-        }
-        payload.color = float4(color * (1.0f - l_meshCB.reflectivity) + reflectedColor * l_meshCB.reflectivity, 1);
+        payload.color = float4(color, 1);
+        
+
     }
 }

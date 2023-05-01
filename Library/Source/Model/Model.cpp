@@ -60,6 +60,14 @@ namespace library
     void Model::Update(_In_ FLOAT deltaTime)
     {
     }
+    void Model::ForceMaterial(_In_ const std::shared_ptr<Material>& material)
+    {//외부 material로 모델의 모든 Mesh의 material을 강제로 세팅
+        m_materials.push_back(material);
+        for (UINT i = 0; i < static_cast<UINT>(m_meshes.size()); i++)
+        {
+            m_meshes[i]->SetMaterial(m_materials[static_cast<UINT>(m_meshes.size() - 1)]);
+        }
+    }
     const std::vector<std::shared_ptr<ModelMesh>>& Model::GetMeshes() const
     {
         return m_meshes;
