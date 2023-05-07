@@ -20,6 +20,9 @@ git clone repository
 `q` : down  
 `e` : up  
 
+`mouseX` : rotate camera Y axis
+`mouseY` : rotate camera X axis
+
 
 # Develop Schedule
 (22'07'23 ~ 22'08'22)  
@@ -36,18 +39,34 @@ git clone repository
 (23'04'19 ~ present)
 * 23'04'20 : Assimp Model Loading
 * 23'04'22 : Normal Map
+* 23'05'01 : PBR Shading
 
 # Main Features
+
 ## Shadow Ray
 When shading hit point, Every hit point trace 1 shadow ray to light source.
+
 ## Reflection Ray
 When shading hit point, Every hit point trace 1 reflection ray to reflected direction. This TraceRay function call is recursive, So reflected ray is also trace 1 
 reflection ray to reflected direction. This recursive call is infinite unless miss shader calls or recursive depth reach to max_depth(constant).
+
 ## Ambient Occlusion Ray
-<img src = "Image/Ambient Occlusion.png" width = "600" height = "400">
-When shading hit point, Every hit point trace 4 Ambient Occlusion ray to pre defined direction in hemisphere space. If many occlusion ray hit in near point, that hit point will be shaded more darker.
+<img src = "Image/Ambient Occlusion.png" width = "600" height = "400">  
+
+When shading hit point, Every hit point trace 4 Ambient Occlusion ray to pre defined direction in hemisphere space. If many occlusion ray hit in near point, that hit point will be shaded more darker.  
+
+## Model Loading
+<img src = "Image/ModelLoading.png" width = "600" height = "450">  
+
+Model Loading Using Assimp Open Source.(1 BLAS per 1 Mesh)
+
+## PBR Shading
+<img src = "Image/PBRBasic.png" width = "600" height = "450">  
+
+PBR Shading using lambertian, cook-torrance brdf
 
 
 # Reference
 - [MS D3D12 Samples](https://github.com/microsoft/DirectX-Graphics-Samples)
 - [SIGGRAPH 2018 DXR Tutorial](http://intro-to-dxr.cwyman.org/)
+- [LearnOpenGL PBR](https://learnopengl.com/PBR/Lighting)
