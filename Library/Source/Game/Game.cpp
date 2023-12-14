@@ -64,6 +64,9 @@ namespace library
 				ImGui::NewFrame();
 				ImGui::Begin("FPS");
 				ImGui::Text("%.3f ms/Frame (%.1f FPS)",1000.0f / ImGui::GetIO().Framerate,ImGui::GetIO().Framerate);
+				const char* items[] = { "Real Time Rendering","Path Tracing"};
+				static int item_current = 0;
+				ImGui::Combo("Method", &item_current, items, IM_ARRAYSIZE(items));
 				ImGui::End();
 				ImGui::Render();
 				m_renderer->Render();
