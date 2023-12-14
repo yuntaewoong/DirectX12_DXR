@@ -199,11 +199,12 @@ namespace library
         );
         pCommandList->ResourceBarrier(ARRAYSIZE(postCopyBarriers), postCopyBarriers);
         
-        pCommandList->SetDescriptorHeaps(1,m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap().GetAddressOf());
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = m_renderingResources.GetRTVDescriptorHeap().GetRTVCPUHandle(m_renderingResources.GetFrameIndex());
-        pCommandList->OMSetRenderTargets(1u,&rtvCPUHandle,FALSE,nullptr);
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
-
+        {//imgui render
+            pCommandList->SetDescriptorHeaps(1,m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap().GetAddressOf());
+            D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = m_renderingResources.GetRTVDescriptorHeap().GetRTVCPUHandle(m_renderingResources.GetFrameIndex());
+            pCommandList->OMSetRenderTargets(1u,&rtvCPUHandle,FALSE,nullptr);
+            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
+        }
         D3D12_RESOURCE_BARRIER postImguiBarriers[1] = {};
         postImguiBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
             currentRenderTarget.Get(),

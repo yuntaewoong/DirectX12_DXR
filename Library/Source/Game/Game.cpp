@@ -62,7 +62,9 @@ namespace library
 				ImGui_ImplDX12_NewFrame();
 				ImGui_ImplWin32_NewFrame();
 				ImGui::NewFrame();
-				ImGui::ShowDemoWindow();
+				ImGui::Begin("FPS");
+				ImGui::Text("%.3f ms/Frame (%.1f FPS)",1000.0f / ImGui::GetIO().Framerate,ImGui::GetIO().Framerate);
+				ImGui::End();
 				ImGui::Render();
 				m_renderer->Render();
 				
