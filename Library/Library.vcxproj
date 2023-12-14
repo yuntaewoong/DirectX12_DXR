@@ -283,6 +283,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <ClCompile Include="Source\Window\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\PathTracerRayClosestHit.hlsl" />
     <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RadianceRayClosestHit.hlsl">
       <FileType>Document</FileType>
     </FxCompile>
@@ -299,6 +300,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\ShadowRayClosestHit.hlsl">
       <FileType>Document</FileType>
     </FxCompile>
+    <FxCompile Include="Shader\MissShader\PathTracerRayMiss.hlsl" />
     <FxCompile Include="Shader\MissShader\RadianceRayMiss.hlsl">
       <FileType>Document</FileType>
     </FxCompile>
@@ -316,6 +318,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)Shader\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FileType>Document</FileType>
     </FxCompile>
+    <FxCompile Include="Shader\RayGenerationShader\PathTracerRayGeneration.hlsl" />
     <FxCompile Include="Shader\RayGenerationShader\RadianceRayGeneration.hlsl">
       <FileType>Document</FileType>
     </FxCompile>

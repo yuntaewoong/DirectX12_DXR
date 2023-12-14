@@ -19,8 +19,11 @@ namespace library
         }
         ComPtr<ID3D12StateObjectProperties> stateObjectProperties(nullptr);
         pStateObject.As(&stateObjectProperties);
-        void* rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(RAY_GEN_SHADER_NAME);
-        Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
+        for (UINT i = 0; i < RAY_GENERATION_TYPE_COUNT; i++)
+        {
+            void* rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(RAY_GEN_SHADER_NAME[i]);
+            Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
+        }
         return hr;
     }
 }

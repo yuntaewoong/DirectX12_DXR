@@ -18,29 +18,37 @@ using namespace DirectX;
 namespace library
 {
     const static UINT NUM_DESCRIPTORS_DEFAULT = 50u;
+    const static UINT RAY_GENERATION_TYPE_COUNT = 2u;
 
     /*===========================================
     Shader 진입점,
     Hit Group 진입점 정의
     =====================================*/
-    constexpr LPCWSTR RAY_GEN_SHADER_NAME = L"RadianceRaygenShader";
+    constexpr LPCWSTR RAY_GEN_SHADER_NAME[RAY_GENERATION_TYPE_COUNT] = 
+    {
+        L"RadianceRaygenShader",
+        L"PathTracerRaygenShader"
+    };
     constexpr LPCWSTR CLOSEST_HIT_SHADER_NAMES[RayType::Count] =
     {
         L"RadianceRayClosestHitShader",
         L"ShadowRayClosestHitShader",
-        L"RTAORayClosestHitShader"
+        L"RTAORayClosestHitShader",
+        L"PathTracerRayClosestHitShader"
     };
     constexpr LPCWSTR MISS_SHADER_NAMES[RayType::Count] =
     {
         L"RadianceRayMissShader",
         L"ShadowRayMissShader",
-        L"RTAORayMissShader"
+        L"RTAORayMissShader",
+        L"PathTracerRayMissShader"
     };
     constexpr LPCWSTR HIT_GROUP_NAMES[RayType::Count] =
     {
         L"MyHitGroup", 
         L"MyShadowRayHitGroup",
-        L"RTAOHitGroup"
+        L"RTAOHitGroup",
+        L"PathTracerRayHitGroup"
     };
 
     /*==========================================

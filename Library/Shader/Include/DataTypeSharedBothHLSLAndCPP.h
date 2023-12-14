@@ -91,9 +91,10 @@ namespace RayType
     enum Enum {
         Radiance = 0,   
         Shadow,
-        RTAO
+        RTAO,
+        PathTracer
     };
-    static const UINT Count = 3;
+    static const UINT Count = 4;
 }
 
 namespace TraceRayParameters
@@ -102,13 +103,15 @@ namespace TraceRayParameters
     static const UINT HitGroupOffset[RayType::Count] = {
         0, // Radiance ray
         1, // Shadow ray
-        2  // RTAO ray
+        2, // RTAO ray
+        3, // PathTracer ray
     };
     static const UINT GeometryStride = RayType::Count;
     static const UINT MissShaderOffset[RayType::Count] = {
         0, // Radiance ray
         1, // Shadow ray
-        2  // RTAO ray
+        2, // RTAO ray
+        3, // PathTracer ray
     };
 }
 
