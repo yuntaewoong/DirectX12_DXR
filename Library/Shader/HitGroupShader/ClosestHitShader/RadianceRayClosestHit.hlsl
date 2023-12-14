@@ -85,7 +85,7 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
 }
     
 [shader("closesthit")]
-void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
+void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
     float3 hitPosition = HitWorldPosition();
     uint indexSizeInBytes = 2; //index´Â 16ºñÆ®

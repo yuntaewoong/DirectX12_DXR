@@ -20,7 +20,7 @@ inline void GenerateCameraRay(uint2 index, out float3 origin, out float3 directi
 
 
 [shader("raygeneration")]
-void MyRaygenShader()
+void RadianceRaygenShader()
 {
     float3 rayDir;
     float3 origin;

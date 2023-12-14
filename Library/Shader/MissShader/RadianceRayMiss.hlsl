@@ -2,7 +2,7 @@
 #include "../Include/HLSLCommon.hlsli"
 
 [shader("miss")]
-void MyMissShader(inout RayPayload payload)
+void RadianceRayMissShader(inout RayPayload payload)
 {
     payload.color = float4(0.0f, 0.2f, 0.4f, 1.0f);
 }

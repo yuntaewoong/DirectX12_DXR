@@ -23,17 +23,17 @@ namespace library
     Shader 진입점,
     Hit Group 진입점 정의
     =====================================*/
-    constexpr LPCWSTR RAY_GEN_SHADER_NAME = L"MyRaygenShader";
+    constexpr LPCWSTR RAY_GEN_SHADER_NAME = L"RadianceRaygenShader";
     constexpr LPCWSTR CLOSEST_HIT_SHADER_NAMES[RayType::Count] =
     {
-        L"MyClosestHitShader",
-        L"MyShadowRayClosestHitShader",
+        L"RadianceRayClosestHitShader",
+        L"ShadowRayClosestHitShader",
         L"RTAORayClosestHitShader"
     };
     constexpr LPCWSTR MISS_SHADER_NAMES[RayType::Count] =
     {
-        L"MyMissShader",
-        L"MyShadowRayMissShader",
+        L"RadianceRayMissShader",
+        L"ShadowRayMissShader",
         L"RTAORayMissShader"
     };
     constexpr LPCWSTR HIT_GROUP_NAMES[RayType::Count] =
