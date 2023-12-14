@@ -32,8 +32,11 @@ namespace library
 		ComPtr<ID3D12Resource>& GetCurrentRenderTarget();
 		ComPtr<ID3D12CommandQueue>& GetCommandQueue();
 		CBVSRVUAVDescriptorHeap& GetCBVSRVUAVDescriptorHeap();
+		RTVDescriptorHeap& GetRTVDescriptorHeap();
+		CBVSRVUAVDescriptorHeap& GetImguiDescriptorHeap();
 		UINT GetWidth() const;
 		UINT GetHeight() const;
+		UINT GetFrameIndex() const;
 	private:
 		HRESULT getHardwareAdapter(
 			_In_ IDXGIFactory1* pFactory,
@@ -60,6 +63,7 @@ namespace library
 		ComPtr<ID3D12GraphicsCommandList> m_commandList;
 		RTVDescriptorHeap m_rtvDescriptorHeap;
 		CBVSRVUAVDescriptorHeap m_cbvSrvUavDescriptorHeap;
+		CBVSRVUAVDescriptorHeap m_ImguiDescriptorHeap;
 
 		//Ææ½º
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;

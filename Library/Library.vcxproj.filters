@@ -74,6 +74,9 @@
     <Filter Include="Shader\Include\BxDF\BRDF">
       <UniqueIdentifier>{8b978e68-bcb9-4ede-b34a-8259a713cd28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Imgui">
+      <UniqueIdentifier>{f3f81858-e1c6-4a5b-b956-73458b4c14e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
@@ -184,6 +187,30 @@
     <ClInclude Include="Header\Model\ModelMesh.h">
       <Filter>Source\Model</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Imgui\imconfig.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imgui.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imgui_impl_dx12.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imgui_impl_win32.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imgui_internal.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imstb_rectpack.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imstb_textedit.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Imgui\imstb_truetype.h">
+      <Filter>Source\Imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -269,6 +296,27 @@
     </ClCompile>
     <ClCompile Include="Source\Model\ModelMesh.cpp">
       <Filter>Source\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui.cpp">
+      <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui_demo.cpp">
+      <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui_draw.cpp">
+      <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui_impl_dx12.cpp">
+      <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui_impl_win32.cpp">
+      <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui_tables.cpp">
+      <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Imgui\imgui_widgets.cpp">
+      <Filter>Source\Imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

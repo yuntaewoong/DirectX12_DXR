@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Game/Game.h"
-
 namespace library
 {
 	Game::Game(_In_ PCWSTR pszGameName, _In_ INT nWidth, _In_ INT nHeight) :
@@ -59,7 +58,15 @@ namespace library
 				m_renderer->Update(elapsedTime);
 				//start timer
 				QueryPerformanceCounter(&StartingTime);
+
+				ImGui_ImplDX12_NewFrame();
+				ImGui_ImplWin32_NewFrame();
+				ImGui::NewFrame();
+				ImGui::ShowDemoWindow();
+				ImGui::Render();
 				m_renderer->Render();
+				
+				
 			}
 		}
 

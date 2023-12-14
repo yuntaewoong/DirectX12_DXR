@@ -1,6 +1,7 @@
 #pragma once
 #include "DescriptorHeap\DescriptorHeap.h"
 
+
 namespace library
 {
     class RTVDescriptorHeap final : public DescriptorHeap
@@ -13,8 +14,11 @@ namespace library
         RTVDescriptorHeap& operator=(RTVDescriptorHeap&& other) = delete;
         virtual ~RTVDescriptorHeap() = default;
         HRESULT CreateRTV(_In_ const ComPtr<ID3D12Device>& pDevice,_In_ const ComPtr<ID3D12Resource>& pRenderTarget);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCPUHandle(UINT index) const;
     private:
         virtual D3D12_DESCRIPTOR_HEAP_DESC createDescriptorHeapDesc() override;
         virtual D3D12_DESCRIPTOR_HEAP_TYPE getDescriptorHeapType() override;
+    private:
+        std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> m_RTVCPUHandles;
     };
 }

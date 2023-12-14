@@ -132,6 +132,13 @@ namespace library
 
         ShowWindow(m_hWnd, nCmdShow);
 
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        ImGui_ImplWin32_Init(m_hWnd);
+
         return S_OK;
     }
 }

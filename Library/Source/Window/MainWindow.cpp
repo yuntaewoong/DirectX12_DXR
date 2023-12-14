@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Window/MainWindow.h"
+#include "Imgui\imgui_impl_win32.h"
 
 namespace library
 {
@@ -78,7 +79,9 @@ namespace library
     {
         PAINTSTRUCT ps;
         HDC hdc;
-
+        extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+        if (ImGui_ImplWin32_WndProcHandler(m_hWnd, uMsg, wParam, lParam))
+            return true;
         switch (uMsg)
         {
         case WM_PAINT:
@@ -171,8 +174,8 @@ namespace library
                     RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawdata.get());
                     if (raw->header.dwType == RIM_TYPEMOUSE)
                     {
-                        m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
-                        m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
+                        //m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
+                        //m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
                     }
                 }
             }

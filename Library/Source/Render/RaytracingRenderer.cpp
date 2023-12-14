@@ -70,7 +70,14 @@ namespace library
         {
             return hr;
         }
-
+        ImGui_ImplDX12_Init(
+            m_dxrDevice.Get(),
+            3,
+            DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+            m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap().Get(),
+            m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
+            m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart()
+        );
         hr = m_camera.Initialize(m_renderingResources.GetDevice().Get());
         if (FAILED(hr))
         {
@@ -164,32 +171,48 @@ namespace library
         m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
         
         ComPtr<ID3D12Resource>& currentRenderTarget = m_renderingResources.GetCurrentRenderTarget();
+
         D3D12_RESOURCE_BARRIER preCopyBarriers[2] = {};
         preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
             currentRenderTarget.Get(),
             D3D12_RESOURCE_STATE_COMMON,
             D3D12_RESOURCE_STATE_COPY_DEST
-        );//Render Target을 Copy목적지로 전이
+        );
         preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
             m_raytracingOutput.Get(),
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE
-        );//UAV에서 Copy
+        );
         pCommandList->ResourceBarrier(ARRAYSIZE(preCopyBarriers), preCopyBarriers);
-
+        
         pCommandList->CopyResource(currentRenderTarget.Get(), m_raytracingOutput.Get());
 
         D3D12_RESOURCE_BARRIER postCopyBarriers[2] = {};
         postCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
             currentRenderTarget.Get(),
             D3D12_RESOURCE_STATE_COPY_DEST, 
-            D3D12_RESOURCE_STATE_COMMON
-        );//Render Target을 present단계로 만들기
+            D3D12_RESOURCE_STATE_RENDER_TARGET
+        );
         postCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
             m_raytracingOutput.Get(),
             D3D12_RESOURCE_STATE_COPY_SOURCE,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-        );//UAV를 다시 UA로 만들기
+        );
         pCommandList->ResourceBarrier(ARRAYSIZE(postCopyBarriers), postCopyBarriers);
+        
+        pCommandList->SetDescriptorHeaps(1,m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap().GetAddressOf());
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = m_renderingResources.GetRTVDescriptorHeap().GetRTVCPUHandle(m_renderingResources.GetFrameIndex());
+        pCommandList->OMSetRenderTargets(1u,&rtvCPUHandle,FALSE,nullptr);
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
+
+        D3D12_RESOURCE_BARRIER postImguiBarriers[1] = {};
+        postImguiBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+            currentRenderTarget.Get(),
+            D3D12_RESOURCE_STATE_RENDER_TARGET, 
+            D3D12_RESOURCE_STATE_COMMON
+        );
+        pCommandList->ResourceBarrier(ARRAYSIZE(postImguiBarriers), postImguiBarriers);
+        
+
         return S_OK;
     }
     

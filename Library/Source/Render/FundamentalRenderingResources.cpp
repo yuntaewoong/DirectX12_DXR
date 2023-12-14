@@ -14,6 +14,7 @@ namespace library
 		m_commandList(nullptr),
 		m_rtvDescriptorHeap(FRAME_COUNT),
         m_cbvSrvUavDescriptorHeap(),
+        m_ImguiDescriptorHeap(),
 		m_fence(nullptr),
 		m_fenceValues(),
 		m_fenceEvent()
@@ -60,6 +61,11 @@ namespace library
         }
         hr = m_cbvSrvUavDescriptorHeap.Initialize(m_device);
         if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = m_ImguiDescriptorHeap.Initialize(m_device);
+        if(FAILED(hr))
         {
             return hr;
         }
@@ -200,6 +206,14 @@ namespace library
     {
         return m_cbvSrvUavDescriptorHeap;
     }
+    RTVDescriptorHeap& FundamentalRenderingResources::GetRTVDescriptorHeap()
+    {
+        return m_rtvDescriptorHeap;
+    }
+    CBVSRVUAVDescriptorHeap& FundamentalRenderingResources::GetImguiDescriptorHeap()
+    {
+        return m_ImguiDescriptorHeap;
+    }
     UINT FundamentalRenderingResources::GetWidth() const
     {
         return m_width;
@@ -207,6 +221,10 @@ namespace library
     UINT FundamentalRenderingResources::GetHeight() const
     {
         return m_height;
+    }
+    UINT FundamentalRenderingResources::GetFrameIndex() const
+    {
+        return m_frameIndex;
     }
     BOOL FundamentalRenderingResources::isDeviceSupportRayTracing(IDXGIAdapter1* adapter) const
     {

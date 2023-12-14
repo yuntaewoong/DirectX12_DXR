@@ -3,7 +3,8 @@
 namespace library
 {
 	RTVDescriptorHeap::RTVDescriptorHeap(_In_ UINT numDescriptors) :
-		DescriptorHeap(numDescriptors)
+		DescriptorHeap(numDescriptors),
+		m_RTVCPUHandles(std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>())
 	{}
 	HRESULT RTVDescriptorHeap::CreateRTV(_In_ const ComPtr<ID3D12Device>& pDevice,_In_ const ComPtr<ID3D12Resource>& pRenderTarget)
 	{
@@ -14,9 +15,14 @@ namespace library
 		{
 			return hr;
 		}
+		m_RTVCPUHandles.push_back(static_cast<D3D12_CPU_DESCRIPTOR_HANDLE>(rtvCPUHandle.ptr));
 		pDevice->CreateRenderTargetView(pRenderTarget.Get(), nullptr, rtvCPUHandle);
 		m_numAllocated++;
 		return hr;
+	}
+	D3D12_CPU_DESCRIPTOR_HANDLE RTVDescriptorHeap::GetRTVCPUHandle(UINT index) const
+	{
+		return m_RTVCPUHandles[index];
 	}
 	D3D12_DESCRIPTOR_HEAP_DESC RTVDescriptorHeap::createDescriptorHeapDesc()
 	{
