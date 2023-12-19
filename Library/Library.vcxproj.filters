@@ -370,5 +370,14 @@
     <None Include="Shader\Include\BxDF\BRDF\PBRModel.hlsli">
       <Filter>Shader\Include\BxDF\BRDF</Filter>
     </None>
+    <None Include="Shader\Include\RaygenerationShaderCommon.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
+    <None Include="Shader\Include\ClosestHitShaderCommon.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
+    <None Include="Shader\Include\PathTracerRayTrace.hlsli">
+      <Filter>Shader\Include</Filter>
+    </None>
   </ItemGroup>
 </Project>

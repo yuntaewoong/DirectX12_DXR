@@ -326,8 +326,11 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
   <ItemGroup>
     <None Include="Shader\Include\BxDF\BRDF\PBRModel.hlsli" />
     <None Include="Shader\Include\BxDF\BRDF\PhongModel.hlsli" />
+    <None Include="Shader\Include\ClosestHitShaderCommon.hlsli" />
     <None Include="Shader\Include\HLSLCommon.hlsli" />
+    <None Include="Shader\Include\PathTracerRayTrace.hlsli" />
     <None Include="Shader\Include\RadianceRayTrace.hlsli" />
+    <None Include="Shader\Include\RaygenerationShaderCommon.hlsli" />
     <None Include="Shader\Include\RTAORayTrace.hlsli" />
     <None Include="Shader\Include\ShadowRayTrace.hlsli" />
   </ItemGroup>
