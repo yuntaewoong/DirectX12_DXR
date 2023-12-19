@@ -18,13 +18,19 @@ using namespace DirectX;
 namespace library
 {
     const static UINT NUM_DESCRIPTORS_DEFAULT = 50u;
-    const static UINT RAY_GENERATION_TYPE_COUNT = 2u;
-
+    namespace RayGenType
+    {
+        enum Enum {
+            RealTime = 0,
+            PathTracer
+        };
+        static const UINT Count = 2;
+    }
     /*===========================================
     Shader 진입점,
     Hit Group 진입점 정의
     =====================================*/
-    constexpr LPCWSTR RAY_GEN_SHADER_NAME[RAY_GENERATION_TYPE_COUNT] = 
+    constexpr LPCWSTR RAY_GEN_SHADER_NAMES[RayGenType::Count] = 
     {
         L"RadianceRaygenShader",
         L"PathTracerRaygenShader"

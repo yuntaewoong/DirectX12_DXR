@@ -17,7 +17,8 @@ namespace library
         m_bottomLevelAccelerationStructures(std::vector<std::unique_ptr<BottomLevelAccelerationStructure>>()),
         m_missShaderTable(),
         m_hitGroupShaderTable(),
-        m_rayGenShaderTable(),
+        m_realTimeRaygenShaderTable(),
+        m_pathTracerRaygenShaderTable(),
         m_raytracingOutput(nullptr),
         m_raytracingOutputGPUHandle()
     {}
@@ -98,9 +99,9 @@ namespace library
     {
         m_scene = pScene;
     }
-    void RaytracingRenderer::Render()
+    void RaytracingRenderer::Render(_In_ UINT renderType)
     {
-        populateCommandList();//command 기록
+        populateCommandList(renderType);//command 기록
         m_renderingResources.ExecuteCommandList();//command queue에 담긴 command list들 실행명령(비동기)
         m_renderingResources.PresentSwapChain();
         m_renderingResources.MoveToNextFrame();
@@ -110,7 +111,7 @@ namespace library
         m_camera.Update(deltaTime);
         m_scene->Update(deltaTime);
     }
-    HRESULT RaytracingRenderer::populateCommandList()
+    HRESULT RaytracingRenderer::populateCommandList(_In_ UINT renderType)
     {
         ComPtr<ID3D12GraphicsCommandList>& pCommandList = m_renderingResources.GetCommandList();
         //command list allocator특: gpu동작 끝나야 Reset가능(펜스로 동기화해라)
@@ -147,12 +148,26 @@ namespace library
             );//Light CB바인딩
         }
 
+        m_dxrCommandList->SetPipelineState1(m_raytracingPipelineStateObject.GetStateObject().Get());//열심히 만든 ray tracing pipeline바인딩
         
+        D3D12_GPU_VIRTUAL_ADDRESS_RANGE rayGenerationShaderRecord = D3D12_GPU_VIRTUAL_ADDRESS_RANGE();
+        switch(renderType)
+        {
+            case RayGenType::RealTime:
+                rayGenerationShaderRecord = {
+                    .StartAddress = m_realTimeRaygenShaderTable.GetShaderTableGPUVirtualAddress(),
+                    .SizeInBytes = m_realTimeRaygenShaderTable.GetShaderTableSizeInBytes()
+                };
+                break;
+            case RayGenType::PathTracer:
+                rayGenerationShaderRecord = {
+                    .StartAddress = m_pathTracerRaygenShaderTable.GetShaderTableGPUVirtualAddress(),
+                    .SizeInBytes = m_pathTracerRaygenShaderTable.GetShaderTableSizeInBytes()
+                };
+                break;
+        }
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {//RayTracing파이프라인 desc
-            .RayGenerationShaderRecord = {
-                .StartAddress = m_rayGenShaderTable.GetShaderTableGPUVirtualAddress(),
-                .SizeInBytes = m_rayGenShaderTable.GetShaderTableSizeInBytes()
-            },
+            .RayGenerationShaderRecord = rayGenerationShaderRecord,
             .MissShaderTable = {
                 .StartAddress = m_missShaderTable.GetShaderTableGPUVirtualAddress(),
                 .SizeInBytes = m_missShaderTable.GetShaderTableSizeInBytes(),
@@ -167,7 +182,6 @@ namespace library
             .Height = m_renderingResources.GetHeight(),
             .Depth = 1
         };
-        m_dxrCommandList->SetPipelineState1(m_raytracingPipelineStateObject.GetStateObject().Get());//열심히 만든 ray tracing pipeline바인딩
         m_dxrCommandList->DispatchRays(&dispatchDesc);// 모든 픽셀에 대해 ray generation shader실행명령
         
         ComPtr<ID3D12Resource>& currentRenderTarget = m_renderingResources.GetCurrentRenderTarget();
@@ -305,7 +319,12 @@ namespace library
     {
         HRESULT hr = S_OK;
         ComPtr<ID3D12Device> pDevice = m_renderingResources.GetDevice();
-        hr = m_rayGenShaderTable.Initialize(pDevice,m_raytracingPipelineStateObject.GetStateObject());
+        hr = m_realTimeRaygenShaderTable.Initialize(pDevice,m_raytracingPipelineStateObject.GetStateObject(),RAY_GEN_SHADER_NAMES[RayGenType::RealTime]);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = m_pathTracerRaygenShaderTable.Initialize(pDevice,m_raytracingPipelineStateObject.GetStateObject(),RAY_GEN_SHADER_NAMES[RayGenType::PathTracer]);
         if (FAILED(hr))
         {
             return hr;

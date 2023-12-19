@@ -47,8 +47,8 @@ namespace library
     void RaytracingPipelineStateObject::createDXILSubobjects()
     {
         {//RayGenerationShader
-            createDXILSubobject(static_cast<const void*>(g_pRadianceRayGeneration), ARRAYSIZE(g_pRadianceRayGeneration), RAY_GEN_SHADER_NAME[0]);
-            createDXILSubobject(static_cast<const void*>(g_pPathTracerRayGeneration), ARRAYSIZE(g_pPathTracerRayGeneration), RAY_GEN_SHADER_NAME[1]);
+            createDXILSubobject(static_cast<const void*>(g_pRadianceRayGeneration), ARRAYSIZE(g_pRadianceRayGeneration), RAY_GEN_SHADER_NAMES[0]);
+            createDXILSubobject(static_cast<const void*>(g_pPathTracerRayGeneration), ARRAYSIZE(g_pPathTracerRayGeneration), RAY_GEN_SHADER_NAMES[1]);
         }
         {//ClosestHitShader
             createDXILSubobject(static_cast<const void*>(g_pRadianceRayClosestHit), ARRAYSIZE(g_pRadianceRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Radiance]);
@@ -94,6 +94,7 @@ namespace library
         CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT* rootSignatureAssociation = m_stateObjectDesc.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
         rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
         rootSignatureAssociation->AddExport(HIT_GROUP_NAMES[RayType::Radiance]);//Radiance Hit Group에서 사용하겠다
+        rootSignatureAssociation->AddExport(HIT_GROUP_NAMES[RayType::PathTracer]);//PathTracer Hit Group에서 사용하겠다
     }
     void RaytracingPipelineStateObject::createGlobalRootSignatureSubobject(_In_ const ComPtr<ID3D12RootSignature>& pGlobalRootSignature)
     {

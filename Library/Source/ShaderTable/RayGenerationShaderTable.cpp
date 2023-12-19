@@ -6,7 +6,11 @@ namespace library
         ShaderTable::ShaderTable()
     {}
 
-    HRESULT RayGenerationShaderTable::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice, _In_ const ComPtr<ID3D12StateObject>& pStateObject)
+    HRESULT RayGenerationShaderTable::Initialize(
+        _In_ const ComPtr<ID3D12Device>& pDevice,
+        _In_ const ComPtr<ID3D12StateObject>& pStateObject,
+        _In_ const LPCWSTR& raygenShaderName
+    )
     {
         HRESULT hr = S_OK;
         UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
@@ -19,11 +23,8 @@ namespace library
         }
         ComPtr<ID3D12StateObjectProperties> stateObjectProperties(nullptr);
         pStateObject.As(&stateObjectProperties);
-        for (UINT i = 0; i < RAY_GENERATION_TYPE_COUNT; i++)
-        {
-            void* rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(RAY_GEN_SHADER_NAME[i]);
-            Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
-        }
+        void* rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(raygenShaderName);
+        Push_back(ShaderRecord(rayGenShaderIdentifier, shaderIdentifierSize));
         return hr;
     }
 }

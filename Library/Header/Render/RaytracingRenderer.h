@@ -29,10 +29,10 @@ namespace library
         HRESULT Initialize(_In_ HWND hWnd);
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);
         void SetMainScene(_In_ const std::shared_ptr<Scene>& pScene);
-        void Render();
+        void Render(_In_ UINT renderType);
         void Update(_In_ FLOAT deltaTime);
     private:
-        HRESULT populateCommandList();
+        HRESULT populateCommandList(_In_ UINT renderType);
 
         //이하 함수는 ray tacing 관련함수
 
@@ -65,7 +65,8 @@ namespace library
         //ray tracing Shader Table자원
         MissShaderTable m_missShaderTable;
         HitGroupShaderTable m_hitGroupShaderTable;
-        RayGenerationShaderTable m_rayGenShaderTable;
+        RayGenerationShaderTable m_realTimeRaygenShaderTable;
+        RayGenerationShaderTable m_pathTracerRaygenShaderTable;
 
         // Raytracing  결과 UAV자원
         ComPtr<ID3D12Resource> m_raytracingOutput;

@@ -29,9 +29,11 @@ namespace library
         record[0] == Meshes[0] radiance hit group
         record[1] == Meshes[0] shadow hit group
         record[2] == Meshes[0] RTAO hit group
-        record[3] == Meshes[1] radiance hit group
-        record[4] == Meshes[1] shadow hit group
-        record[5] == Meshes[1] RTAO hit group
+        record[3] == Meshes[0] PathTracer hit group
+        record[4] == Meshes[1] radiance hit group
+        record[5] == Meshes[1] shadow hit group
+        record[6] == Meshes[1] RTAO hit group
+        record[7] == Meshes[1] PathTracer hit group
         ...
         .
         ....

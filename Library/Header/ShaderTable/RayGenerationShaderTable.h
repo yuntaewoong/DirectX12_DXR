@@ -15,6 +15,10 @@ namespace library
         RayGenerationShaderTable& operator=(const RayGenerationShaderTable& other) = delete;
         RayGenerationShaderTable& operator=(RayGenerationShaderTable&& other) = delete;
 
-        HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice, _In_ const ComPtr<ID3D12StateObject>& pStateObject);
+        HRESULT Initialize(
+            _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ const ComPtr<ID3D12StateObject>& pStateObject,
+            _In_ const LPCWSTR& raygenShaderName
+        );
 	};
 }
