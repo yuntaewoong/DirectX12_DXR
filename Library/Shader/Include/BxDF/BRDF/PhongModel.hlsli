@@ -23,38 +23,6 @@ namespace BxDF
             }
         }
     }
-    float3 PhongShade(
-        in float3 ambientMap,
-        in float3 albedoMap,
-        in float3 specularMap,
-        in float3 normal, 
-        in float3 pointToLights[NUM_LIGHT],
-        in float3 pointToCamera,
-        in float3 lightColor,
-        in float  lightAttenuation,
-        in float shadowAmount
-    )
-    {
-        float3 ambient = float3(0.f, 0.f, 0.f);
-        float3 diffuse = float3(0.f, 0.f, 0.f);
-        float3 specular = float3(0.f, 0.f, 0.f);
-        [unroll(NUM_LIGHT)]
-        for (uint i = 0; i < NUM_LIGHT; i++)
-        {
-            ambient += ambientMap;
-            float3 diffuseColor = BxDF::BRDF::Diffuse::CalculatePhongDiffuse(albedoMap, normal, pointToLights[i]);
-            float3 specularColor = BxDF::BRDF::Specular::CalculateSpecular(specularMap, normal, pointToLights[i], pointToCamera);
-            if (shadowAmount > 0.1f)
-            {
-                diffuseColor = diffuseColor * (1.f - shadowAmount);
-                specularColor = specularColor * (1.f - shadowAmount);
-            }
-            diffuse += diffuseColor;
-            specular += specularColor;
-        }
-        
-        return saturate((ambient + diffuse + specular) * lightColor * lightAttenuation);
-    }
 }
 
 #endif // PHONGMODEL
