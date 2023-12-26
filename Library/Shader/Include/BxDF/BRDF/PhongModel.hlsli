@@ -15,7 +15,7 @@ namespace BxDF
         }
         namespace Specular
         {
-            float3 CalculateSpecular(in float3 specularMap, in float3 normal, in float3 pointToLight, in float3 pointToCamera)
+            float3 CalculatePhongSpecular(in float3 specularMap, in float3 normal, in float3 pointToLight, in float3 pointToCamera)
             {//Specular BRDF°è»ê
                 float3 reflectDirection = normalize(reflect(-pointToLight, normal));
                 float cosFactor = 15.0f;
