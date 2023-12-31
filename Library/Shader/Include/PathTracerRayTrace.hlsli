@@ -6,8 +6,8 @@
 float4 TracePathTracerRay(in float3 rayOrigin,in float3 rayDirection, in uint currentRayRecursionDepth)
 {
     if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
-    {
-        return float4(0.f, 0.f, 0.f, 0.0f);
+    {//max_depth일때는 ambient light를 incoming light값으로 취급
+        return float4(0.1f, 0.1f, 0.1f, 0.0f);
     }
     RayDesc ray;
     ray.Origin = rayOrigin;
@@ -15,7 +15,12 @@ float4 TracePathTracerRay(in float3 rayOrigin,in float3 rayDirection, in uint cu
     ray.TMin = 0.001f;
     ray.TMax = 10000.0;
         
-    RayPayload payload = { float4(0, 0, 0, 0), currentRayRecursionDepth+1 };
+    
+    PathTracerRayPayload payload = {
+        float4(0, 0, 0, 0), 
+        g_cameraCB.cameraPosition.xyz,
+        currentRayRecursionDepth+1 
+    };
     TraceRay(
         g_scene, //acceleration structure
         RAY_FLAG_NONE, //딱히 플래그를 주지 않음
@@ -26,5 +31,5 @@ float4 TracePathTracerRay(in float3 rayOrigin,in float3 rayDirection, in uint cu
         ray, //ray 정보
         payload //payload
     );
-    return payload.color;
+    return payload.color;//closesthitshader, missshader의 결과로 나오는 incoming light리턴
 }

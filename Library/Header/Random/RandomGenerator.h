@@ -17,6 +17,11 @@ namespace library
         HRESULT Initialize(_In_ ID3D12Device* pDevice);
         void Update(_In_ FLOAT deltaTime);
     private:
+        static FLOAT randFloat();
+        void UpdateGPUConstantBuffer();
+    private:
         ComPtr<ID3D12Resource> m_randomConstantBuffer;
+        void* m_mappedData;
+
     };
 }

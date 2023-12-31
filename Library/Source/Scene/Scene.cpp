@@ -91,12 +91,12 @@ namespace library
         {
             m_lights[i]->Update(deltaTime);
         }
-        PointLightConstantBuffer cb = {};
+        /*PointLightConstantBuffer cb = {};
         for (UINT i = 0; i < m_lights.size(); i++)
         {
             cb.position[i] = m_lights[i]->GetPosition();
         }
-        memcpy(m_pointLightMappedData, &cb, sizeof(cb));
+        memcpy(m_pointLightMappedData, &cb, sizeof(cb));*/
     }
     ComPtr<ID3D12Resource>& Scene::GetPointLightsConstantBuffer()
     {

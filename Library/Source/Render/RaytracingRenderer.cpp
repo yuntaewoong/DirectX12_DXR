@@ -8,6 +8,7 @@ namespace library
         m_renderingResources(),
         m_scene(nullptr),
         m_camera(Camera(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
+        m_randomGenerator(),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_raytracingPipelineStateObject(),
@@ -74,12 +75,17 @@ namespace library
         ImGui_ImplDX12_Init(
             m_dxrDevice.Get(),
             3,
-            DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+            DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT,
             m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap().Get(),
             m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
             m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart()
         );
         hr = m_camera.Initialize(m_renderingResources.GetDevice().Get());
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = m_randomGenerator.Initialize(m_renderingResources.GetDevice().Get());
         if (FAILED(hr))
         {
             return hr;
@@ -109,6 +115,7 @@ namespace library
     void RaytracingRenderer::Update(_In_ FLOAT deltaTime)
     {
         m_camera.Update(deltaTime);
+        m_randomGenerator.Update(deltaTime);
         m_scene->Update(deltaTime);
     }
     HRESULT RaytracingRenderer::populateCommandList(_In_ UINT renderType)
@@ -142,6 +149,10 @@ namespace library
                 static_cast<UINT>(EGlobalRootSignatureSlot::CameraConstantSlot),
                 m_camera.GetConstantBuffer()->GetGPUVirtualAddress()
             );//Camera CB바인딩
+            pCommandList->SetComputeRootConstantBufferView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::RandomConstantSlot),
+                m_randomGenerator.GetConstantBuffer()->GetGPUVirtualAddress()
+            );//Random CB바인딩
             pCommandList->SetComputeRootConstantBufferView(
                 static_cast<UINT>(EGlobalRootSignatureSlot::LightConstantSlot),
                 m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
@@ -347,10 +358,9 @@ namespace library
     }
     HRESULT RaytracingRenderer::createRaytacingOutputResource(_In_ HWND hWnd)
     {
-        HRESULT hr = S_OK;
-        //format은 Swap chain의 format과 같아야함!
+        HRESULT hr = S_OK;\
         CD3DX12_RESOURCE_DESC uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-            DXGI_FORMAT_R8G8B8A8_UNORM, 
+            DXGI_FORMAT_R16G16B16A16_FLOAT, 
             m_renderingResources.GetWidth(),
             m_renderingResources.GetHeight(),
             1, 1, 1, 0, 

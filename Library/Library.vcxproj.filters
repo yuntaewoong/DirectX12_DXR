@@ -77,6 +77,9 @@
     <Filter Include="Source\Imgui">
       <UniqueIdentifier>{f3f81858-e1c6-4a5b-b956-73458b4c14e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Random">
+      <UniqueIdentifier>{41361865-0252-47fd-bd48-d3da4f52c9ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
@@ -211,6 +214,9 @@
     <ClInclude Include="Header\Imgui\imstb_truetype.h">
       <Filter>Source\Imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Random\RandomGenerator.h">
+      <Filter>Source\Random</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -317,6 +323,9 @@
     </ClCompile>
     <ClCompile Include="Source\Imgui\imgui_widgets.cpp">
       <Filter>Source\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Random\RandomGenerator.cpp">
+      <Filter>Source\Random</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

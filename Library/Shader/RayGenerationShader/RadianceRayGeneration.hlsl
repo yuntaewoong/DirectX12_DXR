@@ -15,4 +15,5 @@ void RadianceRaygenShader()
     uint currentRecursionDepth = 0u;
     color = TraceRadianceRay(origin, rayDir, currentRecursionDepth);
     g_renderTarget[DispatchRaysIndex().xy] = color;
+    
 }

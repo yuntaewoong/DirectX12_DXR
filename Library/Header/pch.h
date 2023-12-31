@@ -3,6 +3,7 @@
 미리 컴파일된 헤더,
 절대 수정안될 헤더들을 넣으면 빌드시간이 빨라진다..
 */
+#include <algorithm>
 #include <memory>
 #include <wrl.h>
 #include <Windows.h>
@@ -11,6 +12,5 @@
 #include <DirectXMath.h>
 #include "Common\d3dx12.h"
 #include <string>
-#include <algorithm>
 #include <filesystem>
 #include <vector>

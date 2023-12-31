@@ -220,6 +220,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <ClInclude Include="Header\Model\Model.h" />
     <ClInclude Include="Header\Model\ModelMesh.h" />
     <ClInclude Include="Header\pch.h" />
+    <ClInclude Include="Header\Random\RandomGenerator.h" />
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
     <ClInclude Include="Header\Render\FundamentalRenderingResources.h" />
     <ClInclude Include="Header\Render\RaytracingRenderer.h" />
@@ -265,6 +266,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Random\RandomGenerator.cpp" />
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp" />
     <ClCompile Include="Source\Render\FundamentalRenderingResources.cpp" />
     <ClCompile Include="Source\Render\Mesh.cpp" />

@@ -6,6 +6,8 @@
 #define NUM_RTAO_RAY 4 // RTAO에 사용할 Ray수
 #define RTAO_RADIUS 0.2  // RTAO에 적용할 반구의 반지름
 #define PI 3.14159265359f // 원주율정의
+#define RANDOM_SEQUENCE_LENGTH (64 * 64) //랜덤넘버 버퍼에 저장될 0~1 랜덤float변수 개수 정의
+
 
 #ifdef HLSL//HLSL에서 include시
 //전처리기를 이용해 HLSL에서도 c++에서도 같은 파일을 Include시켜주는 트릭
@@ -31,6 +33,12 @@ struct CameraConstantBuffer
 {
     XMMATRIX projectionToWorld;
     XMVECTOR cameraPosition;
+};
+
+struct RandomConstantBuffer
+{
+    XMVECTOR randFloats0[RANDOM_SEQUENCE_LENGTH / 4];
+	XMVECTOR randFloats1[RANDOM_SEQUENCE_LENGTH / 4];
 };
 
 struct PointLightConstantBuffer
@@ -61,6 +69,13 @@ struct Vertex
     XMFLOAT3 tangent;
     XMFLOAT3 biTangent;
 };
+struct PathTracerRayPayload
+{
+    XMFLOAT4 color;
+    XMFLOAT3 camera;//각각의 hit상황에서의 cameraPosition
+    UINT recursionDepth;
+};
+
 struct RayPayload
 {
     XMFLOAT4 color;

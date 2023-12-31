@@ -2,7 +2,7 @@
 #include "../Include/HLSLCommon.hlsli"
 
 [shader("miss")]
-void PathTracerRayMissShader(inout RayPayload payload)
+void PathTracerRayMissShader(inout PathTracerRayPayload payload)
 {
-    payload.color = float4(1.f, 0.f, 0.0f, 1.0f);
+    payload.color = float4(0.1f, 0.1f, 0.1f, 0.0f);
 }

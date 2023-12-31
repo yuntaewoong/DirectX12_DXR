@@ -15,6 +15,8 @@ namespace library
         m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::AccelerationStructureSlot)].InitAsShaderResourceView(0);//t0번 레지스터는 AS다
         m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::CameraConstantSlot)].InitAsConstantBufferView(0);//b0번 레지스터는 Camera Constant Buffer다
         m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::LightConstantSlot)].InitAsConstantBufferView(2);//b2번 레지스터는 Light Constant Buffer다
+        m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::RandomConstantSlot)].InitAsConstantBufferView(4);//b4번 레지스터는 Random Constant Buffer다
+        
 
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(ARRAYSIZE(m_rootParameter), m_rootParameter);

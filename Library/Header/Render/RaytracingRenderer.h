@@ -6,6 +6,7 @@
 #include "AccelerationStructure\BottomLevelAccelerationStructure.h"
 #include "Scene\Scene.h"
 #include "Camera\Camera.h"
+#include "Random\RandomGenerator.h"
 #include "ShaderTable\HitGroupShaderTable.h"
 #include "ShaderTable\MissShaderTable.h"
 #include "ShaderTable\RayGenerationShaderTable.h"
@@ -46,6 +47,7 @@ namespace library
         FundamentalRenderingResources m_renderingResources;
         std::shared_ptr<Scene> m_scene;
         Camera m_camera;
+        RandomGenerator m_randomGenerator;
 
         // DXR파이프라인 관련
         ComPtr<ID3D12Device5> m_dxrDevice;

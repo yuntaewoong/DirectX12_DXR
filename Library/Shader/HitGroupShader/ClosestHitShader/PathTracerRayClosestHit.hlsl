@@ -2,7 +2,6 @@
 #include "../../Include/HLSLCommon.hlsli"
 #include "../../Include/ClosestHitShaderCommon.hlsli"
 #include "../../Include/PathTracerRayTrace.hlsli"
-#include "../../Include/ShadowRayTrace.hlsli"
 #include "../../Include/BxDF/BRDF/PhongModel.hlsli"
 #include "../../Include/BxDF/BRDF/PBRModel.hlsli"
     
@@ -64,8 +63,151 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
     return normalize(newNormal);
 }
 
-[shader("closesthit")]
-void PathTracerRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
+float3 RandomHemisphereVector(float random1, float random2)
 {
-    payload.color = float4(0.2f,0.4f,0.6f,1.f);
+    // random1과 random2는 [0, 1) 범위의 난수
+
+    // theta와 phi 각도 계산
+    float theta = acos(random1); // [0, π/2] 범위 (반구)
+    float phi = 2.0 * 3.14159265 * random2; // [0, 2π] 범위
+
+    // 구면 좌표계에서 카테시안 좌표계로 변환
+    float x = sin(theta) * cos(phi);
+    float y = sin(theta) * sin(phi);
+    float z = cos(theta);
+
+    return float3(x, y, z);
+}
+float3 RotateVectorToNormal(float3 inputVector, float3 normal)
+{
+    // 법선을 기준으로 직교 좌표계 생성
+    float3 nt;
+    if (abs(normal.x) > abs(normal.z))
+        nt = float3(-normal.y, normal.x, 0.0);
+    else
+        nt = float3(0.0, -normal.z, normal.y);
+
+    nt = normalize(nt);
+    float3 nb = normalize(cross(normal, nt));
+
+    // 벡터를 법선을 기준으로 회전
+    return inputVector.x * nb + inputVector.y * nt + inputVector.z * normal;
+}
+float3 RandomVectorInHemisphere(float3 normal, float random1, float random2)
+{
+    float3 randomVector = RandomHemisphereVector(random1, random2);//반구공간상의 Uniform랜덤 벡터 생성
+    return RotateVectorToNormal(randomVector, normal);//인풋 normal기준으로 공간변환
+}
+
+
+[shader("closesthit")]
+void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
+{
+    float3 hitPosition = HitWorldPosition();
+    uint indexSizeInBytes = 2; //index는 16비트
+    uint indicesPerTriangle = 3; //삼각형은 Vertex가 3개
+    uint triangleIndexStride = indicesPerTriangle * indexSizeInBytes; //primitive별로 끊어 읽어야하는 Index단위
+    uint baseIndex = PrimitiveIndex() * triangleIndexStride; //충돌한 Primitive에 해당하는 index값중 첫번째값
+    
+    const uint3 indices = Load3x16BitIndices(baseIndex); //base부터 3개의 index값 로드6
+
+    float3 vertexNormals[3] =
+    { //index값으로 world space vertex normal값 가져오기
+        normalize(mul(float4(l_vertices[indices[0]].normal, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[1]].normal, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[2]].normal, 0), l_meshCB.world).xyz)
+    };
+    float3 vertexTangent[3] =
+    { //index값으로 world space vertex tangent값 가져오기
+        normalize(mul(float4(l_vertices[indices[0]].tangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[1]].tangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[2]].tangent, 0), l_meshCB.world).xyz)
+    };
+    float3 vertexBiTangent[3] =
+    { //index값으로 world space vertex biTangent값 가져오기
+        normalize(mul(float4(l_vertices[indices[0]].biTangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[1]].biTangent, 0), l_meshCB.world).xyz),
+        normalize(mul(float4(l_vertices[indices[2]].biTangent, 0), l_meshCB.world).xyz)
+    };
+    float2 vertexUV[3] =
+    { //index값으로 vertex uv값 가져오기
+        l_vertices[indices[0]].uv,
+        l_vertices[indices[1]].uv,
+        l_vertices[indices[2]].uv 
+    };
+    
+    float3 triangleNormal = HitAttributeFloat3(vertexNormals, attr); //무게중심 좌표계로 normal값 보간하기
+    float3 triangleTangent = HitAttributeFloat3(vertexTangent, attr); //무게중심 좌표계로 tangent값 보간하기
+    float3 triangleBitangent = HitAttributeFloat3(vertexBiTangent, attr); //무게중심 좌표계로 biTangent값 보간하기
+    float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
+    triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
+    
+    uint firstSeqLinearIndex = DispatchRaysIndex().x + 800 *  DispatchRaysIndex().y;
+    uint seqLinearIndex0 = (firstSeqLinearIndex + payload.recursionDepth) % RANDOM_SEQUENCE_LENGTH;
+	uint seqLinearIndex1 = (firstSeqLinearIndex + payload.recursionDepth) % RANDOM_SEQUENCE_LENGTH;
+	float rand0 =  g_randomCB.randFloats0[seqLinearIndex0 / 4][seqLinearIndex0 % 4];
+	float rand1 = g_randomCB.randFloats1[seqLinearIndex1 / 4][seqLinearIndex1 % 4];
+    float3 randomVectorInHemisphere = RandomVectorInHemisphere(triangleNormal,rand0,rand1);
+    
+    
+    
+    if(l_meshCB.materialType == MaterialType::Phong)
+    {//PhongShading모델
+        float3 diffuse = l_meshCB.albedo.rgb;
+        float3 specular = float3(1.f, 1.f, 1.f);
+        if (l_meshCB.hasDiffuseTexture)
+        { 
+            diffuse = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+        }
+        if (l_meshCB.hasSpecularTexture)
+        { 
+            specular = l_specularTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
+        }
+        float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
+        float3 pointToCamera = normalize(payload.camera - hitPosition);
+        float3 phongDiffuse = BxDF::BRDF::Diffuse::CalculatePhongDiffuse(diffuse, triangleNormal, randomVectorInHemisphere);
+        float3 phongSpecular = BxDF::BRDF::Specular::CalculatePhongSpecular(specular, triangleNormal, randomVectorInHemisphere, pointToCamera);
+        float3 color = saturate((diffuse + specular) * incomingLight.xyz /** lightAttenuation*/);
+        payload.camera = hitPosition;
+        payload.color = float4(color,1.f);
+    }
+    else if(l_meshCB.materialType == MaterialType::PBR)
+    {//PBR Shading 모델
+        float3 diffuse = l_meshCB.albedo.rgb;
+        float roughness = l_meshCB.roughness;
+        float metallic = l_meshCB.metallic;
+        if (l_meshCB.hasDiffuseTexture)
+        { 
+            diffuse = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
+        }
+        if(l_meshCB.hasRoughnessTexture)
+        {
+            roughness = l_roughnessTexture.SampleLevel(l_sampler, triangleUV, 0).x;
+        }
+        if (l_meshCB.hasMetallicTexture)
+        {
+            metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).x;
+        }
+        float3 color = float3(0.f, 0.f, 0.f);
+        float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
+        float3 pointToCamera = normalize(payload.camera - hitPosition);
+        
+        
+        float3 halfVector = normalize(randomVectorInHemisphere + pointToCamera);
+        diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);
+        float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
+        F0 = lerp(F0, diffuse, metallic);
+        float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
+        float3 kS = F; //Specular상수
+        float3 kD = float3(1.f, 1.f, 1.f) - kS; //Diffuse 상수
+        kD = kD * (1-metallic);//Diffuse에 metallic반영
+        float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(triangleNormal, pointToCamera, halfVector, randomVectorInHemisphere, roughness, F);
+        float NdotL = max(dot(triangleNormal, randomVectorInHemisphere), 0.0);
+        color += (kD *(diffuse + specular)) * incomingLight.xyz /** lightAttenuation*/ * NdotL;
+        {//감마변환    
+            color = color / (color + float3(1.0f, 1.0f, 1.0f));
+            color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+        }
+        payload.color = float4(color, 1);
+    }
 }
