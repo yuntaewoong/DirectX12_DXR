@@ -14,6 +14,9 @@
     <Filter Include="Source\Plane">
       <UniqueIdentifier>{a2312cfc-3f14-4b03-887e-c95c7793946d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Scene">
+      <UniqueIdentifier>{46486084-6046-4d1d-beb1-8eceacbc4e6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">
@@ -34,6 +37,9 @@
     <ClCompile Include="Source\Light\FixedLight.cpp">
       <Filter>Source\Light</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\CustomScene.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h">
@@ -50,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="Header\Light\FixedLight.h">
       <Filter>Source\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Scene\CustomScene.h">
+      <Filter>Source\Scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -360,7 +360,7 @@ namespace library
     {
         HRESULT hr = S_OK;\
         CD3DX12_RESOURCE_DESC uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-            DXGI_FORMAT_R16G16B16A16_FLOAT, 
+            DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT, 
             m_renderingResources.GetWidth(),
             m_renderingResources.GetHeight(),
             1, 1, 1, 0, 

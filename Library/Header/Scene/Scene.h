@@ -12,7 +12,7 @@ namespace library
     /*
         Renderer가 그리게 될 Scene
     */
-    class Scene final
+    class Scene
     {
     public:
         Scene();
