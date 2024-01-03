@@ -9,6 +9,8 @@
 #include <DirectXColors.h>
 
 CustomScene::CustomScene()
+	:
+	Scene::Scene()
 {
 	XMFLOAT4 color;
 	XMStoreFloat4(&color, Colors::White);

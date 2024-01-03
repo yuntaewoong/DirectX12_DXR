@@ -40,6 +40,12 @@
     <ClCompile Include="Source\Scene\CustomScene.cpp">
       <Filter>Source\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\CornellBoxScene.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\BathroomScene.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Cube\BaseCube.h">
@@ -58,6 +64,12 @@
       <Filter>Source\Light</Filter>
     </ClInclude>
     <ClInclude Include="Header\Scene\CustomScene.h">
+      <Filter>Source\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Scene\CornellBoxScene.h">
+      <Filter>Source\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Scene\BathroomScene.h">
       <Filter>Source\Scene</Filter>
     </ClInclude>
   </ItemGroup>
