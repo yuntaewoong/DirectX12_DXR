@@ -28,7 +28,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch_game.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Source\Plane\BasePlane.cpp" />
-    <ClCompile Include="Source\Scene\BathroomScene.cpp" />
     <ClCompile Include="Source\Scene\CornellBoxScene.cpp" />
     <ClCompile Include="Source\Scene\CustomScene.cpp" />
   </ItemGroup>
@@ -38,7 +37,6 @@
     <ClInclude Include="Header\Light\RotatingLight.h" />
     <ClInclude Include="Header\pch_game.h" />
     <ClInclude Include="Header\Plane\BasePlane.h" />
-    <ClInclude Include="Header\Scene\BathroomScene.h" />
     <ClInclude Include="Header\Scene\CornellBoxScene.h" />
     <ClInclude Include="Header\Scene\CustomScene.h" />
   </ItemGroup>
@@ -133,8 +131,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\Build\Library\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libraryd.lib;dxgi.lib;assimp-vc142-mtd.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Build\Library\Debug;$(ProjectDir)..\ThirdParty\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libraryd.lib;dxgi.lib;pbrtParser.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -80,6 +80,9 @@
     <Filter Include="Source\Random">
       <UniqueIdentifier>{41361865-0252-47fd-bd48-d3da4f52c9ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\ThirdParty\pbrtParser">
+      <UniqueIdentifier>{4224bc87-bdb6-48d2-902e-a816c8331e22}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader\Include\DataTypeSharedBothHLSLAndCPP.h">
@@ -216,6 +219,12 @@
     </ClInclude>
     <ClInclude Include="Header\Random\RandomGenerator.h">
       <Filter>Source\Random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdPartyHeader\pbrtParser\math.h">
+      <Filter>Source\ThirdParty\pbrtParser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdPartyHeader\pbrtParser\Scene.h">
+      <Filter>Source\ThirdParty\pbrtParser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

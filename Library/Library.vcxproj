@@ -109,7 +109,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;assimp-vc142-mtd.lib;pbrtParser.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\ThirdParty\Debug</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
       <ShaderModel>6.3</ShaderModel>
@@ -151,7 +152,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;DirectXTK12.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;DirectXTK12.lib;pbrtParser.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\ThirdParty\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
@@ -198,6 +199,8 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\ThirdPartyHeader\pbrtParser\math.h" />
+    <ClInclude Include="..\ThirdPartyHeader\pbrtParser\Scene.h" />
     <ClInclude Include="Header\AccelerationStructure\AccelerationStructure.h" />
     <ClInclude Include="Header\AccelerationStructure\BottomLevelAccelerationStructure.h" />
     <ClInclude Include="Header\AccelerationStructure\TopLevelAccelerationStructure.h" />

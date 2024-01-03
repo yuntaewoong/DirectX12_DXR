@@ -1,8 +1,24 @@
+
 #include "pch.h"
 #include "Scene\Scene.h"
+#include "pbrtParser/Scene.h"
+
+
 namespace library
 {
+
     Scene::Scene() :
+        m_filePath(),
+        m_meshes(),
+        m_lights(),
+        m_materials(),
+        m_pointLightsConstantBuffer(nullptr),
+        m_pointLightMappedData(nullptr)
+    {}
+
+    Scene::Scene(const std::filesystem::path & filePath)
+        :
+        m_filePath(filePath),
         m_meshes(),
         m_lights(),
         m_materials(),
@@ -17,6 +33,15 @@ namespace library
     )
     {
         HRESULT hr = S_OK;
+        if (!m_filePath.empty())
+        {//pbrt ¾À ·Îµù
+            
+            
+            std::shared_ptr<pbrt::Scene> pbrtScene = pbrt::importPBRT(m_filePath.string());
+            int a = 1;
+        }
+
+
         for (UINT i = 0; i < m_meshes.size(); i++)
         {
             hr = m_meshes[i]->Initialize(pDevice);

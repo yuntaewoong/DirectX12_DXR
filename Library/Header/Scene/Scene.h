@@ -7,6 +7,7 @@
 #include "Texture\Material.h"
 #include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
 
+
 namespace library
 {
     /*
@@ -15,7 +16,8 @@ namespace library
     class Scene
     {
     public:
-        Scene();
+        Scene(); //기본 생성자 => empty scene
+        Scene(_In_ const std::filesystem::path& filePath); //경로가 주어진 생성자 => pre defined scene
         Scene(const Scene& other) = delete;
         Scene(Scene&& other) = delete;
         Scene& operator=(const Scene& other) = delete;
@@ -38,6 +40,7 @@ namespace library
         HRESULT createLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
         void updateLightConstantBuffer();
     private:
+        std::filesystem::path m_filePath;
         std::vector<std::shared_ptr<Mesh>> m_meshes;
         std::vector<std::shared_ptr<Model>> m_models;
         std::vector<std::shared_ptr<PointLight>> m_lights;  
