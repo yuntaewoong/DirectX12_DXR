@@ -40,10 +40,6 @@ namespace library
 	}
 	HRESULT DescriptorHeap::getLastAllocatedDescriptorGPUHandle(_Out_ CD3DX12_GPU_DESCRIPTOR_HANDLE* pGPUHandle)
 	{
-		if (m_numAllocated == 0)
-		{
-			return E_FAIL;//할당된 Descriptor가 존재하지 않음
-		}
 		pGPUHandle->InitOffsetted(
 			m_descriptorHeap->GetGPUDescriptorHandleForHeapStart(),
 			m_numAllocated,

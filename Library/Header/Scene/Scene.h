@@ -7,6 +7,11 @@
 #include "Texture\Material.h"
 #include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
 
+namespace pbrt
+{
+    struct Object;
+};
+
 
 namespace library
 {
@@ -37,6 +42,7 @@ namespace library
         void Update(_In_ FLOAT deltaTime);
         ComPtr<ID3D12Resource>& GetPointLightsConstantBuffer();
     private:
+        void traverse(std::shared_ptr<pbrt::Object> object);
         HRESULT createLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
         void updateLightConstantBuffer();
     private:

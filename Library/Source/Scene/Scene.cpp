@@ -7,7 +7,8 @@
 namespace library
 {
 
-    Scene::Scene() :
+    Scene::Scene() 
+        :
         m_filePath(),
         m_meshes(),
         m_lights(),
@@ -34,10 +35,9 @@ namespace library
     {
         HRESULT hr = S_OK;
         if (!m_filePath.empty())
-        {//pbrt 씬 로딩
-            
-            
+        {//파일경로가 주어졌다면, pbrt 씬 로딩
             std::shared_ptr<pbrt::Scene> pbrtScene = pbrt::importPBRT(m_filePath.string());
+            traverse(pbrtScene->world);
             
         }
 
@@ -126,6 +126,59 @@ namespace library
     ComPtr<ID3D12Resource>& Scene::GetPointLightsConstantBuffer()
     {
         return m_pointLightsConstantBuffer;
+    }
+    void Scene::traverse(std::shared_ptr<pbrt::Object> object)
+    {
+        
+        for (auto shape : object->shapes) 
+        {//shape: pbrt씬의 primitive구조
+            if (std::shared_ptr<pbrt::TriangleMesh> mesh = std::dynamic_pointer_cast<pbrt::TriangleMesh>(shape))
+            {//TriangleMesh로 다운캐스팅
+                m_meshes.push_back(
+                    std::make_shared<Mesh>(XMVectorZero(),XMVectorZero(),XMVectorSet(1.f,1.f,1.f,1.f), XMFLOAT4(1.f,1.f,1.f,.1f))
+                );
+                {//디버그용(모든 primitive에 기본 머테리얼 대응)
+                    m_materials.push_back(std::make_shared<Material>(MaterialType::PBR));
+                    m_meshes[m_meshes.size() - 1]->SetMaterial(m_materials[m_materials.size() - 1]);
+                }
+                {//vertex로딩
+                    for (UINT i = 0; i < static_cast<UINT>(mesh->vertex.size()); i++)
+                    {
+                        const pbrt::vec3f& pbrtPosition = mesh->vertex[i];
+                        //const pbrt::vec2f& pbrtUV = mesh->texcoord[i];//.pbrt파일은 텍스처가 없는경우 uv값이 주어지지 않음
+                        const pbrt::vec3f& pbrtNormal = mesh->normal[i];
+                        Vertex vertex =
+                        {
+                            .position = XMFLOAT3(pbrtPosition.x, pbrtPosition.y, pbrtPosition.z),
+                            .uv = XMFLOAT2(0.f, 0.f),
+                            .normal = XMFLOAT3(pbrtNormal.x, pbrtNormal.y, pbrtNormal.z),
+                            .tangent = XMFLOAT3(0.f,0.f,0.f),//
+                            .biTangent = XMFLOAT3(0.f,0.f,0.f)
+                        };//pbrt에는 노말맵계산을 위한 tangent,bitangent정보가 들어있지 않다
+                        m_meshes[m_meshes.size() - 1]->AddVertex(vertex);
+                    }
+                }
+                {//index로딩
+                    for (UINT i = 0u; i < static_cast<UINT>(mesh->index.size()); i++)
+                    {
+                        const pbrt::vec3i& pbrtIndex = mesh->index[i];
+                        Index aIndices[3] =
+                        {
+                            static_cast<Index>(pbrtIndex.x),
+                            static_cast<Index>(pbrtIndex.y),
+                            static_cast<Index>(pbrtIndex.z)
+                        };
+                        m_meshes[m_meshes.size() - 1]->AddIndex(aIndices[0]);
+                        m_meshes[m_meshes.size() - 1]->AddIndex(aIndices[1]);
+                        m_meshes[m_meshes.size() - 1]->AddIndex(aIndices[2]);
+                    }
+                }
+            }
+        }
+        for (auto inst : object->instances) 
+        {//Instance들에 대하여 재귀호출
+            traverse(inst->object);
+        }
     }
     HRESULT Scene::createLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
     {//light들에 대한 constant buffer만들기
