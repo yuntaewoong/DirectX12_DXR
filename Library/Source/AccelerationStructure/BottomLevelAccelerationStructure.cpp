@@ -50,8 +50,8 @@ namespace library
 				.Transform3x4 = 0,
 				.IndexFormat = DXGI_FORMAT_R16_UINT,
 				.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT,
-				.IndexCount = m_pMesh->GetNumIndices(),
-				.VertexCount = m_pMesh->GetNumVertices(),
+				.IndexCount = static_cast<UINT>(m_pMesh->GetIndices().size()),
+				.VertexCount = static_cast<UINT>(m_pMesh->GetVertices().size()),
 				.IndexBuffer = m_pMesh->GetIndexBuffer()->GetGPUVirtualAddress(),
 				.VertexBuffer = {
 					.StartAddress = m_pMesh->GetVertexBuffer()->GetGPUVirtualAddress(),

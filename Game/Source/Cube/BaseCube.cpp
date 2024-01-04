@@ -8,34 +8,13 @@ BaseCube::BaseCube(
 	_In_ XMFLOAT4 color
 ) :
 	Mesh::Mesh(location,rotation,scale,color)
-{}
-HRESULT BaseCube::Initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
 {
-	HRESULT hr = S_OK;
-	hr = Mesh::initialize(pDevice);
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-	return hr;
+	for (int i = 0; i < ARRAYSIZE(VERTICES); i++)
+		AddVertex(VERTICES[i]);
+	for (int i = 0; i < ARRAYSIZE(INDICES); i++)
+		AddIndex(INDICES[i]);
 }
 void BaseCube::Update(_In_ FLOAT deltaTime)
 {
 
-}
-UINT BaseCube::GetNumVertices() const
-{
-	return ARRAYSIZE(VERTICES);
-}
-UINT BaseCube::GetNumIndices() const
-{
-	return ARRAYSIZE(INDICES);
-}
-const Vertex* BaseCube::GetVertices() const
-{
-	return VERTICES;
-}
-const Index* BaseCube::GetIndices() const
-{
-	return INDICES;
 }

@@ -38,7 +38,7 @@ namespace library
             
             
             std::shared_ptr<pbrt::Scene> pbrtScene = pbrt::importPBRT(m_filePath.string());
-            int a = 1;
+            
         }
 
 
@@ -57,10 +57,10 @@ namespace library
             {
                 return hr;
             }
-            const std::vector<std::shared_ptr<ModelMesh>>& modelMeshes = m_models[i]->GetMeshes();
-            for (UINT i = 0u; i < modelMeshes.size(); i++)
-            {//임시구현: ModelMesh들을 Mesh배열에 추가
-                m_meshes.push_back(modelMeshes[i]);
+            const std::vector<std::shared_ptr<Mesh>>& meshes = m_models[i]->GetMeshes();
+            for (UINT i = 0u; i < meshes.size(); i++)
+            {//모델들을 구성하는 Mesh를 씬에 추가
+                m_meshes.push_back(meshes[i]);
             }
         }
         for (UINT i = 0; i < m_lights.size(); i++)

@@ -190,9 +190,6 @@
     <ClInclude Include="Header\Model\Model.h">
       <Filter>Source\Model</Filter>
     </ClInclude>
-    <ClInclude Include="Header\Model\ModelMesh.h">
-      <Filter>Source\Model</Filter>
-    </ClInclude>
     <ClInclude Include="Header\Imgui\imconfig.h">
       <Filter>Source\Imgui</Filter>
     </ClInclude>
@@ -307,9 +304,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Model\Model.cpp">
-      <Filter>Source\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Model\ModelMesh.cpp">
       <Filter>Source\Model</Filter>
     </ClCompile>
     <ClCompile Include="Source\Imgui\imgui.cpp">

@@ -1,4 +1,3 @@
-#include "Model\Model.h"
 #include "pch.h"
 #include "Model/Model.h"
 
@@ -18,7 +17,7 @@ namespace library
         _In_ XMFLOAT4 color
     )   :
         m_filePath(filePath),
-        m_meshes(std::vector<std::shared_ptr<ModelMesh>>()),
+        m_meshes(std::vector<std::shared_ptr<Mesh>>()),
         m_materials(std::vector<std::shared_ptr<Material>>()),
         m_pScene(nullptr),
         m_location(location),
@@ -68,7 +67,7 @@ namespace library
             m_meshes[i]->SetMaterial(m_materials[static_cast<UINT>(m_meshes.size() - 1)]);
         }
     }
-    const std::vector<std::shared_ptr<ModelMesh>>& Model::GetMeshes() const
+    const std::vector<std::shared_ptr<Mesh>>& Model::GetMeshes() const
     {
         return m_meshes;
     }
@@ -88,8 +87,7 @@ namespace library
         for (UINT i = 0u; i < pScene->mNumMeshes; ++i)
         {
             const aiMesh* pMesh = pScene->mMeshes[i];
-            initSingleMesh(i, pMesh);
-            hr = m_meshes[i]->Initialize(pDevice);
+            hr = initSingleMesh(pDevice,i, pMesh);
             if (FAILED(hr))
             {
                 return hr;
@@ -143,10 +141,10 @@ namespace library
 
         return hr;
     }
-    void Model::initSingleMesh(_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh)
+    HRESULT Model::initSingleMesh(_In_ const ComPtr<ID3D12Device>& pDevice,_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh)
     {
         m_meshes.push_back(
-            std::make_shared<ModelMesh>(m_location,m_rotation,m_scale,m_color)
+            std::make_shared<Mesh>(m_location,m_rotation,m_scale,m_color)
         );
         const aiVector3D zero3d(0.0f, 0.0f, 0.0f);
         for (UINT i = 0u; i < pMesh->mNumVertices; i++)
@@ -180,6 +178,12 @@ namespace library
             m_meshes[uMeshIndex]->AddIndex(aIndices[1]);
             m_meshes[uMeshIndex]->AddIndex(aIndices[2]);
         }
+        HRESULT hr = m_meshes[uMeshIndex]->Initialize(pDevice);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        return hr;
     }
 
     HRESULT Model::loadDiffuseTexture(

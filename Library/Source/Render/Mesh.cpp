@@ -13,12 +13,33 @@ namespace library
 		m_indexBuffer(nullptr),
         m_world(XMMatrixIdentity()),
         m_color(color),
-        m_material()
+        m_material(),
+        m_vertices(std::vector<Vertex>()),
+        m_indices(std::vector<Index>())
+        
 	{
         m_world = m_world *
             XMMatrixRotationRollPitchYawFromVector(rotation) *
             XMMatrixScalingFromVector(scale) *
             XMMatrixTranslationFromVector(location);
+    }
+    HRESULT Mesh::Initialize(const ComPtr<ID3D12Device>& pDevice)
+    {
+        HRESULT hr = S_OK;
+        hr = createVertexBuffer(pDevice);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = createIndexBuffer(pDevice);
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+		return hr;
+    }
+    void Mesh::Update(FLOAT deltaTime)
+    {
     }
     ComPtr<ID3D12Resource>& Mesh::GetVertexBuffer()
     {
@@ -27,6 +48,14 @@ namespace library
     ComPtr<ID3D12Resource>& Mesh::GetIndexBuffer()
     {
         return m_indexBuffer;
+    }
+    const std::vector<Vertex>& Mesh::GetVertices() const
+    {
+        return m_vertices;
+    }
+    const std::vector<Index>& Mesh::GetIndices() const
+    {
+        return m_indices;
     }
     XMMATRIX Mesh::GetWorldMatrix() const
     {
@@ -44,26 +73,19 @@ namespace library
     {
         m_material = pMaterial;
     }
-    HRESULT Mesh::initialize(_In_ const ComPtr<ID3D12Device>& pDevice)
-	{
-		HRESULT hr = S_OK;
-        hr = createVertexBuffer(pDevice);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = createIndexBuffer(pDevice);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-		return hr;
-	}
+    void Mesh::AddVertex(Vertex vertex)
+    {
+        m_vertices.push_back(vertex);
+    }
+    void Mesh::AddIndex(Index index)
+    {
+        m_indices.push_back(index);
+    }
 	HRESULT Mesh::createVertexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
         HRESULT hr = S_OK;
-        const Vertex* triangleVertices = GetVertices();
-        const UINT vertexBufferSize = sizeof(Vertex) * GetNumVertices();
+        const Vertex* triangleVertices = GetVertices().data();
+        const UINT vertexBufferSize = sizeof(Vertex) * static_cast<UINT>(GetVertices().size());
 
         //현재 heap type을 upload로 한 상태로 vertex buffer를 gpu메모리에 생성하는데, 이는 좋지 않은 방법
         //GPU가 접근할때마다 마샬링이 일어난다고 마소직원이 주석을 남김
@@ -92,8 +114,8 @@ namespace library
 	HRESULT Mesh::createIndexBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
 	{
         HRESULT hr = S_OK;
-        const Index* indices = GetIndices();
-        const UINT indexBufferSize = sizeof(Index) * GetNumIndices();
+        const Index* indices = GetIndices().data();
+        const UINT indexBufferSize = sizeof(Index) * static_cast<UINT>(GetIndices().size());
 
         CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);//heap type은 upload
         D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);

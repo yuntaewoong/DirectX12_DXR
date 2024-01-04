@@ -1,6 +1,6 @@
 #pragma once
 #include "Common/Common.h"
-#include "Model\ModelMesh.h"
+#include "Render\Mesh.h"
 #include "Texture\Material.h"
 
 struct aiScene;
@@ -42,7 +42,7 @@ namespace library
         );
         void Update(_In_ FLOAT deltaTime);
         void ForceMaterial(_In_ const std::shared_ptr<Material>& material);
-        const std::vector<std::shared_ptr<ModelMesh>>& GetMeshes() const;
+        const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const;
     private:
         void setMeshes2Materials(_In_ const aiScene* pScene);
         HRESULT initAllMeshes(
@@ -63,7 +63,11 @@ namespace library
             _In_ const aiScene* pScene,
             _In_ const std::filesystem::path& filePath
         );
-        virtual void initSingleMesh(_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh);
+        HRESULT initSingleMesh(
+            _In_ const ComPtr<ID3D12Device>& pDevice,
+            _In_ UINT uMeshIndex,
+            _In_ const aiMesh* pMesh
+        );
         HRESULT loadDiffuseTexture(
             _In_ const ComPtr<ID3D12Device>& pDevice,
             _In_ const ComPtr<ID3D12CommandQueue>& pCommandQueue,
@@ -100,7 +104,7 @@ namespace library
         static std::unique_ptr<Assimp::Importer> sm_pImporter;
     private:
         std::filesystem::path m_filePath;
-        std::vector<std::shared_ptr<ModelMesh>> m_meshes;
+        std::vector<std::shared_ptr<Mesh>> m_meshes;
         std::vector<std::shared_ptr<Material>> m_materials;
         const aiScene* m_pScene;
         XMVECTOR m_location;

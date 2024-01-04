@@ -16,13 +16,7 @@ public:
 	BaseCube& operator=(BaseCube&& other) = delete;
 	~BaseCube() = default;
 
-	HRESULT Initialize(_In_ const ComPtr<ID3D12Device>& pDevice) override;
 	void Update(_In_ FLOAT deltaTime) override;
-	virtual UINT GetNumVertices() const override;
-	virtual UINT GetNumIndices() const override;
-protected:
-	const virtual Vertex* GetVertices() const override;
-	const virtual Index* GetIndices() const override;
 private:
 	static constexpr const Vertex VERTICES[] =
 	{

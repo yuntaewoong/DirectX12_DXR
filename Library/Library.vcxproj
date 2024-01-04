@@ -221,7 +221,6 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <ClInclude Include="Header\Imgui\imstb_truetype.h" />
     <ClInclude Include="Header\Light\PointLight.h" />
     <ClInclude Include="Header\Model\Model.h" />
-    <ClInclude Include="Header\Model\ModelMesh.h" />
     <ClInclude Include="Header\pch.h" />
     <ClInclude Include="Header\Random\RandomGenerator.h" />
     <ClInclude Include="Header\RaytracingPipelineStateObject\RaytracingPipelineStateObject.h" />
@@ -265,7 +264,6 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <ClCompile Include="Source\Imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\Light\PointLight.cpp" />
     <ClCompile Include="Source\Model\Model.cpp" />
-    <ClCompile Include="Source\Model\ModelMesh.cpp" />
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>

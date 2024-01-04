@@ -83,7 +83,7 @@ namespace library
     void RaytracingPipelineStateObject::createShaderConfigSubobject()
     {
         CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT* shaderConfig = m_stateObjectDesc.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-        UINT payloadSize = std::max(std::max(sizeof(RayPayload),sizeof(PathTracerRayPayload)), sizeof(ShadowRayPayload));   //  큰값을 할당
+        UINT payloadSize = static_cast<UINT>(std::max({ sizeof(RayPayload),sizeof(PathTracerRayPayload), sizeof(ShadowRayPayload) }));   //  큰값을 할당
         UINT attributeSize = sizeof(XMFLOAT2);                                  //  barycentrics
         shaderConfig->Config(payloadSize, attributeSize);                       //  payload, attribute사이즈 정의(셰이더에서 인자로 사용됨)
     }
