@@ -135,7 +135,7 @@ namespace library
             if (std::shared_ptr<pbrt::TriangleMesh> mesh = std::dynamic_pointer_cast<pbrt::TriangleMesh>(shape))
             {//TriangleMesh로 다운캐스팅
                 m_meshes.push_back(
-                    std::make_shared<Mesh>(XMVectorZero(),XMVectorZero(),XMVectorSet(1.f,1.f,1.f,1.f), XMFLOAT4(1.f,1.f,1.f,.1f))
+                    std::make_shared<Mesh>(XMVectorZero(),XMVectorZero(),XMVectorSet(1.f,1.f,1.f,1.f), XMFLOAT4(1.f,1.f,0.f,.1f))
                 );
                 {//디버그용(모든 primitive에 기본 머테리얼 대응)
                     m_materials.push_back(std::make_shared<Material>(MaterialType::PBR));
