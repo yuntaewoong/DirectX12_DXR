@@ -9,8 +9,9 @@ This application is DirectX12 Toy Renderer Using basic DXR Ray tracing
 ```
 git clone repository
 ```
-2. Open ```DirectX12_DXR.sln```
-3. Build And Run(RTX Graphic Hardware Required)
+2. Run PowerShell Script `Setup.ps1`  
+3. Open ```DirectX12_DXR.sln```
+4. Build And Run(RTX Graphic Hardware Required)
 
 # Control
 `w` : front  
