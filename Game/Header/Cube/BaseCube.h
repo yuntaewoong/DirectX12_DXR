@@ -7,8 +7,7 @@ public:
 	BaseCube(
 		_In_ XMVECTOR location,
 		_In_ XMVECTOR rotation,
-		_In_ XMVECTOR scale,
-		_In_ XMFLOAT4 color
+		_In_ XMVECTOR scale
 	);
 	BaseCube(const BaseCube& other) = delete;
 	BaseCube(BaseCube&& other) = delete;

@@ -6,13 +6,11 @@ namespace library
     Mesh::Mesh(
         _In_ XMVECTOR location,
         _In_ XMVECTOR rotation,
-        _In_ XMVECTOR scale,
-        _In_ XMFLOAT4 color
+        _In_ XMVECTOR scale
     ) :
 		m_vertexBuffer(nullptr),
 		m_indexBuffer(nullptr),
         m_world(XMMatrixIdentity()),
-        m_color(color),
         m_material(),
         m_vertices(std::vector<Vertex>()),
         m_indices(std::vector<Index>())
@@ -60,10 +58,6 @@ namespace library
     XMMATRIX Mesh::GetWorldMatrix() const
     {
         return m_world;
-    }
-    XMFLOAT4 Mesh::GetColor() const
-    {
-        return m_color;
     }
     const std::shared_ptr<Material>& Mesh::GetMaterial() const
     {

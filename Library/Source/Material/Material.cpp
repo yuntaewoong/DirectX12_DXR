@@ -1,15 +1,15 @@
 #include "pch.h"
-#include "Texture\Material.h"
+#include "Material\Material.h"
 
 namespace library
 {
-	Material::Material(_In_ MaterialType::Enum materialType) :
-		m_materialType(materialType),
-		m_diffuseTexture(nullptr),
+	Material::Material() :
+		m_albedoTexture(nullptr),
 		m_normalTexture(nullptr),
 		m_specularTexture(nullptr),
 		m_roughnessTexture(nullptr),
 		m_metallicTexture(nullptr),
+		m_albedo(XMFLOAT4(1.0f,20.f/255.f,147.f/255.f,1.0f)),
 		m_reflectivity(0.f),
 		m_roughness(0.5f),
 		m_metallic(0.f)
@@ -22,9 +22,9 @@ namespace library
 	)
 	{
 		HRESULT hr = S_OK;
-		if (m_diffuseTexture)
+		if (m_albedoTexture)
 		{
-			hr = m_diffuseTexture->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
+			hr = m_albedoTexture->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
 			if (FAILED(hr))
 			{
 				return hr;
@@ -65,9 +65,9 @@ namespace library
 		return hr;
 	}
 
-	void Material::SetDiffuseTexture(_In_ const std::shared_ptr<Texture>& diffuse)
+	void Material::SetAlbedoTexture(_In_ const std::shared_ptr<Texture>& diffuse)
 	{
-		m_diffuseTexture = diffuse;
+		m_albedoTexture = diffuse;
 	}
 	void Material::SetNormalTexture(_In_ const std::shared_ptr<Texture>& normal)
 	{
@@ -97,9 +97,9 @@ namespace library
 	{
 		m_metallic = metallic;
 	}
-	const std::shared_ptr<Texture> Material::GetDiffuseTexture() const
+	const std::shared_ptr<Texture> Material::GetAlbedoTexture() const
 	{
-		return m_diffuseTexture;
+		return m_albedoTexture;
 	}
 	const std::shared_ptr<Texture> Material::GetNormalTexture() const
 	{
@@ -117,9 +117,9 @@ namespace library
 	{
 		return m_metallicTexture;
 	}
-	MaterialType::Enum Material::GetMaterialType() const
+	XMFLOAT4 Material::GetAlbedo() const
 	{
-		return m_materialType;
+		return m_albedo;
 	}
 	FLOAT Material::GetReflectivity() const
 	{
@@ -133,9 +133,9 @@ namespace library
 	{
 		return m_metallic;
 	}
-	BOOL Material::HasDiffuseTexture() const
+	BOOL Material::HasAlbedoTexture() const
 	{
-		return m_diffuseTexture ? TRUE : FALSE;
+		return m_albedoTexture ? TRUE : FALSE;
 	}
 	BOOL Material::HasNormalTexture() const
 	{

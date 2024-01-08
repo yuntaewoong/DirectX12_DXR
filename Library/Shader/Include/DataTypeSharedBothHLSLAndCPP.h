@@ -50,12 +50,11 @@ struct MeshConstantBuffer
 {
     XMMATRIX world;//float(32bit)가 16개 -> DWORD 16개필요
     XMFLOAT4 albedo;//float(32bit)가 4개 -> DWORD 4개 필요
-    UINT hasDiffuseTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
+    UINT hasAlbedoTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     UINT hasNormalTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     UINT hasSpecularTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     UINT hasRoughnessTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     UINT hasMetallicTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
-    UINT materialType;//MaterialType::Enum자료형을 UINT로 표현, 32bit가 1개 -> DWORD 1개 필요
     FLOAT reflectivity;//1이면 거울,0이면 무반사, 32bit가 1개 -> DWORD 1개 필요
     FLOAT roughness;//거친정도, 32bit가 1개 -> DWORD 1개 필요
     FLOAT metallic;//금속인 정도, 32bit가 1개 -> DWORD 1개 필요
@@ -91,14 +90,6 @@ struct RTAORayPayload
 {
     FLOAT tHit; // at + b직선 방정식의 t값
 };
-
-namespace MaterialType
-{
-    enum Enum {
-        Phong = 0,
-        PBR
-    };
-}
 
 
 namespace RayType 

@@ -42,10 +42,9 @@ namespace library
             .cb = {
                 .world = XMMATRIX(),
                 .albedo = XMFLOAT4(0.0f,1.0f,0.0f,1.0f),
-                .hasDiffuseTexture = 0,
+                .hasAlbedoTexture = 0,
                 .hasNormalTexture = 0,
                 .hasSpecularTexture = 0,
-                .materialType = static_cast<UINT>(MaterialType::Phong),
                 .reflectivity = 0.f,
                 .roughness = 0.5f,
                 .metallic = 0.f
@@ -59,22 +58,21 @@ namespace library
         for (UINT i = 0; i < meshes.size(); i++)
         {
             rootArgument.cb.world = XMMatrixTranspose(meshes[i]->GetWorldMatrix());
-            rootArgument.cb.albedo = meshes[i]->GetColor();
+            rootArgument.cb.albedo = meshes[i]->GetMaterial()->GetAlbedo();
             rootArgument.cb.reflectivity = meshes[i]->GetMaterial()->GetReflectivity();
             rootArgument.cb.roughness = meshes[i]->GetMaterial()->GetRoughness();
             rootArgument.cb.metallic = meshes[i]->GetMaterial()->GetMetallic();
             rootArgument.vbGPUAddress = meshes[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = meshes[i]->GetIndexBuffer()->GetGPUVirtualAddress();
-            rootArgument.cb.hasDiffuseTexture = 0u;
+            rootArgument.cb.hasAlbedoTexture = 0u;
             rootArgument.cb.hasNormalTexture = 0u;
             rootArgument.cb.hasSpecularTexture = 0u;
             rootArgument.cb.hasRoughnessTexture = 0u;
             rootArgument.cb.hasMetallicTexture = 0u;
-            rootArgument.cb.materialType = static_cast<UINT>(meshes[i]->GetMaterial()->GetMaterialType());
-            if (meshes[i]->GetMaterial()->HasDiffuseTexture())
+            if (meshes[i]->GetMaterial()->HasAlbedoTexture())
             {
-                rootArgument.cb.hasDiffuseTexture = 1u;
-                rootArgument.diffuseTextureDescriptorHandle = meshes[i]->GetMaterial()->GetDiffuseTexture()->GetDescriptorHandle();
+                rootArgument.cb.hasAlbedoTexture = 1u;
+                rootArgument.diffuseTextureDescriptorHandle = meshes[i]->GetMaterial()->GetAlbedoTexture()->GetDescriptorHandle();
             }
             if (meshes[i]->GetMaterial()->HasNormalTexture())
             {

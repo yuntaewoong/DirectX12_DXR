@@ -13,8 +13,7 @@ namespace library
         _In_ const std::filesystem::path& filePath,
         _In_ XMVECTOR location,
         _In_ XMVECTOR rotation,
-        _In_ XMVECTOR scale,
-        _In_ XMFLOAT4 color
+        _In_ XMVECTOR scale
     )   :
         m_filePath(filePath),
         m_meshes(std::vector<std::shared_ptr<Mesh>>()),
@@ -22,8 +21,7 @@ namespace library
         m_pScene(nullptr),
         m_location(location),
         m_rotation(rotation),
-        m_scale(scale),
-        m_color(color)
+        m_scale(scale)
     {}
     HRESULT Model::Initialize(
         _In_ const ComPtr<ID3D12Device>& pDevice,
@@ -135,7 +133,7 @@ namespace library
         for (UINT i = 0u; i < pScene->mNumMaterials; ++i)
         {
             const aiMaterial* pMaterial = pScene->mMaterials[i];
-            m_materials.push_back(std::make_shared<Material>(MaterialType::Phong));
+            m_materials.push_back(std::make_shared<Material>());
             loadTextures(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, i);
         }
 
@@ -144,7 +142,7 @@ namespace library
     HRESULT Model::initSingleMesh(_In_ const ComPtr<ID3D12Device>& pDevice,_In_ UINT uMeshIndex, _In_ const aiMesh* pMesh)
     {
         m_meshes.push_back(
-            std::make_shared<Mesh>(m_location,m_rotation,m_scale,m_color)
+            std::make_shared<Mesh>(m_location,m_rotation,m_scale)
         );
         const aiVector3D zero3d(0.0f, 0.0f, 0.0f);
         for (UINT i = 0u; i < pMesh->mNumVertices; i++)
@@ -196,7 +194,7 @@ namespace library
     )
     {
         HRESULT hr = S_OK;
-        m_materials[uIndex]->SetDiffuseTexture(nullptr);
+        m_materials[uIndex]->SetAlbedoTexture(nullptr);
 
         if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
         {
@@ -213,9 +211,9 @@ namespace library
 
                 std::filesystem::path fullPath = parentDirectory / szPath;
 
-                m_materials[uIndex]->SetDiffuseTexture(std::make_shared<Texture>(fullPath));
+                m_materials[uIndex]->SetAlbedoTexture(std::make_shared<Texture>(fullPath));
 
-                hr = m_materials[uIndex]->GetDiffuseTexture()->Initialize(pDevice,pCommandQueue,cbvSrvUavDescriptorHeap);
+                hr = m_materials[uIndex]->GetAlbedoTexture()->Initialize(pDevice,pCommandQueue,cbvSrvUavDescriptorHeap);
                 if (FAILED(hr))
                 {
                     OutputDebugString(L"Error loading diffuse texture \"");

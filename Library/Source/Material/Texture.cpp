@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Texture\Texture.h"
+#include "Material\Texture.h"
 #include "ThirdPartyHeader\DDSTextureLoader.h"
 #include "ThirdPartyHeader\WICTextureLoader.h"
 #include "ThirdPartyHeader\ResourceUploadBatch.h"

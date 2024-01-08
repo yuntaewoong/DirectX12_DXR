@@ -53,9 +53,6 @@
     <Filter Include="Source\RaytracingPipelineStateObject">
       <UniqueIdentifier>{e8060c37-ddaf-482d-bf29-92da75fb5825}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Texture">
-      <UniqueIdentifier>{c908750f-be0d-46c8-8ce8-f838bb97d79b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\DescriptorHeap">
       <UniqueIdentifier>{46883919-04a4-470b-90a3-90540355e85c}</UniqueIdentifier>
     </Filter>
@@ -82,6 +79,9 @@
     </Filter>
     <Filter Include="Source\ThirdParty\pbrtParser">
       <UniqueIdentifier>{4224bc87-bdb6-48d2-902e-a816c8331e22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Material">
+      <UniqueIdentifier>{c908750f-be0d-46c8-8ce8-f838bb97d79b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -154,12 +154,6 @@
     <ClInclude Include="Header\ShaderTable\ShaderTable.h">
       <Filter>Source\ShaderTable</Filter>
     </ClInclude>
-    <ClInclude Include="Header\Texture\Material.h">
-      <Filter>Source\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="Header\Texture\Texture.h">
-      <Filter>Source\Texture</Filter>
-    </ClInclude>
     <ClInclude Include="Header\Window\BaseWindow.h">
       <Filter>Source\Window</Filter>
     </ClInclude>
@@ -223,6 +217,12 @@
     <ClInclude Include="..\ThirdPartyHeader\pbrtParser\Scene.h">
       <Filter>Source\ThirdParty\pbrtParser</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Material\Material.h">
+      <Filter>Source\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Material\Texture.h">
+      <Filter>Source\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -285,12 +285,6 @@
     <ClCompile Include="Source\RaytracingPipelineStateObject\RaytracingPipelineStateObject.cpp">
       <Filter>Source\RaytracingPipelineStateObject</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Texture\Texture.cpp">
-      <Filter>Source\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Texture\Material.cpp">
-      <Filter>Source\Texture</Filter>
-    </ClCompile>
     <ClCompile Include="Source\DescriptorHeap\DescriptorHeap.cpp">
       <Filter>Source\DescriptorHeap</Filter>
     </ClCompile>
@@ -329,6 +323,12 @@
     </ClCompile>
     <ClCompile Include="Source\Random\RandomGenerator.cpp">
       <Filter>Source\Random</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Material\Material.cpp">
+      <Filter>Source\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Material\Texture.cpp">
+      <Filter>Source\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

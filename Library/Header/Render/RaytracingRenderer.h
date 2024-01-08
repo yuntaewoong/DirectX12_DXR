@@ -13,7 +13,7 @@
 #include "RootSignature\GlobalRootSignature.h"
 #include "RootSignature\LocalRootSignature.h"
 #include "RaytracingPipelineStateObject\RaytracingPipelineStateObject.h"
-#include "Texture\Texture.h"
+#include "Material\Texture.h"
 
 namespace library
 {

@@ -11,7 +11,7 @@
 //SRV
 StructuredBuffer<Vertex> l_vertices : register(t2, space0);
 ByteAddressBuffer l_indices : register(t3, space0);
-Texture2D l_diffuseTexture : register(t4);
+Texture2D l_albedoTexture : register(t4);
 Texture2D l_normalTexture : register(t5);
 Texture2D l_specularTexture : register(t6);
 Texture2D l_roughnessTexture : register(t7);
@@ -151,63 +151,41 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
     
     
     
-    if(l_meshCB.materialType == MaterialType::Phong)
-    {//PhongShading모델
-        float3 diffuse = l_meshCB.albedo.rgb;
-        float3 specular = float3(1.f, 1.f, 1.f);
-        if (l_meshCB.hasDiffuseTexture)
-        { 
-            diffuse = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
-        }
-        if (l_meshCB.hasSpecularTexture)
-        { 
-            specular = l_specularTexture.SampleLevel(l_sampler, triangleUV, 0).xyz;
-        }
-        float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
-        float3 pointToCamera = normalize(payload.camera - hitPosition);
-        float3 phongDiffuse = BxDF::BRDF::Diffuse::CalculatePhongDiffuse(diffuse, triangleNormal, randomVectorInHemisphere);
-        float3 phongSpecular = BxDF::BRDF::Specular::CalculatePhongSpecular(specular, triangleNormal, randomVectorInHemisphere, pointToCamera);
-        float3 color = saturate((diffuse + specular) * incomingLight.xyz /** lightAttenuation*/);
-        payload.camera = hitPosition;
-        payload.color = float4(color,1.f);
+    float3 diffuse = l_meshCB.albedo.rgb;
+    float roughness = l_meshCB.roughness;
+    float metallic = l_meshCB.metallic;
+    if (l_meshCB.hasAlbedoTexture)
+    { 
+        diffuse = l_albedoTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
     }
-    else if(l_meshCB.materialType == MaterialType::PBR)
-    {//PBR Shading 모델
-        float3 diffuse = l_meshCB.albedo.rgb;
-        float roughness = l_meshCB.roughness;
-        float metallic = l_meshCB.metallic;
-        if (l_meshCB.hasDiffuseTexture)
-        { 
-            diffuse = l_diffuseTexture.SampleLevel(l_sampler, triangleUV, 0).rgb;
-        }
-        if(l_meshCB.hasRoughnessTexture)
-        {
-            roughness = l_roughnessTexture.SampleLevel(l_sampler, triangleUV, 0).x;
-        }
-        if (l_meshCB.hasMetallicTexture)
-        {
-            metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).x;
-        }
-        float3 color = float3(0.f, 0.f, 0.f);
-        float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
-        float3 pointToCamera = normalize(payload.camera - hitPosition);
+    if(l_meshCB.hasRoughnessTexture)
+    {
+        roughness = l_roughnessTexture.SampleLevel(l_sampler, triangleUV, 0).x;
+    }
+    if (l_meshCB.hasMetallicTexture)
+    {
+        metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).x;
+    }
+    float3 color = float3(0.f, 0.f, 0.f);
+    float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
+    float3 pointToCamera = normalize(payload.camera - hitPosition);
         
         
-        float3 halfVector = normalize(randomVectorInHemisphere + pointToCamera);
-        diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);
-        float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
-        F0 = lerp(F0, diffuse, metallic);
-        float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
-        float3 kS = F; //Specular상수
-        float3 kD = float3(1.f, 1.f, 1.f) - kS; //Diffuse 상수
-        kD = kD * (1-metallic);//Diffuse에 metallic반영
-        float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(triangleNormal, pointToCamera, halfVector, randomVectorInHemisphere, roughness, F);
-        float NdotL = max(dot(triangleNormal, randomVectorInHemisphere), 0.0);
-        color += (kD *(diffuse + specular)) * incomingLight.xyz /** lightAttenuation*/ * NdotL;
-        {//감마변환    
-            color = color / (color + float3(1.0f, 1.0f, 1.0f));
-            color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
-        }
-        payload.color = float4(color, 1);
-    }
+    float3 halfVector = normalize(randomVectorInHemisphere + pointToCamera);
+    diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);
+    float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
+    F0 = lerp(F0, diffuse, metallic);
+    float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
+    float3 kS = F; //Specular상수
+    float3 kD = float3(1.f, 1.f, 1.f) - kS; //Diffuse 상수
+    kD = kD * (1-metallic);//Diffuse에 metallic반영
+    float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(triangleNormal, pointToCamera, halfVector, randomVectorInHemisphere, roughness, F);
+    float NdotL = max(dot(triangleNormal, randomVectorInHemisphere), 0.0);
+    color += (kD *diffuse + specular) * incomingLight.xyz /** lightAttenuation*/ * NdotL;
+    //{//감마변환    
+    //    color = color / (color + float3(1.0f, 1.0f, 1.0f));
+    //    color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+    //}
+    payload.color = float4(color, 1);
+    
 }

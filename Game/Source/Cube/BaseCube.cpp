@@ -4,10 +4,9 @@
 BaseCube::BaseCube(
 	_In_ XMVECTOR location,
 	_In_ XMVECTOR rotation,
-	_In_ XMVECTOR scale,
-	_In_ XMFLOAT4 color
+	_In_ XMVECTOR scale
 ) :
-	Mesh::Mesh(location,rotation,scale,color)
+	Mesh::Mesh(location,rotation,scale)
 {
 	for (int i = 0; i < ARRAYSIZE(VERTICES); i++)
 		AddVertex(VERTICES[i]);

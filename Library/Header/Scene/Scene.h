@@ -4,13 +4,21 @@
 #include "Render\Mesh.h"
 #include "Model\Model.h"
 #include "Light\PointLight.h"
-#include "Texture\Material.h"
+#include "Material\Material.h"
 #include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
+#include "pbrtParser/Scene.h"
 
-namespace pbrt
-{
-    struct Object;
-};
+//namespace pbrt
+//{
+//    
+//    struct Object;
+//    struct TriangleMesh;
+//    namespace math
+//    {
+//        struct vec3f;
+//    }
+//    
+//};
 
 
 namespace library
@@ -42,7 +50,17 @@ namespace library
         void Update(_In_ FLOAT deltaTime);
         ComPtr<ID3D12Resource>& GetPointLightsConstantBuffer();
     private:
-        void traverse(std::shared_ptr<pbrt::Object> object);
+        void loadPBRT(_In_ const std::shared_ptr<const pbrt::Object> object);
+        void loadPBRTMaterial(_In_ const std::shared_ptr<const pbrt::Material> material);
+        void loadPBRTTriangleMesh(_In_ const std::shared_ptr<const pbrt::TriangleMesh> mesh);
+        void loadPBRTTriangleMeshVertices(
+            _In_ const std::vector<pbrt::vec3f>& vertexPositions,
+            _In_ const std::vector<pbrt::vec2f>& vertexUV,
+            _In_ const std::vector<pbrt::vec3f>& vertexNormals
+        );
+        void loadPBRTTriangleMeshIndices(
+            _In_ const std::vector<pbrt::vec3i>& indices
+        );
         HRESULT createLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
         void updateLightConstantBuffer();
     private:

@@ -1,7 +1,7 @@
 #pragma once
 #include "Common/Common.h"
 #include "Render\Mesh.h"
-#include "Texture\Material.h"
+#include "Material\Material.h"
 
 struct aiScene;
 struct aiMesh;
@@ -26,8 +26,7 @@ namespace library
             _In_ const std::filesystem::path& filePath,
             _In_ XMVECTOR location,
             _In_ XMVECTOR rotation,
-            _In_ XMVECTOR scale,
-            _In_ XMFLOAT4 color
+            _In_ XMVECTOR scale
         );
         Model(const Model& other) = delete;
         Model(Model&& other) = delete;
@@ -110,6 +109,5 @@ namespace library
         XMVECTOR m_location;
         XMVECTOR m_rotation;
         XMVECTOR m_scale;
-        XMFLOAT4 m_color;
     };
 }
