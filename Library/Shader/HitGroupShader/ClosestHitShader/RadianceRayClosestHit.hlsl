@@ -140,6 +140,7 @@ void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleInt
     {
         float3 pointToLight = normalize(g_lightCB.position[i].xyz - hitPosition);
         float3 lightColor = float3(1.f, 1.f, 1.f);
+        float lightIntensity = g_lightCB.lumen[i].r / (4 * PI * PI); 
         float lightDistance = sqrt(dot(g_lightCB.position[i].xyz - hitPosition, g_lightCB.position[i].xyz - hitPosition));
         float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         float3 halfVector = normalize(pointToLight + pointToCamera);
@@ -153,13 +154,13 @@ void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleInt
         float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(triangleNormal, pointToCamera, halfVector, pointToLight, roughness, F);
         float shadow = TraceShadowRay(hitPosition, g_lightCB.position[i], payload.recursionDepth);
         float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
-        color += (1.f-shadow) * (kD * diffuse + specular) * lightColor * lightAttenuation * NdotL;
+        color += (1.f-shadow) * (kD * diffuse + specular) * lightColor *lightIntensity* lightAttenuation * NdotL;
     }
     color += ambientColor;
-    //{//감마변환    
-    //    color = color / (color + 1.0f);
-    //    color = pow(color, 1.0f / 2.2f);
-    //}
+    
+    
     payload.color = float4(color, 1);
+    
+    
     
 }

@@ -44,6 +44,7 @@ struct RandomConstantBuffer
 struct PointLightConstantBuffer
 {
     XMVECTOR position[NUM_LIGHT];
+    XMFLOAT4 lumen[NUM_LIGHT];//(Lumen,padding,padding,padding)
 };
 
 struct MeshConstantBuffer

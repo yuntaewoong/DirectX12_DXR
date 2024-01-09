@@ -78,8 +78,8 @@ CustomScene::CustomScene()
 	
 
 
-	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f));
-	std::shared_ptr<library::PointLight> light2 = std::make_shared<FixedLight>(XMVectorSet(3.f, 3.f, -5.f, 1.f));
+	std::shared_ptr<library::PointLight> light1 = std::make_shared<RotatingLight>(XMVectorSet(0.f, 5.f, -5.f,1.f),200.0f);
+	std::shared_ptr<library::PointLight> light2 = std::make_shared<FixedLight>(XMVectorSet(3.f, 3.f, -5.f, 1.f),300.0f);
 
 
 	std::filesystem::path projectDirPath;
@@ -90,6 +90,7 @@ CustomScene::CustomScene()
 		projectDirPath = projectDirString;
 	}
 	
+
 	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
 	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
 	
@@ -109,7 +110,7 @@ CustomScene::CustomScene()
 	{
 		for (UINT j = 0; j < 7u; j++)
 		{//i가 0이면 roughness 0, j가 0이면 metallic 0
-			pbrTestMaterials[i][j] = std::make_shared<library::Material>();
+			pbrTestMaterials[i][j] = std::make_shared<library::Material>(XMFLOAT4(1.0f,0.0f,0.0f,0.0f));
 			pbrTestMaterials[i][j]->SetRoughness(i / 7.f);
 			pbrTestMaterials[i][j]->SetMetallic(j / 7.f);
 		}

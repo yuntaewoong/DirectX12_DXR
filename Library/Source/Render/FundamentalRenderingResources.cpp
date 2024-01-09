@@ -335,7 +335,7 @@ namespace library
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {
             .Width = m_width,                                 //가로
             .Height = m_height,                               //세로
-            .Format = DXGI_FORMAT_R16G16B16A16_FLOAT,           //각 픽셀에 담을 데이터포맷
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,           //각 픽셀에 담을 데이터포맷
             .Stereo = false,                                //풀 스크린인가?
             .SampleDesc = {
                 .Count = 1u,

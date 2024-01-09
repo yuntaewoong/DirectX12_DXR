@@ -116,12 +116,7 @@ namespace library
         {
             m_lights[i]->Update(deltaTime);
         }
-        /*PointLightConstantBuffer cb = {};
-        for (UINT i = 0; i < m_lights.size(); i++)
-        {
-            cb.position[i] = m_lights[i]->GetPosition();
-        }
-        memcpy(m_pointLightMappedData, &cb, sizeof(cb));*/
+        updateLightConstantBuffer();
     }
     ComPtr<ID3D12Resource>& Scene::GetPointLightsConstantBuffer()
     {
@@ -235,6 +230,7 @@ namespace library
         for (UINT i = 0; i < m_lights.size(); i++)
         {
             cb.position[i] = m_lights[i]->GetPosition();
+            cb.lumen[i] = XMFLOAT4(m_lights[i]->GetLumen(),0.0f,0.0f,0.0f);
         }
         memcpy(m_pointLightMappedData, &cb, sizeof(cb));
     }

@@ -75,7 +75,7 @@ namespace library
         ImGui_ImplDX12_Init(
             m_dxrDevice.Get(),
             3,
-            DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT,
+            DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
             m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap().Get(),
             m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
             m_renderingResources.GetImguiDescriptorHeap().GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart()
@@ -360,7 +360,7 @@ namespace library
     {
         HRESULT hr = S_OK;\
         CD3DX12_RESOURCE_DESC uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-            DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT, 
+            DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM, 
             m_renderingResources.GetWidth(),
             m_renderingResources.GetHeight(),
             1, 1, 1, 0, 

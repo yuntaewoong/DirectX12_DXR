@@ -10,7 +10,7 @@ namespace library
 	class Material
 	{
 	public:
-		Material();
+		Material(_In_ XMFLOAT4 baseColor  = XMFLOAT4(1.0f,20.f/255.f,147.f/255.f,1.0f));
 		Material(const Material& other) = default;
 		Material(Material&& other) = default;
 		Material& operator=(const Material& other) = default;

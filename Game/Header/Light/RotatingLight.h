@@ -4,7 +4,7 @@
 class RotatingLight : public library::PointLight
 {
 public:
-	RotatingLight(_In_ XMVECTOR position);
+	RotatingLight(_In_ XMVECTOR position,_In_ FLOAT lumen);
 	RotatingLight(const RotatingLight& other) = delete;
 	RotatingLight(RotatingLight&& other) = delete;
 	RotatingLight& operator=(const RotatingLight& other) = delete;

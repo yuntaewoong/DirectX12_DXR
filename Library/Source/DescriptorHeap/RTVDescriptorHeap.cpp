@@ -17,7 +17,7 @@ namespace library
 		}
 		m_RTVCPUHandles.push_back(static_cast<D3D12_CPU_DESCRIPTOR_HANDLE>(rtvCPUHandle.ptr));
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-		rtvDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 		pDevice->CreateRenderTargetView(pRenderTarget.Get(), &rtvDesc, rtvCPUHandle);

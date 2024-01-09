@@ -3,13 +3,13 @@
 
 namespace library
 {
-	Material::Material() :
+	Material::Material(_In_ XMFLOAT4 baseColor) :
 		m_albedoTexture(nullptr),
 		m_normalTexture(nullptr),
 		m_specularTexture(nullptr),
 		m_roughnessTexture(nullptr),
 		m_metallicTexture(nullptr),
-		m_albedo(XMFLOAT4(1.0f,20.f/255.f,147.f/255.f,1.0f)),
+		m_albedo(baseColor),
 		m_reflectivity(0.f),
 		m_roughness(0.5f),
 		m_metallic(0.f)

@@ -4,7 +4,7 @@
 class FixedLight : public library::PointLight
 {
 public:
-	FixedLight(_In_ XMVECTOR position);
+	FixedLight(_In_ XMVECTOR position,_In_ FLOAT lumen);
 	FixedLight(const FixedLight& other) = delete;
 	FixedLight(FixedLight&& other) = delete;
 	FixedLight& operator=(const FixedLight& other) = delete;
