@@ -1,7 +1,8 @@
 #ifndef DATA_TYPE_SHARED_BOTH_HLSL_AND_CPP_H
 #define DATA_TYPE_SHARED_BOTH_HLSL_AND_CPP_H
 
-#define NUM_LIGHT 2 //빛 개수
+#define NUM_POINT_LIGHT_MAX 5 //point light 개수 최대값
+#define NUM_AREA_LIGHT_MAX 100 //Area Light개수 최대값
 #define MAX_RECURSION_DEPTH 20 //TraceRay재귀 호출 depth
 #define NUM_RTAO_RAY 4 // RTAO에 사용할 Ray수
 #define RTAO_RADIUS 0.2  // RTAO에 적용할 반구의 반지름
@@ -43,8 +44,18 @@ struct RandomConstantBuffer
 
 struct PointLightConstantBuffer
 {
-    XMVECTOR position[NUM_LIGHT];
-    XMFLOAT4 lumen[NUM_LIGHT];//(Lumen,padding,padding,padding)
+    XMVECTOR position[NUM_POINT_LIGHT_MAX];
+    XMFLOAT4 lumen[NUM_POINT_LIGHT_MAX];//(Lumen,padding,padding,padding), 밝기
+    UINT numPointLight;//point light 개수
+};
+
+struct AreaLightConstantBuffer
+{
+    XMVECTOR position[NUM_AREA_LIGHT_MAX];//area light의 world position
+    XMVECTOR normal[NUM_AREA_LIGHT_MAX];//area light이 바라보는 방향
+    XMVECTOR vertices[NUM_AREA_LIGHT_MAX][3];//area light를 구성하는 3개의 vertex정보
+
+    
 };
 
 struct MeshConstantBuffer
@@ -58,6 +69,7 @@ struct MeshConstantBuffer
     UINT hasMetallicTexture;//1이면 texture있음, 0이면 없음, 32bit가 1개 -> DWORD 1개 필요
     FLOAT roughness;//거친정도, 32bit가 1개 -> DWORD 1개 필요
     FLOAT metallic;//금속인 정도, 32bit가 1개 -> DWORD 1개 필요
+    FLOAT emission;//빛을 발하는 정도, 32bit가 1개 -> DWORD 1개 필요
 };
 
 struct Vertex

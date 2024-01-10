@@ -79,7 +79,7 @@ namespace library
                 return hr;
             }
         }
-        hr = createLightConstantBuffer(pDevice);
+        hr = createPointLightConstantBuffer(pDevice);
         if (FAILED(hr))
         {
             return hr;
@@ -116,7 +116,7 @@ namespace library
         {
             m_lights[i]->Update(deltaTime);
         }
-        updateLightConstantBuffer();
+        updatePointLightConstantBuffer();
     }
     ComPtr<ID3D12Resource>& Scene::GetPointLightsConstantBuffer()
     {
@@ -200,7 +200,7 @@ namespace library
             m_meshes[m_meshes.size() - 1]->AddIndex(aIndices[2]);
         }
     }
-    HRESULT Scene::createLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
+    HRESULT Scene::createPointLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
     {//light들에 대한 constant buffer만들기
         HRESULT hr = S_OK;
         const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
@@ -226,10 +226,10 @@ namespace library
         {
             return hr;
         }
-        updateLightConstantBuffer();
+        updatePointLightConstantBuffer();
         return hr;
     }
-    void Scene::updateLightConstantBuffer()
+    void Scene::updatePointLightConstantBuffer()
     {
         PointLightConstantBuffer cb = {};
         for (UINT i = 0; i < m_lights.size(); i++)
@@ -237,6 +237,7 @@ namespace library
             cb.position[i] = m_lights[i]->GetPosition();
             cb.lumen[i] = XMFLOAT4(m_lights[i]->GetLumen(),0.0f,0.0f,0.0f);
         }
+        cb.numPointLight = static_cast<UINT>(m_lights.size());
         memcpy(m_pointLightMappedData, &cb, sizeof(cb));
     }
 }

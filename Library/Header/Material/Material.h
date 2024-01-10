@@ -29,6 +29,7 @@ namespace library
 		void SetMetallicTexture(_In_ const std::shared_ptr<Texture>& metallic);
 		void SetRoughness(_In_ FLOAT roughness);
 		void SetMetallic(_In_ FLOAT metallic);
+		void SetEmission(_In_ FLOAT emission);
 		const std::shared_ptr<Texture> GetAlbedoTexture() const;
 		const std::shared_ptr<Texture> GetNormalTexture() const;
 		const std::shared_ptr<Texture> GetSpecularTexture() const;
@@ -37,6 +38,7 @@ namespace library
 		XMFLOAT4 GetAlbedo() const;
 		FLOAT GetRoughness() const;
 		FLOAT GetMetallic() const;
+		FLOAT GetEmission() const;
 		BOOL HasAlbedoTexture() const;
 		BOOL HasNormalTexture() const;
 		BOOL HasSpecularTexture() const;
@@ -51,5 +53,6 @@ namespace library
 		XMFLOAT4 m_albedo;//기본색상
 		FLOAT m_roughness;//거친정도
 		FLOAT m_metallic;//금속인 정도
+		FLOAT m_emission;//빛을 스스로 방출하는 정도
 	};
 }

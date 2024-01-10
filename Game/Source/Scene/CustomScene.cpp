@@ -89,7 +89,8 @@ CustomScene::CustomScene()
 		projectDirString.erase(projectDirString.size() - 2);// "\."제거
 		projectDirPath = projectDirString;
 	}
-	
+	std::shared_ptr<library::Material> emissiveMaterial = std::make_shared<library::Material>(XMFLOAT4(1.f,1.f,1.f,1.f));
+	emissiveMaterial->SetEmission(10.0f);
 
 	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
 	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path
@@ -151,18 +152,18 @@ CustomScene::CustomScene()
 		AddLight(light1);
 		AddLight(light2);
 
-		
-		AddMaterial(floorMaterial);
+		AddMaterial(emissiveMaterial);
 		AddMaterial(woodMaterial);
+		AddMaterial(floorMaterial);
 		AddMaterial(mirrorMaterial);
 		AddMaterial(ironPBRMaterial);
 	}
 	{//Mesh=>Material 대응 세팅
 		cube1->SetMaterial(woodMaterial);
-		cube2->SetMaterial(woodMaterial);
-		cube3->SetMaterial(woodMaterial);
+		cube2->SetMaterial(ironPBRMaterial);
+		cube3->SetMaterial(ironPBRMaterial);
 		cube4->SetMaterial(woodMaterial);
-		cube5->SetMaterial(woodMaterial);
+		cube5->SetMaterial(emissiveMaterial);
 		plane->SetMaterial(floorMaterial);
 		mirror->SetMaterial(mirrorMaterial);
 

@@ -4,9 +4,6 @@
 
 namespace library
 {
-    /*
-        PointLight의 Base 클래스
-    */
     class PointLight
     {
     public:

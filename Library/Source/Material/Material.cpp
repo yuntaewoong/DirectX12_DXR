@@ -11,7 +11,8 @@ namespace library
 		m_metallicTexture(nullptr),
 		m_albedo(baseColor),
 		m_roughness(0.0f),
-		m_metallic(0.0f)
+		m_metallic(0.0f),
+		m_emission(0.0f)
 	{}
 
 	HRESULT Material::Initialize(
@@ -92,6 +93,10 @@ namespace library
 	{
 		m_metallic = metallic;
 	}
+	void Material::SetEmission(_In_ FLOAT emission)
+	{
+		m_emission = emission;
+	}
 	const std::shared_ptr<Texture> Material::GetAlbedoTexture() const
 	{
 		return m_albedoTexture;
@@ -123,6 +128,10 @@ namespace library
 	FLOAT Material::GetMetallic() const
 	{
 		return m_metallic;
+	}
+	FLOAT Material::GetEmission() const
+	{
+		return m_emission;
 	}
 	BOOL Material::HasAlbedoTexture() const
 	{

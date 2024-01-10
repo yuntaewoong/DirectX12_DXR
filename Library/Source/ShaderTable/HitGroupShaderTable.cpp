@@ -45,8 +45,9 @@ namespace library
                 .hasAlbedoTexture = 0,
                 .hasNormalTexture = 0,
                 .hasSpecularTexture = 0,
-                .roughness = 0.5f,
-                .metallic = 0.f
+                .roughness = 0.f,
+                .metallic = 0.f,
+                .emission = 0.f
             },
             .vbGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
             .ibGPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(),
@@ -60,6 +61,7 @@ namespace library
             rootArgument.cb.albedo = meshes[i]->GetMaterial()->GetAlbedo();
             rootArgument.cb.roughness = meshes[i]->GetMaterial()->GetRoughness();
             rootArgument.cb.metallic = meshes[i]->GetMaterial()->GetMetallic();
+            rootArgument.cb.emission = meshes[i]->GetMaterial()->GetEmission();
             rootArgument.vbGPUAddress = meshes[i]->GetVertexBuffer()->GetGPUVirtualAddress();
             rootArgument.ibGPUAddress = meshes[i]->GetIndexBuffer()->GetGPUVirtualAddress();
             rootArgument.cb.hasAlbedoTexture = 0u;

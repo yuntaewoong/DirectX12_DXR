@@ -66,6 +66,14 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
 [shader("closesthit")]
 void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
+    if(l_meshCB.emission > 0)
+    {//Emissive속성의 material은 광원으로 취급하기에 바로 색상 리턴
+        payload.color = l_meshCB.emission;
+        return;
+    }
+     
+
+
     float3 hitPosition = HitWorldPosition();
     uint indexSizeInBytes = 2; //index는 16비트
     uint indicesPerTriangle = 3; //삼각형은 Vertex가 3개
@@ -134,9 +142,9 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
     {
         metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).x;
     }
-    float3 color = float3(0.f, 0.f, 0.f);
-    [unroll(NUM_LIGHT)]
-    for (uint i = 0; i < NUM_LIGHT; i++)
+    float3 color = 0.f;
+    
+    for (uint i = 0; i < g_lightCB.numPointLight; i++)
     {//직접광에 의한 Lighting
         float3 pointToLight = normalize(g_lightCB.position[i].xyz - hitPosition);
         float3 lightColor = float3(1.f, 1.f, 1.f);

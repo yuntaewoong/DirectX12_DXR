@@ -8,19 +8,6 @@
 #include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
 #include "pbrtParser/Scene.h"
 
-//namespace pbrt
-//{
-//    
-//    struct Object;
-//    struct TriangleMesh;
-//    namespace math
-//    {
-//        struct vec3f;
-//    }
-//    
-//};
-
-
 namespace library
 {
     /*
@@ -61,8 +48,8 @@ namespace library
         void loadPBRTTriangleMeshIndices(
             _In_ const std::vector<pbrt::vec3i>& indices
         );
-        HRESULT createLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
-        void updateLightConstantBuffer();
+        HRESULT createPointLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
+        void updatePointLightConstantBuffer();
     private:
         std::filesystem::path m_filePath;
         std::vector<std::shared_ptr<Mesh>> m_meshes;
