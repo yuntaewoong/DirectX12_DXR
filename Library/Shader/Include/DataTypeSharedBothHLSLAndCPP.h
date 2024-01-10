@@ -75,7 +75,7 @@ struct PathTracerRayPayload
     UINT recursionDepth;
 };
 
-struct RayPayload
+struct RealTimeRayPayload
 {
     XMFLOAT4 color;
     UINT recursionDepth;//얼마나 재귀호출되었는가?
@@ -95,7 +95,7 @@ struct RTAORayPayload
 namespace RayType 
 {
     enum Enum {
-        Radiance = 0,   
+        RealTime = 0,   
         Shadow,
         RTAO,
         PathTracer
@@ -107,14 +107,14 @@ namespace TraceRayParameters
 {
     static const UINT InstanceMask = ~0; 
     static const UINT HitGroupOffset[RayType::Count] = {
-        0, // Radiance ray
+        0, // RealTime ray
         1, // Shadow ray
         2, // RTAO ray
         3, // PathTracer ray
     };
     static const UINT GeometryStride = RayType::Count;
     static const UINT MissShaderOffset[RayType::Count] = {
-        0, // Radiance ray
+        0, // RealTime ray
         1, // Shadow ray
         2, // RTAO ray
         3, // PathTracer ray

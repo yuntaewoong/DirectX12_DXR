@@ -332,16 +332,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shader\RayGenerationShader\RadianceRayGeneration.hlsl">
+    <FxCompile Include="Shader\RayGenerationShader\RealTimeRayGeneration.hlsl">
       <Filter>Shader\RayGenerationShader</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RadianceRayClosestHit.hlsl">
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RealTimeRayClosestHit.hlsl">
       <Filter>Shader\HitGroupShader\ClosestHitShader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\ShadowRayClosestHit.hlsl">
       <Filter>Shader\HitGroupShader\ClosestHitShader</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\MissShader\RadianceRayMiss.hlsl">
+    <FxCompile Include="Shader\MissShader\RealTimeRayMiss.hlsl">
       <Filter>Shader\MissShader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MissShader\ShadowRayMiss.hlsl">
@@ -367,7 +367,7 @@
     <None Include="Shader\Include\HLSLCommon.hlsli">
       <Filter>Shader\Include</Filter>
     </None>
-    <None Include="Shader\Include\RadianceRayTrace.hlsli">
+    <None Include="Shader\Include\RealTimeRayTrace.hlsli">
       <Filter>Shader\Include</Filter>
     </None>
     <None Include="Shader\Include\ShadowRayTrace.hlsli">

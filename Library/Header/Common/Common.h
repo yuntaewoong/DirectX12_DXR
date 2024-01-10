@@ -32,28 +32,28 @@ namespace library
     =====================================*/
     constexpr LPCWSTR RAY_GEN_SHADER_NAMES[RayGenType::Count] = 
     {
-        L"RadianceRaygenShader",
+        L"RealTimeRaygenShader",
         L"PathTracerRaygenShader"
     };
     constexpr LPCWSTR CLOSEST_HIT_SHADER_NAMES[RayType::Count] =
     {
-        L"RadianceRayClosestHitShader",
+        L"RealTimeRayClosestHitShader",
         L"ShadowRayClosestHitShader",
         L"RTAORayClosestHitShader",
         L"PathTracerRayClosestHitShader"
     };
     constexpr LPCWSTR MISS_SHADER_NAMES[RayType::Count] =
     {
-        L"RadianceRayMissShader",
+        L"RealTimeRayMissShader",
         L"ShadowRayMissShader",
         L"RTAORayMissShader",
         L"PathTracerRayMissShader"
     };
     constexpr LPCWSTR HIT_GROUP_NAMES[RayType::Count] =
     {
-        L"MyHitGroup", 
-        L"MyShadowRayHitGroup",
-        L"RTAOHitGroup",
+        L"RealTimeRayHitGroup", 
+        L"ShadowRayHitGroup",
+        L"RTAORayHitGroup",
         L"PathTracerRayHitGroup"
     };
 

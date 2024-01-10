@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "RaytracingPipelineStateObject\RaytracingPipelineStateObject.h"
 
-#include "CompiledShaders\RadianceRayGeneration.hlsl.h"
+#include "CompiledShaders\RealTimeRayGeneration.hlsl.h"
 #include "CompiledShaders\PathTracerRayGeneration.hlsl.h"
-#include "CompiledShaders\RadianceRayClosestHit.hlsl.h"
+#include "CompiledShaders\RealTimeRayClosestHit.hlsl.h"
 #include "CompiledShaders\ShadowRayClosestHit.hlsl.h"
 #include "CompiledShaders\RTAORayClosestHit.hlsl.h"
 #include "CompiledShaders\PathTracerRayClosestHit.hlsl.h"
-#include "CompiledShaders\RadianceRayMiss.hlsl.h"
+#include "CompiledShaders\RealTimeRayMiss.hlsl.h"
 #include "CompiledShaders\ShadowRayMiss.hlsl.h"
 #include "CompiledShaders\RTAORayMiss.hlsl.h"
 #include "CompiledShaders\PathTracerRayMiss.hlsl.h"
@@ -47,17 +47,17 @@ namespace library
     void RaytracingPipelineStateObject::createDXILSubobjects()
     {
         {//RayGenerationShader
-            createDXILSubobject(static_cast<const void*>(g_pRadianceRayGeneration), ARRAYSIZE(g_pRadianceRayGeneration), RAY_GEN_SHADER_NAMES[0]);
+            createDXILSubobject(static_cast<const void*>(g_pRealTimeRayGeneration), ARRAYSIZE(g_pRealTimeRayGeneration), RAY_GEN_SHADER_NAMES[0]);
             createDXILSubobject(static_cast<const void*>(g_pPathTracerRayGeneration), ARRAYSIZE(g_pPathTracerRayGeneration), RAY_GEN_SHADER_NAMES[1]);
         }
         {//ClosestHitShader
-            createDXILSubobject(static_cast<const void*>(g_pRadianceRayClosestHit), ARRAYSIZE(g_pRadianceRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Radiance]);
+            createDXILSubobject(static_cast<const void*>(g_pRealTimeRayClosestHit), ARRAYSIZE(g_pRealTimeRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::RealTime]);
             createDXILSubobject(static_cast<const void*>(g_pShadowRayClosestHit), ARRAYSIZE(g_pShadowRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::Shadow]);
             createDXILSubobject(static_cast<const void*>(g_pRTAORayClosestHit), ARRAYSIZE(g_pRTAORayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::RTAO]);
             createDXILSubobject(static_cast<const void*>(g_pPathTracerRayClosestHit), ARRAYSIZE(g_pPathTracerRayClosestHit), CLOSEST_HIT_SHADER_NAMES[RayType::PathTracer]);
         }
         {//MissShader
-            createDXILSubobject(static_cast<const void*>(g_pRadianceRayMiss), ARRAYSIZE(g_pRadianceRayMiss), MISS_SHADER_NAMES[RayType::Radiance]);
+            createDXILSubobject(static_cast<const void*>(g_pRealTimeRayMiss), ARRAYSIZE(g_pRealTimeRayMiss), MISS_SHADER_NAMES[RayType::RealTime]);
             createDXILSubobject(static_cast<const void*>(g_pShadowRayMiss), ARRAYSIZE(g_pShadowRayMiss), MISS_SHADER_NAMES[RayType::Shadow]);
             createDXILSubobject(static_cast<const void*>(g_pRTAORayMiss), ARRAYSIZE(g_pRTAORayMiss), MISS_SHADER_NAMES[RayType::RTAO]);
             createDXILSubobject(static_cast<const void*>(g_pPathTracerRayMiss), ARRAYSIZE(g_pPathTracerRayMiss), MISS_SHADER_NAMES[RayType::PathTracer]);
@@ -83,7 +83,7 @@ namespace library
     void RaytracingPipelineStateObject::createShaderConfigSubobject()
     {
         CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT* shaderConfig = m_stateObjectDesc.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-        UINT payloadSize = static_cast<UINT>(std::max({ sizeof(RayPayload),sizeof(PathTracerRayPayload), sizeof(ShadowRayPayload) }));   //  큰값을 할당
+        UINT payloadSize = static_cast<UINT>(std::max({ sizeof(RealTimeRayPayload),sizeof(PathTracerRayPayload), sizeof(ShadowRayPayload) }));   //  큰값을 할당
         UINT attributeSize = sizeof(XMFLOAT2);                                  //  barycentrics
         shaderConfig->Config(payloadSize, attributeSize);                       //  payload, attribute사이즈 정의(셰이더에서 인자로 사용됨)
     }
@@ -93,7 +93,7 @@ namespace library
         localRootSignature->SetRootSignature(pLocalRootSignature.Get());
         CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT* rootSignatureAssociation = m_stateObjectDesc.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
         rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
-        rootSignatureAssociation->AddExport(HIT_GROUP_NAMES[RayType::Radiance]);//Radiance Hit Group에서 사용하겠다
+        rootSignatureAssociation->AddExport(HIT_GROUP_NAMES[RayType::RealTime]);//RealTime Hit Group에서 사용하겠다
         rootSignatureAssociation->AddExport(HIT_GROUP_NAMES[RayType::PathTracer]);//PathTracer Hit Group에서 사용하겠다
     }
     void RaytracingPipelineStateObject::createGlobalRootSignatureSubobject(_In_ const ComPtr<ID3D12RootSignature>& pGlobalRootSignature)

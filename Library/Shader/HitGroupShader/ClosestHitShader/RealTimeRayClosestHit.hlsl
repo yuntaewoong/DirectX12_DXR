@@ -1,7 +1,7 @@
 #define HLSL
 #include "../../Include/HLSLCommon.hlsli"
 #include "../../Include/ClosestHitShaderCommon.hlsli"
-#include "../../Include/RadianceRayTrace.hlsli"
+#include "../../Include/RealTimeRayTrace.hlsli"
 #include "../../Include/ShadowRayTrace.hlsli"
 #include "../../Include/RTAORayTrace.hlsli"
 #include "../../Include/BxDF/BRDF/PhongModel.hlsli"
@@ -64,7 +64,7 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
 }
     
 [shader("closesthit")]
-void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
+void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
     float3 hitPosition = HitWorldPosition();
     uint indexSizeInBytes = 2; //index는 16비트
@@ -164,7 +164,7 @@ void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleInt
     
         
         float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal); //반사용으로 Trace할 다음 Ray의 Direction
-        float3 reflectedColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
+        float3 reflectedColor = TraceRealTimeRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
         float reflectedWeight = metallic * (1-roughness);//반사광 표현비율(metallic에 비례하고 roughness에 반비례하도록)
         float directWeight = 1 - reflectedWeight;
         

@@ -124,8 +124,13 @@ namespace library
     }
     void Scene::loadPBRT(_In_ const std::shared_ptr<const pbrt::Object> object)
     {
+        
         for (auto shape : object->shapes) 
         {//shape: pbrt씬의 primitive구조
+            if (std::shared_ptr<pbrt::AreaLight> areaLight = std::dynamic_pointer_cast<pbrt::AreaLight>(shape->areaLight))
+            {//AreaLight로 다운캐스팅성공시
+                int a = 1;
+            }
             if (std::shared_ptr<pbrt::TriangleMesh> mesh = std::dynamic_pointer_cast<pbrt::TriangleMesh>(shape))
             {//TriangleMesh로 다운캐스팅 성공시 Mesh로딩
                 loadPBRTTriangleMesh(mesh);

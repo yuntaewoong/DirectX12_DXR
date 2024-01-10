@@ -181,19 +181,16 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
     kD = kD * (1-metallic);//Diffuse에 metallic반영
    
     float NDF = BxDF::BRDF::Specular::DistributionGGX(triangleNormal, halfVector, roughness); //미세면 분포도 NDF계산
-    float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, incomingLight, roughness); //미세면 그림자 계산
+    float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, incomingLight.rgb, roughness); //미세면 그림자 계산
      
     float3 numerator = NDF * G * F;
-    float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, incomingLight), 0.0) + 0.0001f;
+    float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, incomingLight.rgb), 0.0) + 0.0001f;
     float3 specular = numerator / denominator;
    
    
     float NdotL = max(dot(triangleNormal, randomVectorInHemisphere), 0.0);
     color += (kD *diffuse + specular) * incomingLight.xyz /** lightAttenuation*/ * NdotL;
-    //{//감마변환    
-    //    color = color / (color + float3(1.0f, 1.0f, 1.0f));
-    //    color = pow(color, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
-    //}
+    
     payload.color = float4(color, 1);
     
 }

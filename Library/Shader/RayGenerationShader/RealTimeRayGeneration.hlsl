@@ -1,11 +1,11 @@
 #define HLSL
 #include "../Include/HLSLCommon.hlsli"
-#include "../Include/RadianceRayTrace.hlsli"
+#include "../Include/RealTimeRayTrace.hlsli"
 #include "../Include/RaygenerationShaderCommon.hlsli"
 
 
 [shader("raygeneration")]
-void RadianceRaygenShader()
+void RealTimeRaygenShader()
 {
     float3 rayDir;
     float3 origin;
@@ -13,7 +13,7 @@ void RadianceRaygenShader()
     
     float4 color = float4(0.f, 0.f, 0.f, 1.f);
     uint currentRecursionDepth = 0u;
-    color = TraceRadianceRay(origin, rayDir, currentRecursionDepth);
+    color = TraceRealTimeRay(origin, rayDir, currentRecursionDepth);
     g_renderTarget[DispatchRaysIndex().xy] = color;
     
 }

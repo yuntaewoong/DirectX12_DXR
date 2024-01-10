@@ -287,7 +287,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\PathTracerRayClosestHit.hlsl" />
-    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RadianceRayClosestHit.hlsl">
+    <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RealTimeRayClosestHit.hlsl">
       <FileType>Document</FileType>
     </FxCompile>
     <FxCompile Include="Shader\HitGroupShader\ClosestHitShader\RTAORayClosestHit.hlsl">
@@ -304,7 +304,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
       <FileType>Document</FileType>
     </FxCompile>
     <FxCompile Include="Shader\MissShader\PathTracerRayMiss.hlsl" />
-    <FxCompile Include="Shader\MissShader\RadianceRayMiss.hlsl">
+    <FxCompile Include="Shader\MissShader\RealTimeRayMiss.hlsl">
       <FileType>Document</FileType>
     </FxCompile>
     <FxCompile Include="Shader\MissShader\RTAORayMiss.hlsl">
@@ -322,7 +322,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
       <FileType>Document</FileType>
     </FxCompile>
     <FxCompile Include="Shader\RayGenerationShader\PathTracerRayGeneration.hlsl" />
-    <FxCompile Include="Shader\RayGenerationShader\RadianceRayGeneration.hlsl">
+    <FxCompile Include="Shader\RayGenerationShader\RealTimeRayGeneration.hlsl">
       <FileType>Document</FileType>
     </FxCompile>
   </ItemGroup>
@@ -332,7 +332,7 @@ xcopy /y /d "$(SolutionDir)ThirdParty\Debug\assimp-vc142-mtd.pdb" "$(SolutionDir
     <None Include="Shader\Include\ClosestHitShaderCommon.hlsli" />
     <None Include="Shader\Include\HLSLCommon.hlsli" />
     <None Include="Shader\Include\PathTracerRayTrace.hlsli" />
-    <None Include="Shader\Include\RadianceRayTrace.hlsli" />
+    <None Include="Shader\Include\RealTimeRayTrace.hlsli" />
     <None Include="Shader\Include\RaygenerationShaderCommon.hlsli" />
     <None Include="Shader\Include\RTAORayTrace.hlsli" />
     <None Include="Shader\Include\ShadowRayTrace.hlsli" />
