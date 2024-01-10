@@ -27,10 +27,6 @@ namespace library
 	}
 	HRESULT DescriptorHeap::getEmptyDescriptorSpaceCPUHandle(_Out_ CD3DX12_CPU_DESCRIPTOR_HANDLE* pCPUHandle)
 	{
-		if (m_numAllocated >= m_numDescriptor)
-		{
-			return E_FAIL;//메모리 부족
-		}
 		pCPUHandle->InitOffsetted(
 			m_descriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 			m_numAllocated,

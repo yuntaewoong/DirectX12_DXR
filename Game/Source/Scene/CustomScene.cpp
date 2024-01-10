@@ -98,7 +98,8 @@ CustomScene::CustomScene()
 	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
 	
 	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>();//Texture없는 Material
-	
+	mirrorMaterial->SetMetallic(0.8f);
+
 	std::shared_ptr<library::Material> ironPBRMaterial = std::make_shared<library::Material>();//PBR 철
 	std::filesystem::path ironBaseColorTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_basecolor.png");//project dir상에서의 상대Path
 	std::filesystem::path ironNormalTexturePath(L"Assets/Texture/IronPBRTexture/rustediron2_normal.png");//project dir상에서의 상대Path
@@ -119,6 +120,7 @@ CustomScene::CustomScene()
 
 
 	{//Material=>Texture대응 세팅
+		floorMaterial->SetAlbedoTexture(std::make_shared<library::Texture>(projectDirPath / floorTexturePath));
 		woodMaterial->SetAlbedoTexture(std::make_shared<library::Texture>(projectDirPath / woodTexturePath));
 		ironPBRMaterial->SetAlbedoTexture(std::make_shared<library::Texture>(projectDirPath / ironBaseColorTexturePath));
 		ironPBRMaterial->SetNormalTexture(std::make_shared<library::Texture>(projectDirPath / ironNormalTexturePath));
@@ -126,11 +128,6 @@ CustomScene::CustomScene()
 		ironPBRMaterial->SetMetallicTexture(std::make_shared<library::Texture>(projectDirPath / ironMetallicTexturePath));
 	}
 
-	{//Material의 반사되는 정도 세팅(기본값은 0)
-		mirrorMaterial->SetReflectivity(0.9f);
-		floorMaterial->SetReflectivity(0.6f);
-		woodMaterial->SetReflectivity(0.0f);
-	}
 
 	{//Scene에서 초기화해줄 Object들 Pass
 		AddMesh(cube1);
@@ -154,6 +151,7 @@ CustomScene::CustomScene()
 		AddLight(light1);
 		AddLight(light2);
 
+		
 		AddMaterial(floorMaterial);
 		AddMaterial(woodMaterial);
 		AddMaterial(mirrorMaterial);

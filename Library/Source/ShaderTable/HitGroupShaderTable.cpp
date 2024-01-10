@@ -45,7 +45,6 @@ namespace library
                 .hasAlbedoTexture = 0,
                 .hasNormalTexture = 0,
                 .hasSpecularTexture = 0,
-                .reflectivity = 0.f,
                 .roughness = 0.5f,
                 .metallic = 0.f
             },
@@ -59,7 +58,6 @@ namespace library
         {
             rootArgument.cb.world = XMMatrixTranspose(meshes[i]->GetWorldMatrix());
             rootArgument.cb.albedo = meshes[i]->GetMaterial()->GetAlbedo();
-            rootArgument.cb.reflectivity = meshes[i]->GetMaterial()->GetReflectivity();
             rootArgument.cb.roughness = meshes[i]->GetMaterial()->GetRoughness();
             rootArgument.cb.metallic = meshes[i]->GetMaterial()->GetMetallic();
             rootArgument.vbGPUAddress = meshes[i]->GetVertexBuffer()->GetGPUVirtualAddress();

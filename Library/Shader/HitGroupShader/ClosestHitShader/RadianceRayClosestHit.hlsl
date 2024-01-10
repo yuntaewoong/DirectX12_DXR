@@ -106,11 +106,11 @@ void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleInt
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
         
-    float3 ambientColor = float3(0.03f, 0.03f, 0.03f);
-    //{//RTAO(Ray Tracing Ambient Occlusion 계산)
-    //    ambientColor = TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
-    //    ambientColor /= 3.f; //너무 밝지않게 조절
-    //}
+    float3 ambientColor = float3(0.1f, 0.1f, 0.1f);
+    {//RTAO(Ray Tracing Ambient Occlusion 계산)
+        ambientColor *= TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
+    }
+    
     float3 diffuseColor =l_meshCB.albedo.rgb;
     
     float3 specularColor = float3(1.f, 1.f, 1.f);
@@ -137,7 +137,7 @@ void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleInt
     float3 color = float3(0.f, 0.f, 0.f);
     [unroll(NUM_LIGHT)]
     for (uint i = 0; i < NUM_LIGHT; i++)
-    {
+    {//직접광에 의한 Lighting
         float3 pointToLight = normalize(g_lightCB.position[i].xyz - hitPosition);
         float3 lightColor = float3(1.f, 1.f, 1.f);
         float lightIntensity = g_lightCB.lumen[i].r / (4 * PI * PI); 
@@ -145,18 +145,33 @@ void RadianceRayClosestHitShader(inout RayPayload payload, in BuiltInTriangleInt
         float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         float3 halfVector = normalize(pointToLight + pointToCamera);
         float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuseColor);
-        float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
+        float3 F0 = 0.04f; //일반적인 프레넬 상수수치를 0.04로 정의
         F0 = lerp(F0, diffuseColor, metallic);
         float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
         float3 kS = F; //Specular상수
-        float3 kD = float3(1.f, 1.f, 1.f) - kS; //Diffuse 상수
+        float3 kD = 1 - kS; //Diffuse 상수
         kD = kD * (1-metallic);//Diffuse에 metallic반영
-        float3 specular = BxDF::BRDF::Specular::CalculateCookTorranceBRDF(triangleNormal, pointToCamera, halfVector, pointToLight, roughness, F);
+        float NDF = BxDF::BRDF::Specular::DistributionGGX(triangleNormal, halfVector, roughness); //미세면 분포도 NDF계산
+        float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, pointToLight, roughness); //미세면 그림자 계산
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, pointToLight), 0.0) + 0.0001f;
+        float3 specular = numerator / denominator;
         float shadow = TraceShadowRay(hitPosition, g_lightCB.position[i], payload.recursionDepth);
         float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
         color += (1.f-shadow) * (kD * diffuse + specular) * lightColor *lightIntensity* lightAttenuation * NdotL;
     }
-    color += ambientColor;
+    {//간접광에 의한 Lighting(Roughness,Metallic기반으로 weight정하기)
+    
+        
+        float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal); //반사용으로 Trace할 다음 Ray의 Direction
+        float3 reflectedColor = TraceRadianceRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
+        float reflectedWeight = metallic * (1-roughness);//반사광 표현비율(metallic에 비례하고 roughness에 반비례하도록)
+        float directWeight = 1 - reflectedWeight;
+        
+        color = color * directWeight + reflectedColor * reflectedWeight; //반사광(real time rendering을 위해 야매로 계산(정반사만 고려))
+        color += ambientColor;//주변광
+    }
+    
     
     
     payload.color = float4(color, 1);

@@ -54,24 +54,6 @@ namespace BxDF
             {//프레넬 식(표면마다 다른 프레넬 상수(F0),Normal벡터와의 각도 cosTheta가 주어졌을때 반사되는 '비율'
                 return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
             }
-            float3 CalculateCookTorranceBRDF(
-                in float3 normal,
-                in float3 pointToCamera,
-                in float3 halfVector,
-                in float3 pointToLight,
-                in float roughness,
-                in float3 F
-            )
-            {
-                float NDF = DistributionGGX(normal, halfVector, roughness); //미세면 분포도 NDF계산
-                float G = GeometrySmith(normal, pointToCamera, pointToLight, roughness); //미세면 그림자 계산
-                
-                float3 numerator = NDF * G * F;
-                float denominator = 4.0 * max(dot(normal, pointToCamera), 0.0) * max(dot(normal, pointToLight), 0.0) + 0.0001f;
-                float3 specular = numerator / denominator;
-                
-                return specular;
-            }
         }
     }
 }

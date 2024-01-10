@@ -27,7 +27,6 @@ namespace library
 		void SetSpecularTexture(_In_ const std::shared_ptr<Texture>& specular);
 		void SetRoughnessTexture(_In_ const std::shared_ptr<Texture>& roughness);
 		void SetMetallicTexture(_In_ const std::shared_ptr<Texture>& metallic);
-		void SetReflectivity(_In_ FLOAT reflectivity);
 		void SetRoughness(_In_ FLOAT roughness);
 		void SetMetallic(_In_ FLOAT metallic);
 		const std::shared_ptr<Texture> GetAlbedoTexture() const;
@@ -36,7 +35,6 @@ namespace library
 		const std::shared_ptr<Texture> GetRoughnessTexture() const;
 		const std::shared_ptr<Texture> GetMetallicTexture() const;
 		XMFLOAT4 GetAlbedo() const;
-		FLOAT GetReflectivity() const;
 		FLOAT GetRoughness() const;
 		FLOAT GetMetallic() const;
 		BOOL HasAlbedoTexture() const;
@@ -51,7 +49,6 @@ namespace library
 		std::shared_ptr<Texture> m_roughnessTexture;
 		std::shared_ptr<Texture> m_metallicTexture;
 		XMFLOAT4 m_albedo;//기본색상
-		FLOAT m_reflectivity;//반사되는 정도 (1:거울, 0:완전 빛 흡수)
 		FLOAT m_roughness;//거친정도
 		FLOAT m_metallic;//금속인 정도
 	};

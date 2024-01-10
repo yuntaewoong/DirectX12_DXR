@@ -10,9 +10,8 @@ namespace library
 		m_roughnessTexture(nullptr),
 		m_metallicTexture(nullptr),
 		m_albedo(baseColor),
-		m_reflectivity(0.f),
-		m_roughness(0.5f),
-		m_metallic(0.f)
+		m_roughness(0.0f),
+		m_metallic(0.0f)
 	{}
 
 	HRESULT Material::Initialize(
@@ -85,10 +84,6 @@ namespace library
 	{
 		m_metallicTexture = metallic;
 	}
-	void Material::SetReflectivity(_In_ FLOAT reflectivity)
-	{
-		m_reflectivity = reflectivity;
-	}
 	void Material::SetRoughness(_In_ FLOAT roughness)
 	{
 		m_roughness = roughness;
@@ -120,10 +115,6 @@ namespace library
 	XMFLOAT4 Material::GetAlbedo() const
 	{
 		return m_albedo;
-	}
-	FLOAT Material::GetReflectivity() const
-	{
-		return m_reflectivity;
 	}
 	FLOAT Material::GetRoughness() const
 	{
