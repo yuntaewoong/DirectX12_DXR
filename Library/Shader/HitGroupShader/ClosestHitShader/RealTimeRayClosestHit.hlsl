@@ -144,12 +144,36 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
     }
     float3 color = 0.f;
     
-    for (uint i = 0; i < g_lightCB.numPointLight; i++)
-    {//직접광에 의한 Lighting
-        float3 pointToLight = normalize(g_lightCB.position[i].xyz - hitPosition);
+    for (uint i = 0; i < g_pointLightCB.numPointLight; i++)
+    { //point light 직접광에 의한 Lighting
+        float3 pointToLight = normalize(g_pointLightCB.position[i].xyz - hitPosition);
         float3 lightColor = float3(1.f, 1.f, 1.f);
-        float lightIntensity = g_lightCB.lumen[i].r / (4 * PI * PI); 
-        float lightDistance = sqrt(dot(g_lightCB.position[i].xyz - hitPosition, g_lightCB.position[i].xyz - hitPosition));
+        float lightIntensity = g_pointLightCB.lumen[i].r / (4 * PI * PI);
+        float lightDistance = sqrt(dot(g_pointLightCB.position[i].xyz - hitPosition, g_pointLightCB.position[i].xyz - hitPosition));
+        float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
+        float3 halfVector = normalize(pointToLight + pointToCamera);
+        float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuseColor);
+        float3 F0 = 0.04f; //일반적인 프레넬 상수수치를 0.04로 정의
+        F0 = lerp(F0, diffuseColor, metallic);
+        float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
+        float3 kS = F; //Specular상수
+        float3 kD = 1 - kS; //Diffuse 상수
+        kD = kD * (1 - metallic); //Diffuse에 metallic반영
+        float NDF = BxDF::BRDF::Specular::DistributionGGX(triangleNormal, halfVector, roughness); //미세면 분포도 NDF계산
+        float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, pointToLight, roughness); //미세면 그림자 계산
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, pointToLight), 0.0) + 0.0001f;
+        float3 specular = numerator / denominator;
+        float shadow = TraceShadowRay(hitPosition, g_pointLightCB.position[i], payload.recursionDepth);
+        float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
+        color += (1.f - shadow) * (kD * diffuse + specular) * lightColor * lightIntensity * lightAttenuation * NdotL;
+    }
+    for (i = 0; i < g_areaLightCB.numAreaLight; i++)
+    {//area light 직접광에 의한 Lighting
+        float3 pointToLight = normalize(g_areaLightCB.position[i].xyz - hitPosition);
+        float3 lightColor = float3(1.f, 1.f, 1.f);
+        float lightIntensity = 1.f;//g_areaLightCB.lumen[i].r / (4 * PI * PI); 
+        float lightDistance = sqrt(dot(g_areaLightCB.position[i].xyz - hitPosition, g_areaLightCB.position[i].xyz - hitPosition));
         float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         float3 halfVector = normalize(pointToLight + pointToCamera);
         float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuseColor);
@@ -164,20 +188,20 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
         float3 numerator = NDF * G * F;
         float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, pointToLight), 0.0) + 0.0001f;
         float3 specular = numerator / denominator;
-        float shadow = TraceShadowRay(hitPosition, g_lightCB.position[i], payload.recursionDepth);
+        //float shadow = TraceShadowRay(hitPosition, g_areaLightCB.position[i], payload.recursionDepth);
         float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
-        color += (1.f-shadow) * (kD * diffuse + specular) * lightColor *lightIntensity* lightAttenuation * NdotL;
+        color += /*(1.f-shadow) * */(kD * diffuse + specular) * lightColor *lightIntensity* lightAttenuation * NdotL;
     }
     {//간접광에 의한 Lighting(Roughness,Metallic기반으로 weight정하기)
     
         
         float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal); //반사용으로 Trace할 다음 Ray의 Direction
         float3 reflectedColor = TraceRealTimeRay(hitPosition, nextRayDirection, payload.recursionDepth).rgb;
-        float reflectedWeight = metallic * (1-roughness);//반사광 표현비율(metallic에 비례하고 roughness에 반비례하도록)
+        float reflectedWeight = metallic * (1 - roughness); //반사광 표현비율(metallic에 비례하고 roughness에 반비례하도록)
         float directWeight = 1 - reflectedWeight;
         
         color = color * directWeight + reflectedColor * reflectedWeight; //반사광(real time rendering을 위해 야매로 계산(정반사만 고려))
-        color += ambientColor;//주변광
+        color += ambientColor; //주변광
     }
     
     

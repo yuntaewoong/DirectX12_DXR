@@ -21,8 +21,8 @@ RaytracingAccelerationStructure g_scene : register(t0, space0);
 RWTexture2D<float4> g_renderTarget : register(u0);
 //CBV
 ConstantBuffer<CameraConstantBuffer> g_cameraCB : register(b0);
-ConstantBuffer<PointLightConstantBuffer> g_lightCB : register(b2);
-ConstantBuffer<RandomConstantBuffer> g_randomCB : register(b7);
-
+ConstantBuffer<RandomConstantBuffer> g_randomCB : register(b2);
+ConstantBuffer<PointLightConstantBuffer> g_pointLightCB : register(b3);
+ConstantBuffer<AreaLightConstantBuffer> g_areaLightCB : register(b4);
 //<<이 intellisense error는 무시해도 됨
 

@@ -154,9 +154,13 @@ namespace library
                 m_randomGenerator.GetConstantBuffer()->GetGPUVirtualAddress()
             );//Random CB바인딩
             pCommandList->SetComputeRootConstantBufferView(
-                static_cast<UINT>(EGlobalRootSignatureSlot::LightConstantSlot),
+                static_cast<UINT>(EGlobalRootSignatureSlot::PointLightConstantSlot),
                 m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
-            );//Light CB바인딩
+            );//Point Light CB바인딩
+            pCommandList->SetComputeRootConstantBufferView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::AreaLightConstantSlot),
+                m_scene->GetAreaLightsConstantBuffer()->GetGPUVirtualAddress()
+            );//Area Light CB바인딩
         }
 
         m_dxrCommandList->SetPipelineState1(m_raytracingPipelineStateObject.GetStateObject().Get());//열심히 만든 ray tracing pipeline바인딩
