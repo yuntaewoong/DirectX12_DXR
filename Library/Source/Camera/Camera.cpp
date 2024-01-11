@@ -12,7 +12,7 @@ namespace library
         m_moveBackForward(0.0f),
         m_moveUpDown(0.0f),
         m_travelSpeed(3.f),
-        m_rotationSpeed(0.3f),
+        m_rotationSpeed(1.f),
         m_cameraForward(DEFAULT_FORWARD),
         m_cameraRight(DEFAULT_RIGHT),
         m_cameraUp(DEFAULT_UP),
@@ -42,17 +42,22 @@ namespace library
             m_moveLeftRight += deltaTime * m_travelSpeed;
         if (directions.bLeft)
             m_moveLeftRight -= deltaTime * m_travelSpeed;
-        m_yaw += mouseRelativeMovement.X * deltaTime * m_rotationSpeed;
-        m_pitch += mouseRelativeMovement.Y * deltaTime * m_rotationSpeed;
+        if (directions.bRotateLeft)
+            m_yaw -= deltaTime * m_rotationSpeed;
+        if (directions.bRotateRight)
+            m_yaw += deltaTime * m_rotationSpeed;
         
-        m_pitch = std::clamp(m_pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);//pitch range setting, pitch value must be in range(PI/2 > pitch > -PI/2)
+        //m_yaw += mouseRelativeMovement.X * deltaTime * m_rotationSpeed;
+        //m_pitch += mouseRelativeMovement.Y * deltaTime * m_rotationSpeed;
+        
+        //m_pitch = std::clamp(m_pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);//pitch range setting, pitch value must be in range(PI/2 > pitch > -PI/2)
     }
     HRESULT Camera::Initialize(_In_ ID3D12Device* pDevice)
     {
         HRESULT hr = S_OK;
         const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 
-        size_t cbSize = 256;//왜인지는 모르겠지만 Constant버퍼는 256의 배수여야함
+        size_t cbSize = 256;//Constant버퍼는 256의 배수여야함
         const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
         hr = pDevice->CreateCommittedResource(
             &uploadHeapProperties,

@@ -107,6 +107,8 @@ namespace library
         BOOL bRight;
         BOOL bUp;
         BOOL bDown;
+        BOOL bRotateLeft;
+        BOOL bRotateRight;
     };
 
     /*======

@@ -90,7 +90,7 @@ CustomScene::CustomScene()
 		projectDirPath = projectDirString;
 	}
 	std::shared_ptr<library::Material> emissiveMaterial = std::make_shared<library::Material>(XMFLOAT4(1.f,1.f,1.f,1.f));
-	emissiveMaterial->SetEmission(10.0f);
+	emissiveMaterial->SetEmission(1.0f);
 
 	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
 	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path

@@ -41,8 +41,9 @@ namespace library
         if (!m_filePath.empty())
         {//파일경로가 주어졌다면, pbrt 씬 로딩
             std::shared_ptr<pbrt::Scene> pbrtScene = pbrt::importPBRT(m_filePath.string());
-            loadPBRT(pbrtScene->world);
-            
+            loadPBRTWorld(pbrtScene->world);
+            auto a = pbrtScene->cameras;
+            int b = 1;
         }
 
 
@@ -135,29 +136,44 @@ namespace library
     {
         return m_areaLightsConstantBuffer;
     }
-    void Scene::loadPBRT(_In_ const std::shared_ptr<const pbrt::Object> object)
+    void Scene::loadPBRTWorld(_In_ const std::shared_ptr<const pbrt::Object> world)
     {
-        for (auto shape : object->shapes) 
+        
+        for (auto shape : world->shapes) 
         {//shape: pbrt씬의 primitive구조
-            if (std::shared_ptr<pbrt::AreaLight> areaLight = std::dynamic_pointer_cast<pbrt::AreaLight>(shape->areaLight))
-            {//AreaLight로 다운캐스팅성공시
-                int a = 1;
-            }
             if (std::shared_ptr<pbrt::TriangleMesh> mesh = std::dynamic_pointer_cast<pbrt::TriangleMesh>(shape))
             {//TriangleMesh로 다운캐스팅 성공시 Mesh로딩
                 loadPBRTTriangleMesh(mesh);
-                loadPBRTMaterial(mesh->material);
+                if (std::shared_ptr<pbrt::DiffuseAreaLightBB> areaLight = std::dynamic_pointer_cast<pbrt::DiffuseAreaLightBB>(shape->areaLight))
+                {//AreaLight로 다운캐스팅성공시 emissive material 생성
+                    //areaLight->LinRGB();
+                    //areaLight->scale;
+                    std::shared_ptr<Material> emissiveMaterial = std::make_shared<Material>(
+                        XMFLOAT4(
+                            areaLight->LinRGB().x,
+                            areaLight->LinRGB().y,
+                            areaLight->LinRGB().z,
+                            1.f
+                        )
+                    );
+                    emissiveMaterial->SetEmission(areaLight->scale);
+                    m_materials.push_back(emissiveMaterial);
+                }
+                else
+                {//실패시 일반 material생성
+                    loadPBRTMaterial(mesh->material);
+                }
                 m_meshes[m_meshes.size() - 1]->SetMaterial(m_materials[m_materials.size() - 1]);//로딩된 mesh-material 대응
             }
         }
-        for (auto inst : object->instances) 
+        for (auto inst : world->instances) 
         {//Instance들에 대하여 재귀호출
-            loadPBRT(inst->object);
+            loadPBRTWorld(inst->object);
         }
     }
     void Scene::loadPBRTMaterial(_In_ const std::shared_ptr<const pbrt::Material> material)
     {
-        m_materials.push_back(std::make_shared<Material>());
+        m_materials.push_back(std::make_shared<Material>(XMFLOAT4(1.f,1.f,1.f,0.f)));
     }
     void Scene::loadPBRTTriangleMesh(_In_ const std::shared_ptr<const pbrt::TriangleMesh> mesh)
     {
@@ -290,6 +306,7 @@ namespace library
         {
             if (m_meshes[i]->GetMaterial()->GetEmission() > 0.001f)
             {
+                
                 for (UINT j = 0; j < static_cast<UINT>(m_meshes[i]->GetIndices().size()); j += 3)
                 {//polygon loop
                     cb.position[numAreaLights] = m_meshes[i]->GetWorldMatrix().r[3];
@@ -308,10 +325,13 @@ namespace library
                             1.f
                         );
                     }
+                    cb.lightColor[numAreaLights] = m_meshes[i]->GetMaterial()->GetAlbedo();
+                    cb.emission[numAreaLights] = XMFLOAT4(m_meshes[i]->GetMaterial()->GetEmission(),0.f,0.f,0.f);
                     numAreaLights++;
                 }
             }
         }
+        
         cb.numAreaLight = numAreaLights;
         memcpy(m_areaLightMappedData, &cb, sizeof(cb));
     }

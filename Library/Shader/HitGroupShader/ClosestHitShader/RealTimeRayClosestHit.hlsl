@@ -171,8 +171,8 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
     for (i = 0; i < g_areaLightCB.numAreaLight; i++)
     {//area light 직접광에 의한 Lighting
         float3 pointToLight = normalize(g_areaLightCB.position[i].xyz - hitPosition);
-        float3 lightColor = float3(1.f, 1.f, 1.f);
-        float lightIntensity = 1.f;//g_areaLightCB.lumen[i].r / (4 * PI * PI); 
+        float3 lightColor = g_areaLightCB.lightColor[i].rgb;
+        float lightIntensity = g_areaLightCB.emission[i].r;
         float lightDistance = sqrt(dot(g_areaLightCB.position[i].xyz - hitPosition, g_areaLightCB.position[i].xyz - hitPosition));
         float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         float3 halfVector = normalize(pointToLight + pointToCamera);

@@ -94,93 +94,100 @@ namespace library
         case WM_KEYDOWN:
         {
             unsigned char keyChar = static_cast<unsigned char>(wParam);
-            if (keyChar >= 'a' && keyChar <= 'z' || keyChar >= 'A' && keyChar <= 'Z')
+            switch (keyChar)
             {
-                switch (keyChar)
-                {
-                case 'w':
-                case 'W':
-                    m_directions.bFront = true;
-                    break;
-                case 's':
-                case 'S':
-                    m_directions.bBack = true;
-                    break;
-                case 'a':
-                case 'A':
-                    m_directions.bLeft = true;
-                    break;
-                case 'd':
-                case 'D':
-                    m_directions.bRight = true;
-                    break;
-                case 'q':
-                case 'Q':
-                    m_directions.bDown = true;
-                    break;
-                case 'e':
-                case 'E':
-                    m_directions.bUp = true;
-                    break;
-                }
+            case 'w':
+            case 'W':
+                m_directions.bFront = true;
+                break;
+            case 's':
+            case 'S':
+                m_directions.bBack = true;
+                break;
+            case 'a':
+            case 'A':
+                m_directions.bLeft = true;
+                break;
+            case 'd':
+            case 'D':
+                m_directions.bRight = true;
+                break;
+            case 'q':
+            case 'Q':
+                m_directions.bRotateLeft = true;
+                break;
+            case 'e':
+            case 'E':
+                m_directions.bRotateRight = true;
+                break;
+            case 16://shift키
+                m_directions.bDown = true;
+                break;
+            case 32://space바
+                m_directions.bUp = true;
+                break;
 
             }
+
             break;
         }
         case WM_KEYUP:
         {
             unsigned char keyChar = static_cast<unsigned char>(wParam);
-            if (keyChar >= 'a' && keyChar <= 'z' || keyChar >= 'A' && keyChar <= 'Z')
+            switch (keyChar)
             {
-                switch (keyChar)
-                {
-                case 'w':
-                case 'W':
-                    m_directions.bFront = false;
-                    break;
-                case 's':
-                case 'S':
-                    m_directions.bBack = false;
-                    break;
-                case 'a':
-                case 'A':
-                    m_directions.bLeft = false;
-                    break;
-                case 'd':
-                case 'D':
-                    m_directions.bRight = false;
-                    break;
-                case 'q':
-                case 'Q':
-                    m_directions.bDown = false;
-                    break;
-                case 'e':
-                case 'E':
-                    m_directions.bUp = false;
-                    break;
-                }
+            case 'w':
+            case 'W':
+                m_directions.bFront = false;
+                break;
+            case 's':
+            case 'S':
+                m_directions.bBack = false;
+                break;
+            case 'a':
+            case 'A':
+                m_directions.bLeft = false;
+                break;
+            case 'd':
+            case 'D':
+                m_directions.bRight = false;
+                break;
+            case 'q':
+            case 'Q':
+                m_directions.bRotateLeft = false;
+                break;
+            case 'e':
+            case 'E':
+                m_directions.bRotateRight = false;
+                break;
+            case 16://shift키
+                m_directions.bDown = false;
+                break;
+            case 32://space바
+                m_directions.bUp = false;
+                break;
             }
             break;
         }
-        case WM_INPUT://mouse handling
-        {
-            UINT dataSize = 0;
-            GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, NULL, &dataSize, sizeof(RAWINPUTHEADER)); //Need to populate data size first
-            if (dataSize > 0)
-            {
-                std::unique_ptr<BYTE[]> rawdata = std::make_unique<BYTE[]>(dataSize);
-                if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawdata.get(), &dataSize, sizeof(RAWINPUTHEADER)) == dataSize)
-                {
-                    RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawdata.get());
-                    if (raw->header.dwType == RIM_TYPEMOUSE)
-                    {
-                        //m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
-                        //m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
-                    }
-                }
-            }
-            return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
-        }
+        //case WM_INPUT://mouse handling
+        //{
+        //    UINT dataSize = 0;
+        //    GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, NULL, &dataSize, sizeof(RAWINPUTHEADER)); //Need to populate data size first
+        //    if (dataSize > 0)
+        //    {
+        //        std::unique_ptr<BYTE[]> rawdata = std::make_unique<BYTE[]>(dataSize);
+        //        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawdata.get(), &dataSize, sizeof(RAWINPUTHEADER)) == dataSize)
+        //        {
+        //            RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawdata.get());
+        //            if (raw->header.dwType == RIM_TYPEMOUSE)
+        //            {
+        //                m_mouseRelativeMovement.X = raw->data.mouse.lLastX;
+        //                m_mouseRelativeMovement.Y = raw->data.mouse.lLastY;
+        //            }
+        //        }
+        //    }
+        //    return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+        //}
         default:
             return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
         }
