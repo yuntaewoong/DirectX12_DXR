@@ -223,6 +223,9 @@
     <ClInclude Include="Header\Material\Texture.h">
       <Filter>Source\Material</Filter>
     </ClInclude>
+    <ClInclude Include="Header\Random\RandomSampleCounter.h">
+      <Filter>Source\Random</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window\MainWindow.cpp">
@@ -329,6 +332,9 @@
     </ClCompile>
     <ClCompile Include="Source\Material\Texture.cpp">
       <Filter>Source\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Random\RandomSampleCounter.cpp">
+      <Filter>Source\Random</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

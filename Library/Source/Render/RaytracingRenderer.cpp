@@ -9,6 +9,7 @@ namespace library
         m_scene(nullptr),
         m_camera(Camera(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
         m_randomGenerator(),
+        m_randomSampleCounter(),
         m_dxrDevice(nullptr),
         m_dxrCommandList(nullptr),
         m_raytracingPipelineStateObject(),
@@ -90,6 +91,11 @@ namespace library
         {
             return hr;
         }
+        hr = m_randomSampleCounter.Initialize(m_renderingResources.GetDevice().Get());
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         hr = m_renderingResources.WaitForGPU();
         if (FAILED(hr))
         {
@@ -112,10 +118,11 @@ namespace library
         m_renderingResources.PresentSwapChain();
         m_renderingResources.MoveToNextFrame();
     }
-    void RaytracingRenderer::Update(_In_ FLOAT deltaTime)
+    void RaytracingRenderer::Update(_In_ FLOAT deltaTime,_In_ UINT renderType)
     {
         m_camera.Update(deltaTime);
         m_randomGenerator.Update(deltaTime);
+        m_randomSampleCounter.Update(deltaTime,renderType,m_camera.IsPastFrameMoved());
         m_scene->Update(deltaTime);
     }
     HRESULT RaytracingRenderer::populateCommandList(_In_ UINT renderType)
@@ -161,6 +168,10 @@ namespace library
                 static_cast<UINT>(EGlobalRootSignatureSlot::AreaLightConstantSlot),
                 m_scene->GetAreaLightsConstantBuffer()->GetGPUVirtualAddress()
             );//Area Light CB바인딩
+            pCommandList->SetComputeRootConstantBufferView(
+                static_cast<UINT>(EGlobalRootSignatureSlot::RandomSampleCounterConstantSlot),
+                m_randomSampleCounter.GetConstantBuffer()->GetGPUVirtualAddress()
+            );//RandomSampleCounter CB바인딩
         }
 
         m_dxrCommandList->SetPipelineState1(m_raytracingPipelineStateObject.GetStateObject().Get());//열심히 만든 ray tracing pipeline바인딩

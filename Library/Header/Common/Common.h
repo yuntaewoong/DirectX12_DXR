@@ -61,7 +61,7 @@ namespace library
     Global Root Signature Slot
     Local Root Signature Slot상수 정의
     ======================================*/
-    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 6;
+    const static INT NUM_OF_GLOBAL_ROOT_SIGNATURE_SLOT = 7;
     enum class EGlobalRootSignatureSlot
     {
         OutputViewSlot = 0,
@@ -69,7 +69,8 @@ namespace library
         CameraConstantSlot,
         RandomConstantSlot,
         PointLightConstantSlot,
-        AreaLightConstantSlot
+        AreaLightConstantSlot,
+        RandomSampleCounterConstantSlot
     };
     const static INT NUM_OF_LOCAL_ROOT_SIGNATURE_SLOT = 8;
     enum class ELocalRootSignatureSlot

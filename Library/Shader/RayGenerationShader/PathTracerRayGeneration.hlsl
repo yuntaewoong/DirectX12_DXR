@@ -14,9 +14,7 @@ void PathTracerRaygenShader()
     uint currentRecursionDepth = 0u;
     float3 Li = TracePathTracerRay(origin, rayDir, currentRecursionDepth).xyz;
 	float3 prevLi = g_renderTarget[DispatchRaysIndex().xy].xyz;
-	float historyCount = g_renderTarget[DispatchRaysIndex().xy].w;
+	uint historyCount = g_sampleCountCB.sampleCount;
 	Li = lerp(prevLi, Li, 1.0 / (1.0 + historyCount));
-	historyCount += 1;
-
-	g_renderTarget[DispatchRaysIndex().xy] = float4(Li,historyCount);
+	g_renderTarget[DispatchRaysIndex().xy] = float4(Li,1);
 }

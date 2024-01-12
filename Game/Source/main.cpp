@@ -18,9 +18,9 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Scene> cornellBoxScene = std::make_shared<CornellBoxScene>();
 	std::shared_ptr<library::Scene> customScene = std::make_shared<CustomScene>();
 	{//게임에서 사용할 Scene선택
-		//game->GetRenderer()->SetMainScene(bathroomScene);
+		game->GetRenderer()->SetMainScene(bathroomScene);
 		//game->GetRenderer()->SetMainScene(cornellBoxScene);
-		game->GetRenderer()->SetMainScene(customScene);
+		//game->GetRenderer()->SetMainScene(customScene);
 	}
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))
 	{

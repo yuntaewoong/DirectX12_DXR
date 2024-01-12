@@ -17,7 +17,7 @@ namespace library
         m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::RandomConstantSlot)].InitAsConstantBufferView(2);
         m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::PointLightConstantSlot)].InitAsConstantBufferView(3);
         m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::AreaLightConstantSlot)].InitAsConstantBufferView(4);
-
+        m_rootParameter[static_cast<UINT>(EGlobalRootSignatureSlot::RandomSampleCounterConstantSlot)].InitAsConstantBufferView(5);
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(ARRAYSIZE(m_rootParameter), m_rootParameter);
 
         return RootSignature::initialize(pDevice, rootSignatureDesc);;

@@ -103,6 +103,12 @@ float3 RandomVectorInHemisphere(float3 normal, float random1, float random2)
 [shader("closesthit")]
 void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
+    if(l_meshCB.emission > 0)
+    {//Emissive속성의 material은 광원으로 취급하기에 바로 색상 리턴
+        payload.color = l_meshCB.emission;
+        return;
+    }
+
     float3 hitPosition = HitWorldPosition();
     uint indexSizeInBytes = 2; //index는 16비트
     uint indicesPerTriangle = 3; //삼각형은 Vertex가 3개
@@ -169,7 +175,6 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
     float3 color = float3(0.f, 0.f, 0.f);
     float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
     float3 pointToCamera = normalize(payload.camera - hitPosition);
-        
         
     float3 halfVector = normalize(randomVectorInHemisphere + pointToCamera);
     diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);

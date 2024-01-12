@@ -7,6 +7,7 @@
 #include "Scene\Scene.h"
 #include "Camera\Camera.h"
 #include "Random\RandomGenerator.h"
+#include "Random\RandomSampleCounter.h"
 #include "ShaderTable\HitGroupShaderTable.h"
 #include "ShaderTable\MissShaderTable.h"
 #include "ShaderTable\RayGenerationShaderTable.h"
@@ -31,7 +32,7 @@ namespace library
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);
         void SetMainScene(_In_ const std::shared_ptr<Scene>& pScene);
         void Render(_In_ UINT renderType);
-        void Update(_In_ FLOAT deltaTime);
+        void Update(_In_ FLOAT deltaTime,_In_ UINT renderType);
     private:
         HRESULT populateCommandList(_In_ UINT renderType);
 
@@ -48,7 +49,7 @@ namespace library
         std::shared_ptr<Scene> m_scene;
         Camera m_camera;
         RandomGenerator m_randomGenerator;
-
+        RandomSampleCounter m_randomSampleCounter;
         // DXR파이프라인 관련
         ComPtr<ID3D12Device5> m_dxrDevice;
         ComPtr<ID3D12GraphicsCommandList4> m_dxrCommandList;
@@ -73,6 +74,7 @@ namespace library
         // Raytracing  결과 UAV자원
         ComPtr<ID3D12Resource> m_raytracingOutput;
         D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputGPUHandle;
+
 
 
 	};

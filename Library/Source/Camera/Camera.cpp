@@ -20,7 +20,8 @@ namespace library
         m_at(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)),
         m_up(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)),
         m_rotation(XMMATRIX()),
-        m_view(XMMATRIX())
+        m_view(XMMATRIX()),
+        m_bPastFrameMoved(false)
         
     {}
     ComPtr<ID3D12Resource>& Camera::GetConstantBuffer()
@@ -46,11 +47,18 @@ namespace library
             m_yaw -= deltaTime * m_rotationSpeed;
         if (directions.bRotateRight)
             m_yaw += deltaTime * m_rotationSpeed;
-        
+        m_bPastFrameMoved = false;
+        if (directions.bUp || directions.bDown || directions.bFront || directions.bBack
+            || directions.bRight || directions.bLeft || directions.bRotateLeft || directions.bRotateRight)
+            m_bPastFrameMoved = true;
         //m_yaw += mouseRelativeMovement.X * deltaTime * m_rotationSpeed;
         //m_pitch += mouseRelativeMovement.Y * deltaTime * m_rotationSpeed;
         
         //m_pitch = std::clamp(m_pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);//pitch range setting, pitch value must be in range(PI/2 > pitch > -PI/2)
+    }
+    BOOL Camera::IsPastFrameMoved() const
+    {
+        return m_bPastFrameMoved;
     }
     HRESULT Camera::Initialize(_In_ ID3D12Device* pDevice)
     {

@@ -19,6 +19,7 @@ namespace library
         ComPtr<ID3D12Resource>& GetConstantBuffer();
 
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);
+        BOOL IsPastFrameMoved() const;
         HRESULT Initialize(_In_ ID3D12Device* pDevice);
         void Update(_In_ FLOAT deltaTime);
     private:
@@ -49,6 +50,8 @@ namespace library
 
         XMMATRIX m_rotation;
         XMMATRIX m_view;
+
+        BOOL m_bPastFrameMoved;
     private:
         XMMATRIX getInverseViewProjectionMatrix() const;
     };

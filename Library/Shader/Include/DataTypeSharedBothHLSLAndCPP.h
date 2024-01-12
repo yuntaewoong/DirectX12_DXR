@@ -42,6 +42,11 @@ struct RandomConstantBuffer
 	XMVECTOR randFloats1[RANDOM_SEQUENCE_LENGTH / 4];
 };
 
+struct RandomSampleCounterConstantBuffer
+{
+    UINT sampleCount;
+};
+
 struct PointLightConstantBuffer
 {
     XMVECTOR position[NUM_POINT_LIGHT_MAX];

@@ -50,12 +50,13 @@ namespace library
 			}
 			else
 			{
+				static int RenderTypeCurrent = 0;
 				//end timer
 				QueryPerformanceCounter(&EndingTime);
 				elapsedTime = (EndingTime.QuadPart - StartingTime.QuadPart) / (FLOAT)Frequency.QuadPart;
 				m_renderer->HandleInput(m_mainWindow->GetDirections(), m_mainWindow->GetMouseRelativeMovement(), elapsedTime);
 				m_mainWindow->ResetMouseMovement();
-				m_renderer->Update(elapsedTime);
+				m_renderer->Update(elapsedTime,RenderTypeCurrent);
 				//start timer
 				QueryPerformanceCounter(&StartingTime);
 
@@ -65,7 +66,7 @@ namespace library
 				ImGui::Begin("FPS");
 				ImGui::Text("%.3f ms/Frame (%.1f FPS)",1000.0f / ImGui::GetIO().Framerate,ImGui::GetIO().Framerate);
 				const char* RenderType[2] = {"Real Time Rendering","Path Tracing"};
-				static int RenderTypeCurrent = 0;
+				
 				ImGui::Combo("Method", &RenderTypeCurrent, RenderType, IM_ARRAYSIZE(RenderType));
 				ImGui::End();
 				ImGui::Render();
