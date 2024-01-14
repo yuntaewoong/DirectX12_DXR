@@ -39,7 +39,7 @@ namespace library
         ComPtr<ID3D12Resource>& GetAreaLightsConstantBuffer();
     private:
         void loadPBRTWorld(_In_ const std::shared_ptr<const pbrt::Object> object);
-        void loadPBRTMaterial(_In_ const std::shared_ptr<const pbrt::Material> material);
+        void loadPBRTMaterial(_In_ const std::shared_ptr<pbrt::Material> material);
         void loadPBRTTriangleMesh(_In_ const std::shared_ptr<const pbrt::TriangleMesh> mesh);
         void loadPBRTTriangleMeshVertices(
             _In_ const std::vector<pbrt::vec3f>& vertexPositions,

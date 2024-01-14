@@ -114,8 +114,7 @@ CustomScene::CustomScene()
 		{//i가 0이면 roughness 0, j가 0이면 metallic 0
 			pbrTestMaterials[i][j] = std::make_shared<library::Material>(XMFLOAT4(1.0f,0.0f,0.0f,0.0f));
 			pbrTestMaterials[i][j]->SetRoughness(i / 7.f);
-			//pbrTestMaterials[i][j]->SetMetallic(j / 7.f);
-			pbrTestMaterials[i][j]->SetMetallic(1.0f);
+			pbrTestMaterials[i][j]->SetMetallic(j / 7.f);
 		}
 	}
 

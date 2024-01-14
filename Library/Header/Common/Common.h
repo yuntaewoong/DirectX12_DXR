@@ -17,7 +17,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 namespace library
 {
-    const static UINT NUM_DESCRIPTORS_DEFAULT = 50u;
+    const static UINT NUM_DESCRIPTORS_DEFAULT = 100u;
     namespace RayGenType
     {
         enum Enum {

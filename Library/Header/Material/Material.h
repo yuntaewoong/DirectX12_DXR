@@ -27,6 +27,7 @@ namespace library
 		void SetSpecularTexture(_In_ const std::shared_ptr<Texture>& specular);
 		void SetRoughnessTexture(_In_ const std::shared_ptr<Texture>& roughness);
 		void SetMetallicTexture(_In_ const std::shared_ptr<Texture>& metallic);
+		void SetAlbedo(_In_ XMFLOAT4 albedo);
 		void SetRoughness(_In_ FLOAT roughness);
 		void SetMetallic(_In_ FLOAT metallic);
 		void SetEmission(_In_ FLOAT emission);

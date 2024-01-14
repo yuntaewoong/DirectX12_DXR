@@ -146,8 +146,6 @@ namespace library
                 loadPBRTTriangleMesh(mesh);
                 if (std::shared_ptr<pbrt::DiffuseAreaLightBB> areaLight = std::dynamic_pointer_cast<pbrt::DiffuseAreaLightBB>(shape->areaLight))
                 {//AreaLight로 다운캐스팅성공시 emissive material 생성
-                    //areaLight->LinRGB();
-                    //areaLight->scale;
                     std::shared_ptr<Material> emissiveMaterial = std::make_shared<Material>(
                         XMFLOAT4(
                             areaLight->LinRGB().x,
@@ -171,14 +169,55 @@ namespace library
             loadPBRTWorld(inst->object);
         }
     }
-    void Scene::loadPBRTMaterial(_In_ const std::shared_ptr<const pbrt::Material> material)
+    void Scene::loadPBRTMaterial(_In_ const std::shared_ptr<pbrt::Material> material)
     {
         std::shared_ptr<Material> mat = std::make_shared<Material>(XMFLOAT4(1.f, 1.f, 1.f, 0.f));
-        if (m_materials.size() % 7 == 0)
-        {
-            mat->SetMetallic(0.6f);
-            mat->SetRoughness(0.0f);
+        if (std::shared_ptr<pbrt::MatteMaterial> matMaterial = std::dynamic_pointer_cast<pbrt::MatteMaterial>(material))
+        {//MattMaterial일때
+            mat->SetAlbedo(XMFLOAT4(matMaterial->kd.x,matMaterial->kd.y,matMaterial->kd.z,1.f));
+            if (matMaterial->map_kd)
+            {//albedo맵이 존재할때
+
+            }
+            //mat->SetRoughness(matMaterial->sigma);
+
         }
+        else if (std::shared_ptr<pbrt::MirrorMaterial> mirrorMaterial = std::dynamic_pointer_cast<pbrt::MirrorMaterial>(material))
+        {//MirrorMaterial일때
+            mat->SetMetallic(mirrorMaterial->kr.x);
+        }
+        else if (std::shared_ptr<pbrt::PlasticMaterial> placsticMaterial = std::dynamic_pointer_cast<pbrt::PlasticMaterial>(material))
+        {//plasticMaterial일때
+            mat->SetAlbedo(XMFLOAT4(placsticMaterial->kd.x, placsticMaterial->kd.y, placsticMaterial->kd.z, 1.f));
+            mat->SetRoughness(placsticMaterial->roughness);
+        }
+        else if (std::shared_ptr<pbrt::SubstrateMaterial> substrateMaterial = std::dynamic_pointer_cast<pbrt::SubstrateMaterial>(material))
+        {//SubstrateMaterial일때
+            mat->SetAlbedo(XMFLOAT4(substrateMaterial->kd.x, substrateMaterial->kd.y, substrateMaterial->kd.z, 1.f));
+            if (std::shared_ptr<pbrt::ImageTexture> imageAlbedoTexture = std::dynamic_pointer_cast<pbrt::ImageTexture>(substrateMaterial->map_kd))
+            {
+                mat->SetAlbedoTexture(std::make_shared<Texture>(m_filePath.parent_path() / imageAlbedoTexture->fileName));
+            }
+        }
+        else if (std::shared_ptr<pbrt::GlassMaterial> glassMaterial = std::dynamic_pointer_cast<pbrt::GlassMaterial>(material))
+        {//GlassMaterial일때
+            mat->SetMetallic(glassMaterial->kr.x);
+        }
+        else if (std::shared_ptr<pbrt::UberMaterial> uberMaterial = std::dynamic_pointer_cast<pbrt::UberMaterial>(material))
+        {//UberMaterial일때
+            mat->SetAlbedo(XMFLOAT4(uberMaterial->kd.x, uberMaterial->kd.y, uberMaterial->kd.z, 1.f));
+            if (std::shared_ptr<pbrt::ImageTexture> imageAlbedoTexture = std::dynamic_pointer_cast<pbrt::ImageTexture>(uberMaterial->map_kd))
+            {
+                mat->SetAlbedoTexture(std::make_shared<Texture>(m_filePath.parent_path() / imageAlbedoTexture->fileName));
+            }
+        }
+        else if (std::shared_ptr<pbrt::FourierMaterial> fourierMaterial = std::dynamic_pointer_cast<pbrt::FourierMaterial>(material))
+        {//FourierMaterial일때
+            mat->SetAlbedo(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
+        }
+        
+        
+
         m_materials.push_back(mat);
     }
     void Scene::loadPBRTTriangleMesh(_In_ const std::shared_ptr<const pbrt::TriangleMesh> mesh)
@@ -204,12 +243,12 @@ namespace library
         for (UINT i = 0; i < static_cast<UINT>(vertexPositions.size()); i++)
         {
             const pbrt::vec3f& pbrtPosition = vertexPositions[i];
-            //const pbrt::vec2f& pbrtUV = vertexUV[i];//.pbrt파일은 텍스처가 없는경우 uv값이 주어지지 않음
+            const pbrt::vec2f& pbrtUV = vertexUV.empty() ? pbrt::vec2f(0.f,0.f) : vertexUV[i] ;//.pbrt파일은 텍스처가 없는경우 uv값이 주어지지 않음
             const pbrt::vec3f& pbrtNormal = vertexNormals[i];
             Vertex vertex =
             {
                 .position = XMFLOAT3(pbrtPosition.x, pbrtPosition.y, pbrtPosition.z),
-                .uv = XMFLOAT2(0.f, 0.f),
+                .uv = XMFLOAT2(pbrtUV.x, pbrtUV.y),
                 .normal = XMFLOAT3(pbrtNormal.x, pbrtNormal.y, pbrtNormal.z),
                 .tangent = XMFLOAT3(0.f,0.f,0.f),//
                 .biTangent = XMFLOAT3(0.f,0.f,0.f)

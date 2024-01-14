@@ -85,6 +85,10 @@ namespace library
 	{
 		m_metallicTexture = metallic;
 	}
+	void Material::SetAlbedo(_In_ XMFLOAT4 albedo)
+	{
+		m_albedo = albedo;
+	}
 	void Material::SetRoughness(_In_ FLOAT roughness)
 	{
 		m_roughness = roughness;

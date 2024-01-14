@@ -7,7 +7,7 @@ float4 TracePathTracerRay(in float3 rayOrigin,in float3 rayDirection, in uint cu
 {
     if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
     {//max_depth일때는 ambient light를 incoming light값으로 취급
-        return float4(0.03f, 0.03f, 0.03f, 0.03f);
+        return float4(0.2f, 0.2f, 0.2f, 0.03f);
     }
     RayDesc ray;
     ray.Origin = rayOrigin;
