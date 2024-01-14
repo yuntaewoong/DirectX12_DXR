@@ -18,7 +18,7 @@ float4 TracePathTracerRay(in float3 rayOrigin,in float3 rayDirection, in uint cu
     
     PathTracerRayPayload payload = {
         float4(0, 0, 0, 0), 
-        g_cameraCB.cameraPosition.xyz,
+        rayOrigin,
         currentRayRecursionDepth+1 
     };
     TraceRay(

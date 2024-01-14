@@ -108,6 +108,9 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
         payload.color = l_meshCB.emission;
         return;
     }
+    
+    
+    
 
     float3 hitPosition = HitWorldPosition();
     uint indexSizeInBytes = 2; //index는 16비트
@@ -148,13 +151,27 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
+    
+    if (l_meshCB.metallic > 0)
+    { //metal인경우 전반사(but, 아직 metallic이 0~1중간사이일때의 다른점을 표현할 수 없다는 문제 존재)
+        float3 nextRayDirection = reflect(WorldRayDirection(), triangleNormal);
+        payload.color = TracePathTracerRay(hitPosition, nextRayDirection, payload.recursionDepth);
+        return;
+    }
+    
+    
+    
+    
+    
+    
+    
     uint firstSeqLinearIndex = DispatchRaysIndex().x + 800 *  DispatchRaysIndex().y;
     uint seqLinearIndex0 = (firstSeqLinearIndex + payload.recursionDepth) % RANDOM_SEQUENCE_LENGTH;
 	uint seqLinearIndex1 = (firstSeqLinearIndex + payload.recursionDepth) % RANDOM_SEQUENCE_LENGTH;
 	float rand0 =  g_randomCB.randFloats0[seqLinearIndex0 / 4][seqLinearIndex0 % 4];
 	float rand1 = g_randomCB.randFloats1[seqLinearIndex1 / 4][seqLinearIndex1 % 4];
     float3 randomVectorInHemisphere = RandomVectorInHemisphere(triangleNormal,rand0,rand1);
-    
+    randomVectorInHemisphere = normalize(randomVectorInHemisphere);
     
     
     float3 diffuse = l_meshCB.albedo.rgb;
@@ -173,28 +190,31 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
         metallic = l_metallicTexture.SampleLevel(l_sampler, triangleUV, 0).x;
     }
     float3 color = float3(0.f, 0.f, 0.f);
-    float4 incomingLight = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
+    float4 incomingColor = TracePathTracerRay(hitPosition,randomVectorInHemisphere,payload.recursionDepth);
     float3 pointToCamera = normalize(payload.camera - hitPosition);
-        
+    //float lightDistance =  sqrt(dot(payload.camera - hitPosition,payload.camera - hitPosition));
+    //float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
+    
+    
     float3 halfVector = normalize(randomVectorInHemisphere + pointToCamera);
     diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);
     float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
-    F0 = lerp(F0, diffuse, metallic);
+    F0 = lerp(F0, l_meshCB.albedo.rgb, metallic);
     float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
     float3 kS = F; //Specular상수
-    float3 kD = float3(1.f, 1.f, 1.f) - kS; //Diffuse 상수
+    float3 kD = 1.f - kS; //Diffuse 상수
     kD = kD * (1-metallic);//Diffuse에 metallic반영
    
     float NDF = BxDF::BRDF::Specular::DistributionGGX(triangleNormal, halfVector, roughness); //미세면 분포도 NDF계산
-    float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, incomingLight.rgb, roughness); //미세면 그림자 계산
+    float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, randomVectorInHemisphere, roughness); //미세면 그림자 계산
      
     float3 numerator = NDF * G * F;
-    float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, incomingLight.rgb), 0.0) + 0.0001f;
+    float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, randomVectorInHemisphere), 0.0) + 0.0001f;
     float3 specular = numerator / denominator;
    
    
     float NdotL = max(dot(triangleNormal, randomVectorInHemisphere), 0.0);
-    color += (kD *diffuse + specular) * incomingLight.xyz /** lightAttenuation*/ * NdotL;
+    color += (kD *diffuse + specular) * incomingColor.rgb /** lightAttenuation*/ * NdotL;
     
     payload.color = float4(color, 1);
     

@@ -168,30 +168,30 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
         float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
         color += (1.f - shadow) * (kD * diffuse + specular) * lightColor * lightIntensity * lightAttenuation * NdotL;
     }
-    for (i = 0; i < g_areaLightCB.numAreaLight; i++)
-    {//area light 직접광에 의한 Lighting
-        float3 pointToLight = normalize(g_areaLightCB.position[i].xyz - hitPosition);
-        float3 lightColor = g_areaLightCB.lightColor[i].rgb;
-        float lightIntensity = g_areaLightCB.emission[i].r;
-        float lightDistance = sqrt(dot(g_areaLightCB.position[i].xyz - hitPosition, g_areaLightCB.position[i].xyz - hitPosition));
-        float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
-        float3 halfVector = normalize(pointToLight + pointToCamera);
-        float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuseColor);
-        float3 F0 = 0.04f; //일반적인 프레넬 상수수치를 0.04로 정의
-        F0 = lerp(F0, diffuseColor, metallic);
-        float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
-        float3 kS = F; //Specular상수
-        float3 kD = 1 - kS; //Diffuse 상수
-        kD = kD * (1-metallic);//Diffuse에 metallic반영
-        float NDF = BxDF::BRDF::Specular::DistributionGGX(triangleNormal, halfVector, roughness); //미세면 분포도 NDF계산
-        float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, pointToLight, roughness); //미세면 그림자 계산
-        float3 numerator = NDF * G * F;
-        float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, pointToLight), 0.0) + 0.0001f;
-        float3 specular = numerator / denominator;
-        //float shadow = TraceShadowRay(hitPosition, g_areaLightCB.position[i], payload.recursionDepth);
-        float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
-        color += /*(1.f-shadow) * */(kD * diffuse + specular) * lightColor *lightIntensity* lightAttenuation * NdotL;
-    }
+    //for (i = 0; i < g_areaLightCB.numAreaLight; i++)
+    //{//area light 직접광에 의한 Lighting
+    //    float3 pointToLight = normalize(g_areaLightCB.position[i].xyz - hitPosition);
+    //    float3 lightColor = g_areaLightCB.lightColor[i].rgb;
+    //    float lightIntensity = g_areaLightCB.emission[i].r;
+    //    float lightDistance = sqrt(dot(g_areaLightCB.position[i].xyz - hitPosition, g_areaLightCB.position[i].xyz - hitPosition));
+    //    float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
+    //    float3 halfVector = normalize(pointToLight + pointToCamera);
+    //    float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuseColor);
+    //    float3 F0 = 0.04f; //일반적인 프레넬 상수수치를 0.04로 정의
+    //    F0 = lerp(F0, diffuseColor, metallic);
+    //    float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
+    //    float3 kS = F; //Specular상수
+    //    float3 kD = 1 - kS; //Diffuse 상수
+    //    kD = kD * (1-metallic);//Diffuse에 metallic반영
+    //    float NDF = BxDF::BRDF::Specular::DistributionGGX(triangleNormal, halfVector, roughness); //미세면 분포도 NDF계산
+    //    float G = BxDF::BRDF::Specular::GeometrySmith(triangleNormal, pointToCamera, pointToLight, roughness); //미세면 그림자 계산
+    //    float3 numerator = NDF * G * F;
+    //    float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, pointToLight), 0.0) + 0.0001f;
+    //    float3 specular = numerator / denominator;
+    //    //float shadow = TraceShadowRay(hitPosition, g_areaLightCB.position[i], payload.recursionDepth);
+    //    float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
+    //    color += /*(1.f-shadow) * */(kD * diffuse + specular) * lightColor *lightIntensity* lightAttenuation * NdotL;
+    //}
     {//간접광에 의한 Lighting(Roughness,Metallic기반으로 weight정하기)
     
         

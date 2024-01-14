@@ -173,7 +173,13 @@ namespace library
     }
     void Scene::loadPBRTMaterial(_In_ const std::shared_ptr<const pbrt::Material> material)
     {
-        m_materials.push_back(std::make_shared<Material>(XMFLOAT4(1.f,1.f,1.f,0.f)));
+        std::shared_ptr<Material> mat = std::make_shared<Material>(XMFLOAT4(1.f, 1.f, 1.f, 0.f));
+        if (m_materials.size() % 7 == 0)
+        {
+            mat->SetMetallic(0.6f);
+            mat->SetRoughness(0.0f);
+        }
+        m_materials.push_back(mat);
     }
     void Scene::loadPBRTTriangleMesh(_In_ const std::shared_ptr<const pbrt::TriangleMesh> mesh)
     {

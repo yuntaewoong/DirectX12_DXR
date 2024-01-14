@@ -50,7 +50,7 @@ CustomScene::CustomScene()
 
 	std::shared_ptr<library::Mesh> mirror = std::make_shared<BasePlane>(//거울
 		XMVectorSet(0.f, 0.6f, 2.5f, 1.0f),
-		XMVectorSet(0.f, XM_PIDIV2, XM_PIDIV2, 1.0f),
+		XMVectorSet(0.f, XM_PIDIV2, -XM_PIDIV2, 1.0f),
 		XMVectorSet(15.f, 1.f, 15.f, 1.f)
 	);
 
@@ -98,7 +98,7 @@ CustomScene::CustomScene()
 	std::shared_ptr<library::Material> woodMaterial = std::make_shared<library::Material>();//목재 텍스처
 	std::filesystem::path woodTexturePath(L"Assets/Texture/wood.jpg");//project dir상에서의 상대Path
 	
-	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>();//Texture없는 Material
+	std::shared_ptr<library::Material> mirrorMaterial = std::make_shared<library::Material>(XMFLOAT4(1.f,1.f,1.f,1.f));//Texture없는 Material
 	mirrorMaterial->SetMetallic(0.8f);
 
 	std::shared_ptr<library::Material> ironPBRMaterial = std::make_shared<library::Material>();//PBR 철
@@ -114,7 +114,8 @@ CustomScene::CustomScene()
 		{//i가 0이면 roughness 0, j가 0이면 metallic 0
 			pbrTestMaterials[i][j] = std::make_shared<library::Material>(XMFLOAT4(1.0f,0.0f,0.0f,0.0f));
 			pbrTestMaterials[i][j]->SetRoughness(i / 7.f);
-			pbrTestMaterials[i][j]->SetMetallic(j / 7.f);
+			//pbrTestMaterials[i][j]->SetMetallic(j / 7.f);
+			pbrTestMaterials[i][j]->SetMetallic(1.0f);
 		}
 	}
 
@@ -159,10 +160,10 @@ CustomScene::CustomScene()
 		AddMaterial(ironPBRMaterial);
 	}
 	{//Mesh=>Material 대응 세팅
-		cube1->SetMaterial(woodMaterial);
+		cube1->SetMaterial(emissiveMaterial/*woodMaterial*/);
 		cube2->SetMaterial(ironPBRMaterial);
 		cube3->SetMaterial(ironPBRMaterial);
-		cube4->SetMaterial(woodMaterial);
+		cube4->SetMaterial(emissiveMaterial/*woodMaterial*/);
 		cube5->SetMaterial(emissiveMaterial);
 		plane->SetMaterial(floorMaterial);
 		mirror->SetMaterial(mirrorMaterial);
