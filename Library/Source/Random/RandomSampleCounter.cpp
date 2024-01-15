@@ -43,6 +43,11 @@ namespace library
 	}
     void RandomSampleCounter::Update(_In_ FLOAT deltaTime,_In_ UINT renderType,_In_ BOOL bPastFrameMoved)
     {
+        if (renderType == 0)
+        {
+            m_sampleCount = 0;//Real Time Rendering으로 전환시 샘플 수 초기화
+        }
+
         if (renderType == 1)
         {//path tracer 모드일때만 동작
             if (bPastFrameMoved)
@@ -50,6 +55,10 @@ namespace library
             updateGPUConstantBuffer();
             m_sampleCount++;
         }
+    }
+    UINT RandomSampleCounter::GetCurrentSampleCount() const
+    {
+        return m_sampleCount;
     }
     void RandomSampleCounter::updateGPUConstantBuffer()
     {

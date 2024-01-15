@@ -33,6 +33,7 @@ namespace library
         void SetMainScene(_In_ const std::shared_ptr<Scene>& pScene);
         void Render(_In_ UINT renderType);
         void Update(_In_ FLOAT deltaTime,_In_ UINT renderType);
+        UINT GetCurrentSamplesPerPixel() const;
     private:
         HRESULT populateCommandList(_In_ UINT renderType);
 

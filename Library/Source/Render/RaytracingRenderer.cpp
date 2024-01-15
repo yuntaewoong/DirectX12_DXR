@@ -125,6 +125,10 @@ namespace library
         m_randomSampleCounter.Update(deltaTime,renderType,m_camera.IsPastFrameMoved());
         m_scene->Update(deltaTime);
     }
+    UINT RaytracingRenderer::GetCurrentSamplesPerPixel() const
+    {
+        return m_randomSampleCounter.GetCurrentSampleCount();
+    }
     HRESULT RaytracingRenderer::populateCommandList(_In_ UINT renderType)
     {
         ComPtr<ID3D12GraphicsCommandList>& pCommandList = m_renderingResources.GetCommandList();

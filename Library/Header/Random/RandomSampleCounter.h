@@ -17,6 +17,7 @@ namespace library
         ComPtr<ID3D12Resource>& GetConstantBuffer();
         HRESULT Initialize(_In_ ID3D12Device* pDevice);
         void Update(_In_ FLOAT deltaTime,_In_ UINT renderType,_In_ BOOL bPastFrameMoved);
+        UINT GetCurrentSampleCount() const;
     private:
         void updateGPUConstantBuffer();
     private:

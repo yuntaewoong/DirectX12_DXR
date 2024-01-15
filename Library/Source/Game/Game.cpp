@@ -63,11 +63,18 @@ namespace library
 				ImGui_ImplDX12_NewFrame();
 				ImGui_ImplWin32_NewFrame();
 				ImGui::NewFrame();
-				ImGui::Begin("FPS");
+				ImGui::GetIO().FontGlobalScale = 2.f;
+				ImGui::Begin("Status");
 				ImGui::Text("%.3f ms/Frame (%.1f FPS)",1000.0f / ImGui::GetIO().Framerate,ImGui::GetIO().Framerate);
 				const char* RenderType[2] = {"Real Time Rendering","Path Tracing"};
 				
-				ImGui::Combo("Method", &RenderTypeCurrent, RenderType, IM_ARRAYSIZE(RenderType));
+				ImGui::Combo(" ", &RenderTypeCurrent, RenderType, IM_ARRAYSIZE(RenderType));
+				ImGui::Text("Samples Per Pixel : %d", m_renderer->GetCurrentSamplesPerPixel());
+				ImGui::Text("Control : ");
+				ImGui::Text("'Q','E' : rotate");
+				ImGui::Text("'w','A','S','D' : move horizontally");
+				ImGui::Text("'shift','space' : move vertically");
+
 				ImGui::End();
 				ImGui::Render();
 				m_renderer->Render(RenderTypeCurrent);
