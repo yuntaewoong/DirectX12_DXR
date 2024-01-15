@@ -42,8 +42,7 @@ namespace library
         {//파일경로가 주어졌다면, pbrt 씬 로딩
             std::shared_ptr<pbrt::Scene> pbrtScene = pbrt::importPBRT(m_filePath.string());
             loadPBRTWorld(pbrtScene->world);
-            auto a = pbrtScene->cameras;
-            int b = 1;
+            pbrtScene.reset();
         }
 
 
@@ -214,6 +213,8 @@ namespace library
         else if (std::shared_ptr<pbrt::FourierMaterial> fourierMaterial = std::dynamic_pointer_cast<pbrt::FourierMaterial>(material))
         {//FourierMaterial일때
             mat->SetAlbedo(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
+            auto a = fourierMaterial->fileName;
+            auto b = 1;
         }
         
         
