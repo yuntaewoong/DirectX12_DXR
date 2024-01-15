@@ -174,11 +174,11 @@ namespace library
         if (std::shared_ptr<pbrt::MatteMaterial> matMaterial = std::dynamic_pointer_cast<pbrt::MatteMaterial>(material))
         {//MattMaterial일때
             mat->SetAlbedo(XMFLOAT4(matMaterial->kd.x,matMaterial->kd.y,matMaterial->kd.z,1.f));
-            if (matMaterial->map_kd)
-            {//albedo맵이 존재할때
-
+            if (std::shared_ptr<pbrt::ImageTexture> imageAlbedoTexture = std::dynamic_pointer_cast<pbrt::ImageTexture>(matMaterial->map_kd))
+            {
+                mat->SetAlbedoTexture(std::make_shared<Texture>(m_filePath.parent_path() / imageAlbedoTexture->fileName));
             }
-            //mat->SetRoughness(matMaterial->sigma);
+            mat->SetRoughness(matMaterial->sigma / 100.f);
 
         }
         else if (std::shared_ptr<pbrt::MirrorMaterial> mirrorMaterial = std::dynamic_pointer_cast<pbrt::MirrorMaterial>(material))
@@ -212,13 +212,27 @@ namespace library
         }
         else if (std::shared_ptr<pbrt::FourierMaterial> fourierMaterial = std::dynamic_pointer_cast<pbrt::FourierMaterial>(material))
         {//FourierMaterial일때
-            mat->SetAlbedo(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
-            auto a = fourierMaterial->fileName;
-            auto b = 1;
+            mat->SetAlbedo(XMFLOAT4(1.f, 1.f, 1.f, 1.f));
+            mat->SetRoughness(1.f);
+        }
+        else if (std::shared_ptr<pbrt::GlassMaterial> glassMaterial = std::dynamic_pointer_cast<pbrt::GlassMaterial>(material))
+        {//GlassMaterial일때
+            mat->SetMetallic(glassMaterial->kr.x);
+        }
+        else if (std::shared_ptr<pbrt::TranslucentMaterial> translucentMaterialMaterial = std::dynamic_pointer_cast<pbrt::TranslucentMaterial>(material))
+        {//TranslucentMaterial일때
+            //mat->SetAlbedo(XMFLOAT4(0.f, 0.f, 1.f, 1.f));
+        }
+        else if (std::shared_ptr<pbrt::MetalMaterial> metalMaterial = std::dynamic_pointer_cast<pbrt::MetalMaterial>(material))
+        {//MetalMaterial일때
+            mat->SetRoughness(metalMaterial->roughness);
+            mat->SetMetallic(1.f);
+        }
+        else if (std::shared_ptr<pbrt::MixMaterial> mixMaterial = std::dynamic_pointer_cast<pbrt::MixMaterial>(material))
+        {//MixMaterial일때
+            //mat->SetAlbedo(XMFLOAT4(1.f, 0.f, 0.f, 0.f));
         }
         
-        
-
         m_materials.push_back(mat);
     }
     void Scene::loadPBRTTriangleMesh(_In_ const std::shared_ptr<const pbrt::TriangleMesh> mesh)

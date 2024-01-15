@@ -9,7 +9,7 @@ float4 TraceRealTimeRay(in float3 rayOrigin,in float3 rayDirection, in uint curr
 {
     if (currentRayRecursionDepth >= MAX_RECURSION_DEPTH)
     {
-        return float4(1.f, 1.f, 1.f, 0.0f);
+        return float4(0.03f, 0.03f, 0.03f, 0.0f);
     }
     RayDesc ray;
     ray.Origin = rayOrigin;

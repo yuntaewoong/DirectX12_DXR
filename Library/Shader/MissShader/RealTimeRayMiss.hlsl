@@ -4,5 +4,5 @@
 [shader("miss")]
 void RealTimeRayMissShader(inout RealTimeRayPayload payload)
 {
-    payload.color = float4(0.0f, 0.2f, 0.4f, 1.0f);
+    payload.color = float4(0.03f, 0.03f, 0.03f, 1.0f);
 }

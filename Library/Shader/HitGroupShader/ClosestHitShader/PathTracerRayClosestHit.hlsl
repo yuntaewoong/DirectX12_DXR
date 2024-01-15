@@ -197,9 +197,9 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
     
     
     float3 halfVector = normalize(randomVectorInHemisphere + pointToCamera);
-    diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);
     float3 F0 = float3(0.04f, 0.04f, 0.04f); //일반적인 프레넬 상수수치를 0.04로 정의
-    F0 = lerp(F0, l_meshCB.albedo.rgb, metallic);
+    F0 = lerp(F0,diffuse, metallic);
+    diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuse);
     float3 F = BxDF::BRDF::Specular::fresnelSchlick(max(dot(halfVector, pointToCamera), 0.0), F0); //반사정도 정의
     float3 kS = F; //Specular상수
     float3 kD = 1.f - kS; //Diffuse 상수

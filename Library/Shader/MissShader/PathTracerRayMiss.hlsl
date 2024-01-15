@@ -4,5 +4,5 @@
 [shader("miss")]
 void PathTracerRayMissShader(inout PathTracerRayPayload payload)
 {
-    payload.color = float4(0.3f,0.3f,0.3f,1.f);
+    payload.color = float4(0.03f,0.03f,0.03f,1.f);
 }

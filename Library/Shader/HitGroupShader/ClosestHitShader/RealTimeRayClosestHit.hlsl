@@ -113,7 +113,7 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
-    float3 ambientColor = float3(0.1f, 0.1f, 0.1f);
+    float3 ambientColor = float3(0.03f, 0.03f, 0.03f);
     {//RTAO(Ray Tracing Ambient Occlusion 계산)
         ambientColor *= TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
     }
@@ -172,7 +172,7 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
         float3 lightPosition = mul(g_areaLightCB.vertices[i*3],g_areaLightCB.worldMatrix[i]).xyz;
         float3 pointToLight = normalize(lightPosition - hitPosition);
         float3 lightColor = g_areaLightCB.lightColor[i].rgb;
-        float lightIntensity = g_areaLightCB.emission[i].r;
+        float lightIntensity = g_areaLightCB.emission[i].r  / (4 * PI * PI);
         float lightDistance = sqrt(dot(lightPosition - hitPosition, lightPosition - hitPosition));
         float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         float3 halfVector = normalize(pointToLight + pointToCamera);
@@ -188,9 +188,9 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
         float3 numerator = NDF * G * F;
         float denominator = 4.0 * max(dot(triangleNormal, pointToCamera), 0.0) * max(dot(triangleNormal, pointToLight), 0.0) + 0.0001f;
         float3 specular = numerator / denominator;
-        //float shadow = TraceShadowRay(hitPosition, g_areaLightCB.position[i], payload.recursionDepth);
+        float shadow = TraceShadowRay(hitPosition, float4(lightPosition,1.f), payload.recursionDepth);
         float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
-        color += /*(1.f-shadow) * */(kD * diffuse + specular) * lightColor * lightIntensity * lightAttenuation * NdotL;
+        color += /*(1.f - shadow) **/ (kD * diffuse + specular) * lightColor * lightIntensity * lightAttenuation * NdotL;
     }
     {//간접광에 의한 Lighting(Roughness,Metallic기반으로 weight정하기)
     
