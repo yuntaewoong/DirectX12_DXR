@@ -4,10 +4,10 @@
 #include "DescriptorHeap\CBVSRVUAVDescriptorHeap.h"
 namespace library
 {
-    RaytracingRenderer::RaytracingRenderer() :
+    RaytracingRenderer::RaytracingRenderer(_In_ FLOAT aspectRatio) :
         m_renderingResources(),
         m_scene(nullptr),
-        m_camera(Camera(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f))),
+        m_camera(Camera(XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f),aspectRatio)),
         m_randomGenerator(),
         m_randomSampleCounter(),
         m_dxrDevice(nullptr),

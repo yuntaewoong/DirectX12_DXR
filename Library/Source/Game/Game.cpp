@@ -5,7 +5,7 @@ namespace library
 	Game::Game(_In_ PCWSTR pszGameName, _In_ INT nWidth, _In_ INT nHeight) :
 		m_pszGameName(pszGameName),
 		m_mainWindow(std::make_unique<MainWindow>(nWidth,nHeight)),
-		m_renderer(std::make_unique<RaytracingRenderer>())
+		m_renderer(std::make_unique<RaytracingRenderer>(static_cast<FLOAT>(nWidth) / nHeight))
 	{ }
 
 	/*

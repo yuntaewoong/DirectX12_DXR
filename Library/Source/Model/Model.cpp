@@ -140,7 +140,7 @@ namespace library
             
             aiColor3D emissiveColor(0.f, 0.f, 0.f);
             pMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveColor);//emissive°ª load
-            mat->SetEmission(emissiveColor.r*30.f);
+            mat->SetEmission(emissiveColor.r*20.f);
 
             aiColor3D metallicColor(0.f, 0.f, 0.f);
             pMaterial->Get(AI_MATKEY_COLOR_SPECULAR, metallicColor);//metallic°ª load

@@ -21,7 +21,7 @@ namespace library
 	class RaytracingRenderer
 	{
 	public:
-        RaytracingRenderer();
+        RaytracingRenderer(_In_ FLOAT aspectRatio);
         RaytracingRenderer(const RaytracingRenderer& other) = delete;
         RaytracingRenderer(RaytracingRenderer&& other) = delete;
         RaytracingRenderer& operator=(const RaytracingRenderer& other) = delete;

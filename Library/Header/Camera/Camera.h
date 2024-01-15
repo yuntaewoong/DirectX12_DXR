@@ -8,7 +8,7 @@ namespace library
     {
     public:
         Camera() = delete;
-        Camera(_In_ const XMVECTOR& position);
+        Camera(_In_ const XMVECTOR& position,_In_ FLOAT aspectRatio);
         Camera(const Camera& other) = delete;
         Camera(Camera&& other) = delete;
         Camera& operator=(const Camera& other) = delete;
@@ -30,6 +30,7 @@ namespace library
         ComPtr<ID3D12Resource> m_cameraConstantBuffer;
         void* m_mappedData;
 
+        FLOAT m_aspectRatio;
         FLOAT m_yaw;
         FLOAT m_pitch;
 

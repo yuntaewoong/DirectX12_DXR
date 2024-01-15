@@ -165,7 +165,7 @@ void PathTracerRayClosestHitShader(inout PathTracerRayPayload payload, in BuiltI
     
     
     
-    uint firstSeqLinearIndex = DispatchRaysIndex().x + 800 *  DispatchRaysIndex().y;
+    uint firstSeqLinearIndex = DispatchRaysIndex().x + 1600 *  DispatchRaysIndex().y;
     uint seqLinearIndex0 = (firstSeqLinearIndex + payload.recursionDepth) % RANDOM_SEQUENCE_LENGTH;
 	uint seqLinearIndex1 = (firstSeqLinearIndex + payload.recursionDepth) % RANDOM_SEQUENCE_LENGTH;
 	float rand0 =  g_randomCB.randFloats0[seqLinearIndex0 / 4][seqLinearIndex0 % 4];

@@ -3,9 +3,10 @@
 
 namespace library
 {
-    Camera::Camera(_In_ const XMVECTOR& position) :
+    Camera::Camera(_In_ const XMVECTOR& position,_In_ FLOAT aspectRatio) :
         m_cameraConstantBuffer(),
         m_mappedData(nullptr),
+        m_aspectRatio(aspectRatio),
         m_yaw(0.0f),
         m_pitch(0.0f),
         m_moveLeftRight(0.0f),
@@ -128,7 +129,7 @@ namespace library
     XMMATRIX Camera::getInverseViewProjectionMatrix() const
     {
         XMMATRIX view = XMMatrixLookAtLH(m_eye, m_at, m_up);
-        XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 4.f/3.f, 1.0f, 125.0f);
+        XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_aspectRatio, 1.0f, 125.0f);
         XMMATRIX viewProj = view * proj;
         return XMMatrixInverse(nullptr, viewProj);
     }
