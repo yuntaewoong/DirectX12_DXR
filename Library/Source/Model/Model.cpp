@@ -35,6 +35,7 @@ namespace library
             aiProcess_Triangulate | aiProcess_GenSmoothNormals |
             aiProcess_CalcTangentSpace | aiProcess_ConvertToLeftHanded
         );
+        
         if (m_pScene)
         {
             hr = initFromScene(pDevice,pCommandQueue,cbvSrvUavDescriptorHeap, m_pScene, m_filePath);
@@ -133,7 +134,22 @@ namespace library
         for (UINT i = 0u; i < pScene->mNumMaterials; ++i)
         {
             const aiMaterial* pMaterial = pScene->mMaterials[i];
-            m_materials.push_back(std::make_shared<Material>());
+            aiColor3D diffuseColor(0.f, 0.f, 0.f);
+            pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);//diffuse°ª load
+            std::shared_ptr<Material> mat = std::make_shared<Material>(XMFLOAT4(diffuseColor.r, diffuseColor.g, diffuseColor.b, 1.f));
+            
+            aiColor3D emissiveColor(0.f, 0.f, 0.f);
+            pMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveColor);//emissive°ª load
+            mat->SetEmission(emissiveColor.r*30.f);
+
+            aiColor3D metallicColor(0.f, 0.f, 0.f);
+            pMaterial->Get(AI_MATKEY_COLOR_SPECULAR, metallicColor);//metallic°ª load
+            mat->SetMetallic(metallicColor.r);
+
+            
+            m_materials.push_back(mat);
+            
+            
             loadTextures(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap, parentDirectory, pMaterial, i);
         }
 

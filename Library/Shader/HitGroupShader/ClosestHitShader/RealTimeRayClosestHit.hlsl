@@ -113,7 +113,6 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
     float2 triangleUV = HitAttributeFloat2(vertexUV, attr); //무게중심 좌표계로 UV값 보간하기
     triangleNormal = CalculateNormalmapNormal(triangleNormal, triangleTangent, triangleBitangent, triangleUV); //노말맵이 있다면 노말맵적용
     
-        
     float3 ambientColor = float3(0.1f, 0.1f, 0.1f);
     {//RTAO(Ray Tracing Ambient Occlusion 계산)
         ambientColor *= TraceRTAORay(hitPosition, triangleNormal, payload.recursionDepth);
@@ -170,10 +169,11 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
     }
     for (i = 0; i < g_areaLightCB.numAreaLight; i++)
     { //area light 직접광에 의한 Lighting
-        float3 pointToLight = normalize(g_areaLightCB.position[i].xyz - hitPosition);
+        float3 lightPosition = mul(g_areaLightCB.vertices[i*3],g_areaLightCB.worldMatrix[i]).xyz;
+        float3 pointToLight = normalize(lightPosition - hitPosition);
         float3 lightColor = g_areaLightCB.lightColor[i].rgb;
         float lightIntensity = g_areaLightCB.emission[i].r;
-        float lightDistance = sqrt(dot(g_areaLightCB.position[i].xyz - hitPosition, g_areaLightCB.position[i].xyz - hitPosition));
+        float lightDistance = sqrt(dot(lightPosition - hitPosition, lightPosition - hitPosition));
         float lightAttenuation = 1.0f / (1.0f + 0.09f * lightDistance + 0.032f * (lightDistance * lightDistance));
         float3 halfVector = normalize(pointToLight + pointToCamera);
         float3 diffuse = BxDF::BRDF::Diffuse::CalculateLambertianBRDF(diffuseColor);
@@ -203,7 +203,6 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
         color = color * directWeight + reflectedColor * reflectedWeight; //반사광(real time rendering을 위해 야매로 계산(정반사만 고려))
         color += ambientColor; //주변광
     }
-    
     
     
     payload.color = float4(color, 1);

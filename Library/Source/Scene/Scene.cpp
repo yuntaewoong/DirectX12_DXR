@@ -355,7 +355,7 @@ namespace library
                 
                 for (UINT j = 0; j < static_cast<UINT>(m_meshes[i]->GetIndices().size()); j += 3)
                 {//polygon loop
-                    cb.position[numAreaLights] = m_meshes[i]->GetWorldMatrix().r[3];
+                    cb.worldMatrix[numAreaLights] = m_meshes[i]->GetWorldMatrix();
                     cb.normal[numAreaLights] = XMVectorSet(
                         m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j].index].normal.x,
                         m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j].index].normal.y,

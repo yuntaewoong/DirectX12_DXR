@@ -56,7 +56,7 @@ struct PointLightConstantBuffer
 
 struct AreaLightConstantBuffer
 {
-    XMVECTOR position[NUM_AREA_LIGHT_MAX];//area light의 world position
+    XMMATRIX worldMatrix[NUM_AREA_LIGHT_MAX];//area light의 world matrix
     XMVECTOR normal[NUM_AREA_LIGHT_MAX];//area light이 바라보는 방향
     XMVECTOR vertices[NUM_AREA_LIGHT_MAX*3];//area light를 구성하는 3개의 vertex정보
     XMFLOAT4 lightColor[NUM_AREA_LIGHT_MAX];//area light 색
