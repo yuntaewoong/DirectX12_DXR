@@ -16,7 +16,8 @@ namespace library
         m_pointLightsConstantBuffer(nullptr),
         m_areaLightsConstantBuffer(nullptr),
         m_pointLightMappedData(nullptr),
-        m_areaLightMappedData(nullptr)
+        m_areaLightMappedData(nullptr),
+        m_bInitialized(FALSE)
     {}
 
     Scene::Scene(const std::filesystem::path & filePath)
@@ -28,7 +29,8 @@ namespace library
         m_pointLightsConstantBuffer(nullptr),
         m_areaLightsConstantBuffer(nullptr),
         m_pointLightMappedData(nullptr),
-        m_areaLightMappedData(nullptr)
+        m_areaLightMappedData(nullptr),
+        m_bInitialized(FALSE)
     {}
 
     HRESULT Scene::Initialize(
@@ -37,6 +39,10 @@ namespace library
         _In_ CBVSRVUAVDescriptorHeap& cbvSrvUavDescriptorHeap
     )
     {
+        
+        
+        if (m_bInitialized)//한번 로딩되었던 Scene은 다시 로딩하지 않음
+            return S_OK;
         HRESULT hr = S_OK;
         if (!m_filePath.empty())
         {//파일경로가 주어졌다면, pbrt 씬 로딩
@@ -45,7 +51,7 @@ namespace library
             pbrtScene.reset();
         }
 
-
+        
         for (UINT i = 0; i < m_meshes.size(); i++)
         {
             hr = m_meshes[i]->Initialize(pDevice);
@@ -67,14 +73,6 @@ namespace library
                 m_meshes.push_back(meshes[i]);
             }
         }
-        for (UINT i = 0; i < m_pointLights.size(); i++)
-        {
-            hr = m_pointLights[i]->Initialize(pDevice);
-            if (FAILED(hr))
-            {
-                return hr;
-            }
-        }
         for (UINT i = 0; i < m_materials.size(); i++)
         {
             hr = m_materials[i]->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
@@ -93,6 +91,7 @@ namespace library
         {
             return hr;
         }
+        m_bInitialized = TRUE;
         return hr;
     }
     void Scene::AddMesh(_In_ const std::shared_ptr<Mesh>& pMesh)
@@ -126,6 +125,7 @@ namespace library
             m_pointLights[i]->Update(deltaTime);
         }
         updatePointLightConstantBuffer();
+        updateAreaLightConstantBuffer();
     }
     ComPtr<ID3D12Resource>& Scene::GetPointLightsConstantBuffer()
     {

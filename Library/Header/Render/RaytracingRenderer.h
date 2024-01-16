@@ -30,9 +30,10 @@ namespace library
 
         HRESULT Initialize(_In_ HWND hWnd);
         void HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime);
-        void SetMainScene(_In_ const std::shared_ptr<Scene>& pScene);
+        void SetMainScene(_In_ const std::shared_ptr<Scene>& scene);
         void Render(_In_ UINT renderType);
         void Update(_In_ FLOAT deltaTime,_In_ UINT renderType);
+        HRESULT WaitForGPU();
         UINT GetCurrentSamplesPerPixel() const;
     private:
         HRESULT populateCommandList(_In_ UINT renderType);
@@ -48,6 +49,7 @@ namespace library
     private:
         FundamentalRenderingResources m_renderingResources;
         std::shared_ptr<Scene> m_scene;
+
         Camera m_camera;
         RandomGenerator m_randomGenerator;
         RandomSampleCounter m_randomSampleCounter;

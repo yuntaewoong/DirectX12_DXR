@@ -3,6 +3,7 @@
 #include "Common/Common.h"
 #include "Window/MainWindow.h"
 #include "Render/RaytracingRenderer.h"
+#include "Scene\Scene.h"
 
 namespace library
 {
@@ -24,9 +25,18 @@ namespace library
         std::unique_ptr<RaytracingRenderer>& GetRenderer();
         PCWSTR GetGameName() const;
         std::unique_ptr<MainWindow>& GetWindow();
+
+        void AddScene(_In_ const std::shared_ptr<Scene>& scene);
+        std::shared_ptr<Scene> GetCurrentScene() const;
+    private:
+        void ChangeScene(_In_ UINT sceneIndex);
     private:
         PCWSTR m_pszGameName;
         std::unique_ptr<MainWindow> m_mainWindow;
         std::unique_ptr<RaytracingRenderer> m_renderer;
+        std::vector<std::shared_ptr<Scene>> m_scenes;
+        UINT m_currentSceneIndex;
+        UINT m_pastFrameSceneIndex;
+        
     };
 }

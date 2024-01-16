@@ -46,6 +46,7 @@ namespace library
     HRESULT ShaderTable::initialize(_In_ const ComPtr<ID3D12Device>& pDevice, _In_ UINT numShaderRecords, _In_ UINT shaderRecordSize)
     {
         HRESULT hr = S_OK;
+        m_shaderRecords.clear();
         m_shaderRecordSize = align(shaderRecordSize, D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT);//32바이트 단위로
         m_shaderRecords.reserve(numShaderRecords);
         UINT bufferSize = numShaderRecords * m_shaderRecordSize;//buffer사이즈 설정

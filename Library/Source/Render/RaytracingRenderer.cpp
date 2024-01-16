@@ -41,6 +41,7 @@ namespace library
         {
             return hr;
         }
+        
         //이하는 RayTracing용 초기화
         
         hr = createRaytracingInterfaces();//device,commandList ray tracing지원용으로 query
@@ -107,9 +108,9 @@ namespace library
     {
         m_camera.HandleInput(directions, mouseRelativeMovement, deltaTime);
     }
-    void RaytracingRenderer::SetMainScene(_In_ const std::shared_ptr<Scene>& pScene)
+    void RaytracingRenderer::SetMainScene(_In_ const std::shared_ptr<Scene>& scene)
     {
-        m_scene = pScene;
+        m_scene = scene;
     }
     void RaytracingRenderer::Render(_In_ UINT renderType)
     {
@@ -124,6 +125,16 @@ namespace library
         m_randomGenerator.Update(deltaTime);
         m_randomSampleCounter.Update(deltaTime,renderType,m_camera.IsPastFrameMoved());
         m_scene->Update(deltaTime);
+    }
+    HRESULT RaytracingRenderer::WaitForGPU()
+    {
+        HRESULT hr = S_OK;
+        hr = m_renderingResources.WaitForGPU();
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        return hr;
     }
     UINT RaytracingRenderer::GetCurrentSamplesPerPixel() const
     {
@@ -314,6 +325,7 @@ namespace library
             return hr;
         }
         {//BLAS를 이루게 되는 Mesh들 추출
+            m_bottomLevelAccelerationStructures.clear();
             const std::vector<std::shared_ptr<Mesh>>& meshes = m_scene->GetMeshes();
             for (UINT i = 0; i < meshes.size(); i++)
             {
@@ -367,7 +379,7 @@ namespace library
         hr = m_hitGroupShaderTable.Initialize(
             pDevice,
             m_raytracingPipelineStateObject.GetStateObject(),
-            m_scene->GetMeshes()
+           m_scene->GetMeshes()
         );//hit group table을 초기화 하기 위해서는 Mesh들의 정보가 필요
         if (FAILED(hr))
         {

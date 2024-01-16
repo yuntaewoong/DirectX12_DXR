@@ -63,5 +63,6 @@ namespace library
         ComPtr<ID3D12Resource> m_areaLightsConstantBuffer;
         void* m_pointLightMappedData;
         void* m_areaLightMappedData;
+        BOOL m_bInitialized;
     };
 }
