@@ -7,22 +7,37 @@
 namespace library
 {
 
-    Scene::Scene() 
+    Scene::Scene(
+        _In_ XMVECTOR location,
+        _In_ XMVECTOR rotation,
+        _In_ XMVECTOR scale
+    ) 
         :
         m_filePath(),
         m_meshes(),
         m_pointLights(),
         m_materials(),
-        m_bInitialized(FALSE)
+        m_bInitialized(FALSE),
+        m_location(location),
+        m_rotation(rotation),
+        m_scale(scale)
     {}
 
-    Scene::Scene(const std::filesystem::path & filePath)
+    Scene::Scene(
+        _In_ const std::filesystem::path & filePath,
+        _In_ XMVECTOR location,
+        _In_ XMVECTOR rotation,
+        _In_ XMVECTOR scale
+    )
         :
         m_filePath(filePath),
         m_meshes(),
         m_pointLights(),
         m_materials(),
-        m_bInitialized(FALSE)
+        m_bInitialized(FALSE),
+        m_location(location),
+        m_rotation(rotation),
+        m_scale(scale)
     {}
 
     HRESULT Scene::Initialize(
@@ -234,9 +249,9 @@ namespace library
     {
         m_meshes.push_back(
             std::make_shared<Mesh>(
-                XMVectorZero(),
-                XMVectorZero(),
-                XMVectorSet(1.f,1.f,1.f,1.f)
+                m_location,
+                m_rotation,
+                m_scale
             )
         );//로딩전 빈 mesh를 vector에 추가
         //vertex로딩

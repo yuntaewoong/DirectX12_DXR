@@ -2,9 +2,13 @@
 #include "Scene\CornellBoxSphereScene.h"
 #include <DirectXColors.h>
 
-CornellBoxSphereScene::CornellBoxSphereScene()
+CornellBoxSphereScene::CornellBoxSphereScene(
+	_In_ XMVECTOR location,
+    _In_ XMVECTOR rotation,
+	_In_ XMVECTOR scale
+)
 	:
-	Scene::Scene()
+	Scene::Scene(location,rotation,scale)
 {
 	std::shared_ptr<library::Model> cornellBox = std::make_shared<library::Model>(//ÄÚ³Ú¹Ú½º ¸ðµ¨
 		L"Assets/Model/CornellBox/CornellBox-Sphere.obj",

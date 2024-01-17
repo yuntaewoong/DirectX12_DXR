@@ -8,7 +8,11 @@
 class CornellBoxOriginalScene : public library::Scene
 {
 public:
-    CornellBoxOriginalScene();
+    CornellBoxOriginalScene(
+        _In_ XMVECTOR location,
+        _In_ XMVECTOR rotation,
+        _In_ XMVECTOR scale
+    );
     CornellBoxOriginalScene(const CornellBoxOriginalScene& other) = delete;
     CornellBoxOriginalScene(CornellBoxOriginalScene&& other) = delete;
     CornellBoxOriginalScene& operator=(const CornellBoxOriginalScene& other) = delete;

@@ -16,8 +16,17 @@ namespace library
     class Scene
     {
     public:
-        Scene(); //기본 생성자 => empty scene
-        Scene(_In_ const std::filesystem::path& filePath); //경로가 주어진 생성자 => pre defined scene
+        Scene(
+            _In_ XMVECTOR location,
+            _In_ XMVECTOR rotation,
+            _In_ XMVECTOR scale
+        ); //기본 생성자 => empty scene
+        Scene(
+            _In_ const std::filesystem::path& filePath,
+            _In_ XMVECTOR location,
+            _In_ XMVECTOR rotation,
+            _In_ XMVECTOR scale
+        ); //경로가 주어진 생성자 => pre defined scene
         Scene(const Scene& other) = delete;
         Scene(Scene&& other) = delete;
         Scene& operator=(const Scene& other) = delete;
@@ -55,5 +64,9 @@ namespace library
         std::vector<std::shared_ptr<PointLight>> m_pointLights;  
         std::vector<std::shared_ptr<Material>> m_materials;
         BOOL m_bInitialized;
+
+        XMVECTOR m_location;
+        XMVECTOR m_rotation;
+        XMVECTOR m_scale;
     };
 }

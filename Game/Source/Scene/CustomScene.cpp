@@ -10,7 +10,11 @@
 
 CustomScene::CustomScene()
 	:
-	Scene::Scene()
+	Scene::Scene(
+		XMVectorSet(0.f, 0.0f, 0.f, 1.0f),
+		XMVectorSet(0.f, 0.0f, 0.f, 1.0f),
+		XMVectorSet(1.f, 1.f, 1.f, 1.0f)
+	)
 {
 	std::shared_ptr<library::Mesh> cube1 = std::make_shared<BaseCube>(//Å¥ºê1
 		XMVectorSet(0.6f, 0.0f, 0.f, 1.0f),
