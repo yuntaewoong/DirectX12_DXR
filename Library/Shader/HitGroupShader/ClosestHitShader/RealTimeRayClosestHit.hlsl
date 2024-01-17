@@ -66,6 +66,7 @@ float3 CalculateNormalmapNormal(float3 originNormal,float3 tangent,float3 biTang
 [shader("closesthit")]
 void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
+
     if(l_meshCB.emission > 0)
     {//Emissive속성의 material은 광원으로 취급하기에 바로 색상 리턴
         payload.color = l_meshCB.emission;

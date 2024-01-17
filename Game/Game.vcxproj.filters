@@ -40,7 +40,10 @@
     <ClCompile Include="Source\Scene\CustomScene.cpp">
       <Filter>Source\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\CornellBoxScene.cpp">
+    <ClCompile Include="Source\Scene\CornellBoxSphereScene.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\CornellBoxOriginalScene.cpp">
       <Filter>Source\Scene</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,7 +66,10 @@
     <ClInclude Include="Header\Scene\CustomScene.h">
       <Filter>Source\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Header\Scene\CornellBoxScene.h">
+    <ClInclude Include="Header\Scene\CornellBoxSphereScene.h">
+      <Filter>Source\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Scene\CornellBoxOriginalScene.h">
       <Filter>Source\Scene</Filter>
     </ClInclude>
   </ItemGroup>

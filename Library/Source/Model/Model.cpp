@@ -13,7 +13,8 @@ namespace library
         _In_ const std::filesystem::path& filePath,
         _In_ XMVECTOR location,
         _In_ XMVECTOR rotation,
-        _In_ XMVECTOR scale
+        _In_ XMVECTOR scale,
+        _In_ BOOL reverseNormalOnLoad
     )   :
         m_filePath(filePath),
         m_meshes(std::vector<std::shared_ptr<Mesh>>()),
@@ -21,7 +22,8 @@ namespace library
         m_pScene(nullptr),
         m_location(location),
         m_rotation(rotation),
-        m_scale(scale)
+        m_scale(scale),
+        m_bReverseNoramlOnLoad(reverseNormalOnLoad)
     {}
     HRESULT Model::Initialize(
         _In_ const ComPtr<ID3D12Device>& pDevice,
@@ -146,10 +148,15 @@ namespace library
             pMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveColor);//emissive°ª load
             mat->SetEmission(emissiveColor.r*20.f);
 
+            pMaterial->Get(AI_MATKEY_COLOR_AMBIENT, emissiveColor);//emissive°ª load
+            if(emissiveColor.r > 15.f)
+                mat->SetEmission(emissiveColor.r*20.f);
+
             aiColor3D metallicColor(0.f, 0.f, 0.f);
             pMaterial->Get(AI_MATKEY_COLOR_SPECULAR, metallicColor);//metallic°ª load
             mat->SetMetallic(metallicColor.r);
 
+            
             
             m_materials.push_back(mat);
             
@@ -180,6 +187,11 @@ namespace library
                 .tangent = XMFLOAT3(tangent.x,tangent.y,tangent.z),
                 .biTangent = XMFLOAT3(biTangent.x,biTangent.y,biTangent.z)
             };
+            if (m_bReverseNoramlOnLoad)
+            {
+                XMFLOAT3 newNormal = XMFLOAT3(-vertex.normal.x, -vertex.normal.y, -vertex.normal.z);
+                vertex.normal = newNormal;
+            }
             m_meshes[uMeshIndex]->AddVertex(vertex);
         }
         for (UINT i = 0u; i < pMesh->mNumFaces; i++)

@@ -28,7 +28,8 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch_game.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Source\Plane\BasePlane.cpp" />
-    <ClCompile Include="Source\Scene\CornellBoxScene.cpp" />
+    <ClCompile Include="Source\Scene\CornellBoxOriginalScene.cpp" />
+    <ClCompile Include="Source\Scene\CornellBoxSphereScene.cpp" />
     <ClCompile Include="Source\Scene\CustomScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -37,7 +38,8 @@
     <ClInclude Include="Header\Light\RotatingLight.h" />
     <ClInclude Include="Header\pch_game.h" />
     <ClInclude Include="Header\Plane\BasePlane.h" />
-    <ClInclude Include="Header\Scene\CornellBoxScene.h" />
+    <ClInclude Include="Header\Scene\CornellBoxOriginalScene.h" />
+    <ClInclude Include="Header\Scene\CornellBoxSphereScene.h" />
     <ClInclude Include="Header\Scene\CustomScene.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

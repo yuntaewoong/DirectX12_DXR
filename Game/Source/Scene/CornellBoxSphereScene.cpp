@@ -1,8 +1,8 @@
 #include "pch_game.h"
-#include "Scene\CornellBoxScene.h"
+#include "Scene\CornellBoxSphereScene.h"
 #include <DirectXColors.h>
 
-CornellBoxScene::CornellBoxScene()
+CornellBoxSphereScene::CornellBoxSphereScene()
 	:
 	Scene::Scene()
 {

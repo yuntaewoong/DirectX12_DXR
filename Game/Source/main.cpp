@@ -3,7 +3,8 @@
 #include "Scene\Scene.h"
 #include "Game\Game.h"
 #include "Scene\CustomScene.h"
-#include "Scene\CornellBoxScene.h"
+#include "Scene\CornellBoxSphereScene.h"
+#include "Scene\CornellBoxOriginalScene.h"
 
 
 INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ INT nCmdShow)
@@ -14,11 +15,13 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	std::shared_ptr<library::Scene> bathroomScene = std::make_shared<library::Scene>(
 		L"Assets/Scene/bathroom/pbrt-v3-scenes-master-bathroom/bathroom/bathroom.pbrt"
 	);
-	std::shared_ptr<library::Scene> cornellBoxScene = std::make_shared<CornellBoxScene>();
+	std::shared_ptr<library::Scene> cornellBoxSphereScene = std::make_shared<CornellBoxSphereScene>();
+	std::shared_ptr<library::Scene> cornellBoxOriginalScene = std::make_shared<CornellBoxOriginalScene>();
 	std::shared_ptr<library::Scene> customScene = std::make_shared<CustomScene>();
 	{//게임에서 사용할 Scene 추가 & 선택
 		game->AddScene(bathroomScene);
-		game->AddScene(cornellBoxScene);
+		game->AddScene(cornellBoxSphereScene);
+		game->AddScene(cornellBoxOriginalScene);
 		game->AddScene(customScene);
 	}
 	if (FAILED(game->Initialize(hInstance, nCmdShow)))

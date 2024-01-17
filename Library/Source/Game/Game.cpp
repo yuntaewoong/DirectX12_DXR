@@ -73,7 +73,12 @@ namespace library
 
 				ImGui::Text("%.3f ms/Frame (%.1f FPS)",1000.0f / ImGui::GetIO().Framerate,ImGui::GetIO().Framerate);
 
-				const char* SceneType[3] = {"Bathroom PBRT Scene","Cornell Box","My Custom Scene"};
+				const char* SceneType[4] = {
+					"Bathroom PBRT Scene",
+					"Cornell Box Sphere",
+					"Cornell Box Original",
+					"My Custom Scene"
+				};
 				ImGui::Combo("Scene", &SceneTypeCurrent, SceneType, IM_ARRAYSIZE(SceneType));
 
 				
