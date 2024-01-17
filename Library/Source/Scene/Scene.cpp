@@ -13,10 +13,6 @@ namespace library
         m_meshes(),
         m_pointLights(),
         m_materials(),
-        m_pointLightsConstantBuffer(nullptr),
-        m_areaLightsConstantBuffer(nullptr),
-        m_pointLightMappedData(nullptr),
-        m_areaLightMappedData(nullptr),
         m_bInitialized(FALSE)
     {}
 
@@ -26,10 +22,6 @@ namespace library
         m_meshes(),
         m_pointLights(),
         m_materials(),
-        m_pointLightsConstantBuffer(nullptr),
-        m_areaLightsConstantBuffer(nullptr),
-        m_pointLightMappedData(nullptr),
-        m_areaLightMappedData(nullptr),
         m_bInitialized(FALSE)
     {}
 
@@ -41,8 +33,19 @@ namespace library
     {
         
         
-        if (m_bInitialized)//한번 로딩되었던 Scene은 다시 로딩하지 않음
-            return S_OK;
+        if (m_bInitialized)//한번 로딩되었던 Scene은 다시 로딩할때 Texture만 다시 로딩(디스크립터 힙이 바뀌었기 때문에)
+        {
+            HRESULT hr = S_OK;
+            for (UINT i = 0; i < static_cast<UINT>(m_materials.size()); i++)
+            {
+                hr = m_materials[i]->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
+                if (FAILED(hr))
+                {
+                    return hr;
+                }
+            }
+            return hr;
+        }
         HRESULT hr = S_OK;
         if (!m_filePath.empty())
         {//파일경로가 주어졌다면, pbrt 씬 로딩
@@ -60,6 +63,14 @@ namespace library
                 return hr;
             }
         }
+        for (UINT i = 0; i < m_materials.size(); i++)
+        {
+            hr = m_materials[i]->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+        }
         for (UINT i = 0; i < m_models.size(); i++)
         {
             hr = m_models[i]->Initialize(pDevice, pCommandQueue,cbvSrvUavDescriptorHeap);
@@ -72,25 +83,14 @@ namespace library
             {//모델들을 구성하는 Mesh를 씬에 추가
                 m_meshes.push_back(meshes[i]);
             }
-        }
-        for (UINT i = 0; i < m_materials.size(); i++)
-        {
-            hr = m_materials[i]->Initialize(pDevice, pCommandQueue, cbvSrvUavDescriptorHeap);
-            if (FAILED(hr))
-            {
-                return hr;
+
+            const std::vector<std::shared_ptr<Material>>& materials = m_models[i]->GetMaterials();
+            for (UINT i = 0u; i < materials.size(); i++)
+            {//모델들을 구성하는 Material을 씬에 추가
+                m_materials.push_back(materials[i]);
             }
         }
-        hr = createPointLightConstantBuffer(pDevice);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        hr = createAreaLightConstantBuffer(pDevice);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        
         m_bInitialized = TRUE;
         return hr;
     }
@@ -110,6 +110,10 @@ namespace library
     {
         return m_meshes;
     }
+    const std::vector<std::shared_ptr<PointLight>>& Scene::GetPointLights() const
+    {
+        return m_pointLights;
+    }
     void Scene::AddLight(_In_ const std::shared_ptr<PointLight>& pLight)
     {
         m_pointLights.push_back(pLight);
@@ -124,16 +128,7 @@ namespace library
         {
             m_pointLights[i]->Update(deltaTime);
         }
-        updatePointLightConstantBuffer();
-        updateAreaLightConstantBuffer();
-    }
-    ComPtr<ID3D12Resource>& Scene::GetPointLightsConstantBuffer()
-    {
-        return m_pointLightsConstantBuffer;
-    }
-    ComPtr<ID3D12Resource>& Scene::GetAreaLightsConstantBuffer()
-    {
-        return m_areaLightsConstantBuffer;
+        
     }
     void Scene::loadPBRTWorld(_In_ const std::shared_ptr<const pbrt::Object> world)
     {
@@ -287,112 +282,5 @@ namespace library
             m_meshes[m_meshes.size() - 1]->AddIndex(aIndices[1]);
             m_meshes[m_meshes.size() - 1]->AddIndex(aIndices[2]);
         }
-    }
-    HRESULT Scene::createPointLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
-    {//point light들에 대한 constant buffer만들기
-        HRESULT hr = S_OK;
-        const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-
-        size_t cbSize = 256;//Constant버퍼는 256의 배수여야함
-        const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
-
-        hr = pDevice->CreateCommittedResource(
-            &uploadHeapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &constantBufferDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_pointLightsConstantBuffer)
-        );
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        CD3DX12_RANGE readRange(0, 0);
-        hr = m_pointLightsConstantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_pointLightMappedData));
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        updatePointLightConstantBuffer();
-        return hr;
-    }
-    HRESULT Scene::createAreaLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
-    {
-        HRESULT hr = S_OK;
-        const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-
-        size_t cbSize = 256 * NUM_AREA_LIGHT_MAX;//Constant버퍼는 256의 배수여야함
-        const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
-
-        hr = pDevice->CreateCommittedResource(
-            &uploadHeapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &constantBufferDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_areaLightsConstantBuffer)
-        );
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        CD3DX12_RANGE readRange(0, 0);
-        hr = m_areaLightsConstantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_areaLightMappedData));
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-        updateAreaLightConstantBuffer();
-        return hr;
-    }
-    void Scene::updatePointLightConstantBuffer()
-    {
-        PointLightConstantBuffer cb = {};
-        for (UINT i = 0; i < m_pointLights.size(); i++)
-        {
-            cb.position[i] = m_pointLights[i]->GetPosition();
-            cb.lumen[i] = XMFLOAT4(m_pointLights[i]->GetLumen(),0.0f,0.0f,0.0f);
-        }
-        cb.numPointLight = static_cast<UINT>(m_pointLights.size());
-        memcpy(m_pointLightMappedData, &cb, sizeof(cb));
-    }
-    void Scene::updateAreaLightConstantBuffer()
-    {
-        //Area Light정의: Emission값이 0을 초과하는 Mesh가 발산하는 빛
-        AreaLightConstantBuffer cb = {};
-        UINT numAreaLights = 0u;
-        for (UINT i = 0; i < static_cast<UINT>(m_meshes.size()); i++)
-        {
-            if (m_meshes[i]->GetMaterial()->GetEmission() > 0.001f)
-            {
-                
-                for (UINT j = 0; j < static_cast<UINT>(m_meshes[i]->GetIndices().size()); j += 3)
-                {//polygon loop
-                    cb.worldMatrix[numAreaLights] = m_meshes[i]->GetWorldMatrix();
-                    cb.normal[numAreaLights] = XMVectorSet(
-                        m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j].index].normal.x,
-                        m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j].index].normal.y,
-                        m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j].index].normal.z,
-                        1.f
-                    );
-                    for (UINT k = 0; k < 3u; k++)
-                    {
-                        cb.vertices[numAreaLights * 3 + k] = XMVectorSet(
-                            m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j+k].index].position.x,
-                            m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j+k].index].position.y,
-                            m_meshes[i]->GetVertices()[m_meshes[i]->GetIndices()[j+k].index].position.z,
-                            1.f
-                        );
-                    }
-                    cb.lightColor[numAreaLights] = m_meshes[i]->GetMaterial()->GetAlbedo();
-                    cb.emission[numAreaLights] = XMFLOAT4(m_meshes[i]->GetMaterial()->GetEmission(),0.f,0.f,0.f);
-                    numAreaLights++;
-                }
-            }
-        }
-        
-        cb.numAreaLight = numAreaLights;
-        memcpy(m_areaLightMappedData, &cb, sizeof(cb));
     }
 }

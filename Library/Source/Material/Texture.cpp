@@ -20,7 +20,7 @@ namespace library
         HRESULT hr = S_OK;
         ResourceUploadBatch resourceUpload(pDevice.Get());
         resourceUpload.Begin();//upload명령 기록시작
-
+        m_textureResource.Reset();
         hr = CreateWICTextureFromFile(
             pDevice.Get(),
             resourceUpload,

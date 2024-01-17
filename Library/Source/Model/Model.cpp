@@ -70,6 +70,10 @@ namespace library
     {
         return m_meshes;
     }
+    const std::vector<std::shared_ptr<Material>>& Model::GetMaterials() const
+    {
+        return m_materials;
+    }
     void Model::setMeshes2Materials(_In_ const aiScene* pScene)
     {
         for (UINT i = 0u; i < pScene->mNumMeshes; i++)

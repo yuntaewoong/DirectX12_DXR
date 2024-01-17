@@ -42,6 +42,7 @@ namespace library
         void Update(_In_ FLOAT deltaTime);
         void ForceMaterial(_In_ const std::shared_ptr<Material>& material);
         const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const;
+        const std::vector<std::shared_ptr<Material>>& GetMaterials() const;
     private:
         void setMeshes2Materials(_In_ const aiScene* pScene);
         HRESULT initAllMeshes(

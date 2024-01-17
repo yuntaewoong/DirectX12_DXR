@@ -7,8 +7,8 @@ namespace library
 		m_mainWindow(std::make_unique<MainWindow>(nWidth,nHeight)),
 		m_renderer(std::make_unique<RaytracingRenderer>(static_cast<FLOAT>(nWidth) / nHeight)),
 		m_scenes(std::vector<std::shared_ptr<Scene>>()),
-		m_currentSceneIndex(0u),
-		m_pastFrameSceneIndex(0u)
+		m_currentSceneIndex(1u),
+		m_pastFrameSceneIndex(1u)
 	{}
 
 	/*
@@ -55,7 +55,7 @@ namespace library
 			else
 			{
 				static int RenderTypeCurrent = 0;
-				static int SceneTypeCurrent = 0;
+				static int SceneTypeCurrent = 1;
 				//end timer
 				QueryPerformanceCounter(&EndingTime);
 				elapsedTime = (EndingTime.QuadPart - StartingTime.QuadPart) / (FLOAT)Frequency.QuadPart;
@@ -121,7 +121,7 @@ namespace library
 		m_currentSceneIndex = sceneIndex;
 		HRESULT hr = m_renderer->WaitForGPU();//메모리 해제 전에 GPU작업완료대기
 		ImGui_ImplDX12_Shutdown();
-		m_renderer = std::make_unique<RaytracingRenderer>(16.f/9.f);
+		m_renderer = std::make_unique<RaytracingRenderer>(static_cast<FLOAT>(m_mainWindow->GetWidth()) / m_mainWindow->GetHeight());;
 		m_renderer->SetMainScene(m_scenes[m_currentSceneIndex]);//새로운 Renderer에 새로운 Scene세팅
 		m_renderer->Initialize(m_mainWindow->GetWindow());//새로운 Renderer 초기화
 	}

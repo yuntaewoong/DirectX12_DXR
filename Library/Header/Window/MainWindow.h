@@ -28,6 +28,8 @@ namespace library
         const DirectionsInput& GetDirections() const;
         const MouseRelativeMovement& GetMouseRelativeMovement() const;
         void ResetMouseMovement();
+        INT GetWidth() const;
+        INT GetHeight() const;
     private:
         INT m_nWidth;
         INT m_nHeight;

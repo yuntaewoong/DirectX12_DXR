@@ -37,7 +37,7 @@ CustomScene::CustomScene()
 	);
 
 	std::shared_ptr<library::Mesh> cube5 = std::make_shared<BaseCube>(//큐브5
-		XMVectorSet(0.0f, 0.0f, -0.6f, 1.0f),
+		XMVectorSet(-3.0f, 3.0f, -2.f, 1.0f),
 		XMVectorSet(0.f, 0.f, 0.f, 1.0f),
 		XMVectorSet(0.3f, 0.3f, 0.3f, 1.f)
 	);
@@ -90,7 +90,7 @@ CustomScene::CustomScene()
 		projectDirPath = projectDirString;
 	}
 	std::shared_ptr<library::Material> emissiveMaterial = std::make_shared<library::Material>(XMFLOAT4(1.f,1.f,1.f,1.f));
-	emissiveMaterial->SetEmission(10.0f);
+	emissiveMaterial->SetEmission(50.0f);
 
 	std::shared_ptr<library::Material> floorMaterial = std::make_shared<library::Material>();//바닥 텍스처
 	std::filesystem::path floorTexturePath(L"Assets/Texture/seafloor.dds");//project dir상에서의 상대Path

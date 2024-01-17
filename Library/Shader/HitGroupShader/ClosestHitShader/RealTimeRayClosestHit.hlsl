@@ -190,7 +190,7 @@ void RealTimeRayClosestHitShader(inout RealTimeRayPayload payload, in BuiltInTri
         float3 specular = numerator / denominator;
         float shadow = TraceShadowRay(hitPosition, float4(lightPosition,1.f), payload.recursionDepth);
         float NdotL = max(dot(triangleNormal, pointToLight), 0.0);
-        color += /*(1.f - shadow) **/ (kD * diffuse + specular) * lightColor * lightIntensity * lightAttenuation * NdotL;
+        color += /*(1.f - shadow) * */(kD * diffuse + specular) * lightColor * lightIntensity * lightAttenuation * NdotL;
     }
     {//간접광에 의한 Lighting(Roughness,Metallic기반으로 weight정하기)
     

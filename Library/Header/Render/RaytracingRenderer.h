@@ -46,6 +46,11 @@ namespace library
         HRESULT createAccelerationStructure();
         HRESULT createShaderTable();
         HRESULT createRaytacingOutputResource(_In_ HWND hWnd);
+
+        HRESULT createPointLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
+        HRESULT createAreaLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
+        void updatePointLightConstantBuffer();
+        void updateAreaLightConstantBuffer();
     private:
         FundamentalRenderingResources m_renderingResources;
         std::shared_ptr<Scene> m_scene;
@@ -78,7 +83,11 @@ namespace library
         ComPtr<ID3D12Resource> m_raytracingOutput;
         D3D12_GPU_DESCRIPTOR_HANDLE m_raytracingOutputGPUHandle;
 
-
+        // Light Constant Bufferµé
+        ComPtr<ID3D12Resource> m_pointLightsConstantBuffer;
+        ComPtr<ID3D12Resource> m_areaLightsConstantBuffer;
+        void* m_pointLightMappedData;
+        void* m_areaLightMappedData;
 
 	};
 }

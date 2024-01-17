@@ -207,4 +207,12 @@ namespace library
         m_mouseRelativeMovement.X = 0;
         m_mouseRelativeMovement.Y = 0;
     }
+    INT MainWindow::GetWidth() const
+    {
+        return m_nWidth;
+    }
+    INT MainWindow::GetHeight() const
+    {
+        return m_nHeight;
+    }
 }

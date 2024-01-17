@@ -22,7 +22,11 @@ namespace library
         m_realTimeRaygenShaderTable(),
         m_pathTracerRaygenShaderTable(),
         m_raytracingOutput(nullptr),
-        m_raytracingOutputGPUHandle()
+        m_raytracingOutputGPUHandle(),
+        m_pointLightsConstantBuffer(nullptr),
+        m_areaLightsConstantBuffer(nullptr),
+        m_pointLightMappedData(nullptr),
+        m_areaLightMappedData(nullptr)
     {}
 	HRESULT RaytracingRenderer::Initialize(_In_ HWND hWnd)
 	{
@@ -102,6 +106,16 @@ namespace library
         {
             return hr;
         }
+        hr = createPointLightConstantBuffer(m_renderingResources.GetDevice());
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        hr = createAreaLightConstantBuffer(m_renderingResources.GetDevice());
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         return hr;
 	}
     void RaytracingRenderer::HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime)
@@ -125,6 +139,8 @@ namespace library
         m_randomGenerator.Update(deltaTime);
         m_randomSampleCounter.Update(deltaTime,renderType,m_camera.IsPastFrameMoved());
         m_scene->Update(deltaTime);
+        updatePointLightConstantBuffer();
+        updateAreaLightConstantBuffer();
     }
     HRESULT RaytracingRenderer::WaitForGPU()
     {
@@ -177,11 +193,11 @@ namespace library
             );//Random CB바인딩
             pCommandList->SetComputeRootConstantBufferView(
                 static_cast<UINT>(EGlobalRootSignatureSlot::PointLightConstantSlot),
-                m_scene->GetPointLightsConstantBuffer()->GetGPUVirtualAddress()
+                m_pointLightsConstantBuffer->GetGPUVirtualAddress()
             );//Point Light CB바인딩
             pCommandList->SetComputeRootConstantBufferView(
                 static_cast<UINT>(EGlobalRootSignatureSlot::AreaLightConstantSlot),
-                m_scene->GetAreaLightsConstantBuffer()->GetGPUVirtualAddress()
+                m_areaLightsConstantBuffer->GetGPUVirtualAddress()
             );//Area Light CB바인딩
             pCommandList->SetComputeRootConstantBufferView(
                 static_cast<UINT>(EGlobalRootSignatureSlot::RandomSampleCounterConstantSlot),
@@ -426,5 +442,113 @@ namespace library
             return hr;
         }
         return hr;
+    }
+    HRESULT RaytracingRenderer::createPointLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
+    {//point light들에 대한 constant buffer만들기
+        HRESULT hr = S_OK;
+        const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+
+        size_t cbSize = 256;//Constant버퍼는 256의 배수여야함
+        const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
+
+        hr = pDevice->CreateCommittedResource(
+            &uploadHeapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &constantBufferDesc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&m_pointLightsConstantBuffer)
+        );
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        CD3DX12_RANGE readRange(0, 0);
+        hr = m_pointLightsConstantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_pointLightMappedData));
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        updatePointLightConstantBuffer();
+        return hr;
+    }
+    HRESULT RaytracingRenderer::createAreaLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice)
+    {
+        HRESULT hr = S_OK;
+        const D3D12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+
+        size_t cbSize = 256 * NUM_AREA_LIGHT_MAX;//Constant버퍼는 256의 배수여야함
+        const D3D12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(cbSize);
+
+        hr = pDevice->CreateCommittedResource(
+            &uploadHeapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &constantBufferDesc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&m_areaLightsConstantBuffer)
+        );
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        CD3DX12_RANGE readRange(0, 0);
+        hr = m_areaLightsConstantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_areaLightMappedData));
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        updateAreaLightConstantBuffer();
+        return hr;
+    }
+    void RaytracingRenderer::updatePointLightConstantBuffer()
+    {
+        PointLightConstantBuffer cb = {};
+        const std::vector<std::shared_ptr<PointLight>>& pointLights = m_scene->GetPointLights();
+        for (UINT i = 0; i < pointLights.size(); i++)
+        {
+            cb.position[i] = pointLights[i]->GetPosition();
+            cb.lumen[i] = XMFLOAT4(pointLights[i]->GetLumen(),0.0f,0.0f,0.0f);
+        }
+        cb.numPointLight = static_cast<UINT>(pointLights.size());
+        memcpy(m_pointLightMappedData, &cb, sizeof(cb));
+    }
+    void RaytracingRenderer::updateAreaLightConstantBuffer()
+    {
+        //Area Light정의: Emission값이 0을 초과하는 Mesh가 발산하는 빛
+        AreaLightConstantBuffer cb = {};
+        const std::vector<std::shared_ptr<Mesh>>& meshes = m_scene->GetMeshes();
+        UINT numAreaLights = 0u;
+        for (UINT i = 0; i < static_cast<UINT>(meshes.size()); i++)
+        {
+            if (meshes[i]->GetMaterial()->GetEmission() > 0.001f)
+            {
+                
+                for (UINT j = 0; j < static_cast<UINT>(meshes[i]->GetIndices().size()); j += 3)
+                {//polygon loop
+                    cb.worldMatrix[numAreaLights] = XMMatrixTranspose(meshes[i]->GetWorldMatrix());
+                    cb.normal[numAreaLights] = XMVectorSet(
+                        meshes[i]->GetVertices()[meshes[i]->GetIndices()[j].index].normal.x,
+                        meshes[i]->GetVertices()[meshes[i]->GetIndices()[j].index].normal.y,
+                        meshes[i]->GetVertices()[meshes[i]->GetIndices()[j].index].normal.z,
+                        1.f
+                    );
+                    for (UINT k = 0; k < 3u; k++)
+                    {
+                        cb.vertices[numAreaLights * 3 + k] = XMVectorSet(
+                            meshes[i]->GetVertices()[meshes[i]->GetIndices()[j+k].index].position.x,
+                            meshes[i]->GetVertices()[meshes[i]->GetIndices()[j+k].index].position.y,
+                            meshes[i]->GetVertices()[meshes[i]->GetIndices()[j+k].index].position.z,
+                            1.f
+                        );
+                    }
+                    cb.lightColor[numAreaLights] = meshes[i]->GetMaterial()->GetAlbedo();
+                    cb.emission[numAreaLights] = XMFLOAT4(meshes[i]->GetMaterial()->GetEmission(),0.f,0.f,0.f);
+                    numAreaLights++;
+                }
+            }
+        }
+        cb.numAreaLight = numAreaLights;
+        memcpy(m_areaLightMappedData, &cb, sizeof(cb));
     }
 }

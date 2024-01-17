@@ -32,11 +32,10 @@ namespace library
         void AddMesh(_In_ const std::shared_ptr<Mesh>& pMesh);
         void AddModel(_In_ const std::shared_ptr<Model>& pModel);
         const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const;
+        const std::vector<std::shared_ptr<PointLight>>& GetPointLights() const;
         void AddLight(_In_ const std::shared_ptr<PointLight>& pLight);
         void AddMaterial(_In_ const std::shared_ptr<Material>& pMaterial);
         void Update(_In_ FLOAT deltaTime);
-        ComPtr<ID3D12Resource>& GetPointLightsConstantBuffer();
-        ComPtr<ID3D12Resource>& GetAreaLightsConstantBuffer();
     private:
         void loadPBRTWorld(_In_ const std::shared_ptr<const pbrt::Object> object);
         void loadPBRTMaterial(_In_ const std::shared_ptr<pbrt::Material> material);
@@ -49,20 +48,12 @@ namespace library
         void loadPBRTTriangleMeshIndices(
             _In_ const std::vector<pbrt::vec3i>& indices
         );
-        HRESULT createPointLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
-        HRESULT createAreaLightConstantBuffer(_In_ const ComPtr<ID3D12Device>& pDevice);
-        void updatePointLightConstantBuffer();
-        void updateAreaLightConstantBuffer();
     private:
         std::filesystem::path m_filePath;
         std::vector<std::shared_ptr<Mesh>> m_meshes;
         std::vector<std::shared_ptr<Model>> m_models;
         std::vector<std::shared_ptr<PointLight>> m_pointLights;  
         std::vector<std::shared_ptr<Material>> m_materials;
-        ComPtr<ID3D12Resource> m_pointLightsConstantBuffer;
-        ComPtr<ID3D12Resource> m_areaLightsConstantBuffer;
-        void* m_pointLightMappedData;
-        void* m_areaLightMappedData;
         BOOL m_bInitialized;
     };
 }
