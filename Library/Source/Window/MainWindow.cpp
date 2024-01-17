@@ -56,7 +56,7 @@ namespace library
         clientRc.top = p1.y;
         clientRc.right = p2.x;
         clientRc.bottom = p2.y;
-        ClipCursor(&clientRc);//locking cursor
+        //ClipCursor(&clientRc);//locking cursor
 
         //initialize mouse
         RAWINPUTDEVICE rid = {
