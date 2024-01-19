@@ -63,8 +63,11 @@ git clone https://github.com/yuntaewoong/DirectX12_DXR_Renderer.git
 현세대 GPU에서 Real Time에 렌더링할 수 있는 레이트레이싱 기법들을 이용한 고퀄리티 렌더링
 ### 현재 구현된 기능들
 <img src = "Image/PBRBasic.png">
+
 - 직접광에 의한 PBR Shading
+ 
 <img src = "Image/Ambient Occlusion.png">
+
 - Ray Tracing기반 Ambient Occlusion
 
 
@@ -76,12 +79,14 @@ git clone https://github.com/yuntaewoong/DirectX12_DXR_Renderer.git
 
 ### 현재 구현된 기능들
 <img src = "Image/BathRoom3337SPP.png">
+
 - `.pbrt` 씬 파일 렌더링(일부 Material만 구현)
 
 <img src = "Image/CornellBoxSphere32000SPP.png">
 
 
-<img src = "Image/CornellBOx26000spp.png">
+<img src = "Image/CornellBox26000SPP.png">
+
 - .obj 파일 렌더링
 
 # Reference
